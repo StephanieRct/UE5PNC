@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "PNC",
+	"FriendlyName": "UE5PNC",
 	"Description": "Data Oriented Programming with ECS-like capabilities.",
 	"Category": "Other",
 	"CreatedBy": "Stephanie Rancourt",
@@ -16,7 +16,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "PNC",
+			"Name": "UE5PNC",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
