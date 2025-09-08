@@ -26,13 +26,32 @@
 #include "ChunkType.h"
 #include "Chunk.h"
 #include "Algorithm.h"
+#include "Pipeline.h"
+#include "Components.h"
+#include "ChunkTree.h"
 
 namespace PNC
 {
     typedef int32 SizeDefault;
+
     typedef ComponentTypeT<SizeDefault> ComponentType;
     typedef ComponentTypeSetT<SizeDefault> ComponentTypeSet;
+
     typedef ChunkTypeT<SizeDefault> ChunkType;
-    typedef PNC::ChunkT<ChunkType, SizeDefault> Chunk;
+    typedef ChunkT<ChunkType, SizeDefault> Chunk;
+
+    using CoParentInChunk = CoParentInChunkT<SizeDefault>;
+    using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<SizeDefault>;
+    
+    using CoChildrenInChunk = CoChildrenInChunkT<SizeDefault>;
+    using ChunkTree = ChunkTreeT<ChunkType, SizeDefault>;
+
+    template<typename TAlgorithm>
+    using AlgorithmRoutingCache = AlgorithmRoutingCacheT<TAlgorithm, ChunkType, SizeDefault>;
+
+    template<typename TPipeline>
+    using Pipeline = PipelineT<TPipeline, ChunkType, SizeDefault>;
+
+    using CoParentSignedIndex = CoParentSignedIndexT<SizeDefault>;
 
 }

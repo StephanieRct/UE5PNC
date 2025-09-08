@@ -34,6 +34,8 @@ namespace PNC
             Impl()->Execute(chunk.GetSize());
             return true;
         }
+        template<typename TChunk>
+        void TryRun(TChunk* chunk) = delete;
 
         /// <summary>
         /// Will execute the algorithm on a matching chunk.
@@ -44,12 +46,25 @@ namespace PNC
         template<typename TChunk>
         void Run(TChunk& chunk) 
         {
-            check(!chunk.IsNull());
-            if (!Impl()->Requirements(SetAlgorithmChunk<TChunk>(&chunk)))
+            if (!TryRun(chunk))
             {
                 checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunk).name());
             }
-            Impl()->Execute(chunk.GetSize());
+        }
+        template<typename TChunk>
+        void Run(TChunk* chunk) = delete;
+
+
+        template<typename TRouting, typename TChunk>
+        void RunWithRouting(const TRouting& routing, TChunk& chunk)
+        {
+            check(!chunk.IsNull());
+            if(!routing.RouteAlgorithm(*Impl(), chunk))
+            {
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunk).name());
+            }
+            else
+                Impl()->Execute(chunk.GetSize());
         }
 
     private:
@@ -83,6 +98,70 @@ namespace PNC
             if (index < 0)
                 return false;
             component = (T*)Chunk->GetComponentData(index);
+            return true;
+        }
+
+        template<typename T>
+        bool ParentComponent(T*& component)
+        {
+            auto parentChunk = Chunk->GetParentChunk();
+            if (parentChunk == nullptr)
+                return false;
+            const auto& chunkType = parentChunk->GetChunkType();
+            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
+            if (index < 0)
+                return false;
+            component = (T*)parentChunk->GetComponentData(index);
+            return true;
+        }
+
+        bool ParentChunk(Chunk_t*& parent)
+        {
+            parent = Chunk->GetParentChunk();
+        }
+        bool ChildrenChunk(Chunk_t*& children)
+        {
+            children = Chunk->GetFirstChildChunk();
+        }
+    };
+
+    template<typename TChunkType>
+    struct AlgorithmRequirementMatchForChunkType
+    {
+    public:
+        typedef TChunkType TChunkType_t;
+
+    protected:
+        const TChunkType* ChunkType;
+
+    public:
+        AlgorithmRequirementMatchForChunkType(const TChunkType* chunkType)
+            :ChunkType(chunkType)
+        {
+        }
+
+        template<typename T>
+        bool Component(T*& component)
+        {
+            auto index = ChunkType->GetComponentTypeIndexInChunk(&typeid(T));
+            return index >= 0;
+        }
+
+        template<typename T>
+        bool ParentComponent(T*& component)
+        {
+            return true;
+        }
+
+        template<typename TChunk>
+        bool ParentChunk(TChunk*& parent)
+        {
+            return true;
+        }
+
+        template<typename TChunk>
+        bool ChildrenChunk(TChunk*& children)
+        {
             return true;
         }
     };

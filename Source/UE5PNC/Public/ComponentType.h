@@ -83,9 +83,9 @@ namespace PNC
         /// </summary>
         /// <param name="chunkCapacity">How many instances of the component is required to be allocated</param>
         /// <returns>Pointer to the allocated memory. Must be freed by calling Deallocate.</returns>
-        void* Allocate(Size_t chunkCapacity)const
+        void* Allocate(Size_t chunkCapacity, Size_t chunkCount = 1)const
         {
-            auto count = GetNodeDataIndex(chunkCapacity);
+            auto count = GetNodeDataIndex(chunkCapacity, chunkCount) ;
             return FMemory::Malloc(Size * count, Align);
         }
 
@@ -95,11 +95,11 @@ namespace PNC
         /// <param name="chunkCapacity">How many instances of the component is required to be allocated</param>
         /// <param name="chunkSize">How many instances of the component is required to be copied</param>
         /// <returns>Pointer to the allocated memory. Must be freed by calling Deallocate.</returns>
-        void* AllocateCopy(void* from, Size_t chunkCapacity, Size_t chunkSize)const
+        void* AllocateCopy(void* from, Size_t chunkCapacity, Size_t chunkSize, Size_t chunkCount = 1)const
         {
-            auto chunkCapacityCount = GetNodeDataIndex(chunkCapacity);
+            auto chunkCapacityCount = GetNodeDataIndex(chunkCapacity, chunkCount);
             auto ptr = FMemory::Malloc(Size * chunkCapacityCount, Align);
-            auto chunkSizeCount = GetNodeDataIndex(chunkCapacity);
+            auto chunkSizeCount = GetNodeDataIndex(chunkSize, chunkCount);
             Copy(ptr, from, Size * chunkSizeCount);
             return ptr;
         }
@@ -109,7 +109,8 @@ namespace PNC
         /// </summary>
         /// <param name="ptr">pointer from a previous call to Allocate or AllocateCopy</param>
         /// <param name="chunkCapacity"></param>
-        void Deallocate(void* ptr, Size_t chunkCapacity)const
+        /// <param name="chunkCount"></param>
+        void Deallocate(void* ptr, Size_t chunkCapacity, Size_t chunkCount = 1)const
         {
             FMemory::Free(ptr);
         }
@@ -120,24 +121,47 @@ namespace PNC
         /// <param name="to">destination memory</param>
         /// <param name="from">source memory</param>
         /// <param name="chunkSize">How many component instances to copy</param>
-        void Copy(void* to, void* from, Size_t chunkSize)const
+        void Copy(void* to, void* from, Size_t chunkSize, Size_t chunkCount = 1)const
         {
-            auto count = GetNodeDataIndex(chunkSize);
+            auto count = GetNodeDataIndex(chunkSize, chunkCount);
             memcpy_s(to, count * Size, from, count * Size);
         }
 
+        void* SubChunk(void* ptr, Size_t count)const
+        {
+            switch (Owner)
+            {
+            case ComponentOwner_Node:
+                return ptr + count * Size;
+            case ComponentOwner_Chunk:
+                return ptr + Size;
+            default:
+                checkNoEntry();
+                return -1;
+            }
+        }
+
+        void* Forward(void* ptr, Size_t count)const
+        {
+            return ptr + count * Size;
+        }
+        void* Backward(void* ptr, Size_t count)const
+        {
+            return ptr - count * Size;
+        }
         /// <summary>
         /// Figure out the index into an array of this component type where a node's component instance is stored.
         /// </summary>
         /// <param name="nodeIndex"></param>
         /// <returns></returns>
-        Size_t GetNodeDataIndex(Size_t nodeIndex)const {
+        Size_t GetNodeDataIndex(Size_t nodeIndex, Size_t chunkIndex = 1)const
+        {
             switch (Owner)
             {
             case ComponentOwner_Node:
                 return nodeIndex;
             case ComponentOwner_Chunk:
-                return 1;
+                return chunkIndex;
             default:
                 checkNoEntry();
                 return -1;
