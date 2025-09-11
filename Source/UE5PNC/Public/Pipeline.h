@@ -192,6 +192,11 @@ namespace PNC
             component = (T*)parentChunk->GetComponentData(index);
             return true;
         }
+        bool ChunkIndex(Size_t& index)
+        {
+            index = 0;
+            return true;
+        }
     };
 
     template<typename TChunk, typename TSize>
@@ -241,6 +246,11 @@ namespace PNC
             if (index < 0)
                 return false;
             component = (T*)parentChunk->GetComponentData(index);
+            return true;
+        }
+        bool ChunkIndex(Size_t& index)
+        {
+            index = 0;
             return true;
         }
     };

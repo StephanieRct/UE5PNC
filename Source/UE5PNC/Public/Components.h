@@ -7,13 +7,26 @@
 
 namespace PNC 
 {
+    struct NodeComponent 
+    {
+    public:
+        static const ComponentOwner Owner = ComponentOwner_Node;
+
+    };
+
+    struct ChunkComponent
+    {
+    public:
+        static const ComponentOwner Owner = ComponentOwner_Chunk;
+
+    };
 
     /// <summary>
     /// Each node in the chunk has a parent at the given index in the same chunk
     /// except for root nodes who have a parent index of -1.
     /// </summary>
     template< typename TSize>
-    struct CoParentInChunkT
+    struct CoParentInChunkT : public NodeComponent
     {
     public:
         typedef TSize Size_t;
@@ -27,7 +40,7 @@ namespace PNC
     /// except for child node inside the same chunk
     /// </summary>
     template< typename TSize>
-    struct CoParentOutsideChunkT
+    struct CoParentOutsideChunkT : public NodeComponent
     {
     public:
         typedef TSize Size_t;
@@ -40,7 +53,7 @@ namespace PNC
     /// The whole chunk has a single parent (or ancestor) node in the parent chunk.
     /// </summary>
     template< typename TSize>
-    struct CoSingleParentOutsideChunkT
+    struct CoSingleParentOutsideChunkT : public ChunkComponent
     {
     public:
         typedef TSize Size_t;
@@ -55,7 +68,7 @@ namespace PNC
     /// </summary>
     /// <typeparam name="TSize">Must be a signed integer type.</typeparam>
     template< typename TSize>
-    struct CoParentSignedIndexT
+    struct CoParentInOrOutsideIndexT : public NodeComponent
     {
     public:
         typedef TSize Size_t;
@@ -63,15 +76,15 @@ namespace PNC
     public:
         Size_t Index;
         bool IsInSameChunk()const { return Index >= 0; }
-        bool IsInParentChunk()const { return Index >= 0; }
+        bool IsInParentChunk()const { return Index < 0; }
         Size_t GetIndexInParentChunk()const 
         { 
-            assert(IsInParentChunk());
+            assert_pnc(IsInParentChunk());
             return -Index - 1; 
         }
         Size_t GetIndexInSameChunk()const 
         {
-            assert(IsInSameChunk());
+            assert_pnc(IsInSameChunk());
             return Index; 
         }
         void SetIndexInParentChunk(Size_t index)
@@ -85,7 +98,7 @@ namespace PNC
     };
 
     template< typename TSize>
-    struct CoChildrenInChunkT
+    struct CoChildrenInChunkT : public NodeComponent
     {
     public:
         typedef TSize Size_t;
@@ -96,7 +109,7 @@ namespace PNC
     };
 
     template< typename TChunk>
-    struct CoChunkTreeT
+    struct CoChunkTreeT : public ChunkComponent
     {
     public:
         using CoChunkTree_t = CoChunkTreeT<TChunk>;

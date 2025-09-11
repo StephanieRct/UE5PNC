@@ -32,26 +32,46 @@
 
 namespace PNC
 {
-    typedef int32 SizeDefault;
+    using Size_t = int32;
 
-    typedef ComponentTypeT<SizeDefault> ComponentType;
-    typedef ComponentTypeSetT<SizeDefault> ComponentTypeSet;
+    using ComponentType = ComponentTypeT<Size_t>;
+    using ComponentTypeSet = ComponentTypeSetT<Size_t>;
+    using ChunkType = ChunkTypeT<Size_t>;
 
-    typedef ChunkTypeT<SizeDefault> ChunkType;
-    typedef ChunkT<ChunkType, SizeDefault> Chunk;
+    using ChunkPointer = ChunkPointerT<ChunkType>;
+    using Chunk = ChunkT<ChunkType>;
 
-    using CoParentInChunk = CoParentInChunkT<SizeDefault>;
-    using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<SizeDefault>;
+    using ChunkArrayPointer = ChunkArrayPointerT<ChunkPointer>;
+    using ChunkArray = ChunkArrayT<ChunkPointer>;
+
+    using CoParentInChunk = CoParentInChunkT<Size_t>;
+    using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
     
-    using CoChildrenInChunk = CoChildrenInChunkT<SizeDefault>;
-    using ChunkTree = ChunkTreeT<ChunkType, SizeDefault>;
+    using CoChildrenInChunk = CoChildrenInChunkT<Size_t>;
 
     template<typename TAlgorithm>
-    using AlgorithmRoutingCache = AlgorithmRoutingCacheT<TAlgorithm, ChunkType, SizeDefault>;
+    using AlgorithmRoutingCache = AlgorithmRoutingCacheT<TAlgorithm, ChunkType, Size_t>;
 
     template<typename TPipeline>
-    using Pipeline = PipelineT<TPipeline, ChunkType, SizeDefault>;
+    using Pipeline = PipelineT<TPipeline, ChunkType, Size_t>;
 
-    using CoParentSignedIndex = CoParentSignedIndexT<SizeDefault>;
+    using CoParentInOrOutsideIndex = CoParentInOrOutsideIndexT<Size_t>;
+
+
+
+
+    /// <summary>
+    /// A IdentifiableChunk can be reinterpret_cast-ed to ChunkTreePointer if its kind is ChunkKind_ChunkTree
+    /// </summary>
+    using ChunkTreePointer = ChunkTreePointerT<ChunkPointer>;
+
+    /// <summary>
+    /// A IdentifiableChunk or ChunkTreePointer can be reinterpret_cast-ed to ChunkArrayTreePointer if its kind is ChunkKind_ChunkArrayTree
+    /// </summary>
+    using ChunkArrayTreePointer = ChunkTreePointerT<ChunkArrayPointer>;
+
+
+    using ChunkTree = ChunkTreeT<ChunkType>;
+    using ChunkArrayTree = ChunkArrayTreeT<ChunkPointer>;
 
 }

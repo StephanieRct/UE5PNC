@@ -10,3 +10,9 @@
 #include <unordered_map>
 #include <vector>
 #include "CoreMinimal.h"
+
+#if UE_BUILD_DEVELOPMENT
+#   define assert_pnc check
+#elif UE_BUILD_SHIPPING
+#   define assert_pnc assert
+#endif

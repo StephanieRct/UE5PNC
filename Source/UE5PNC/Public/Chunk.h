@@ -6,19 +6,28 @@
 
 namespace PNC 
 {
+    enum ChunkKind 
+    {
+        ChunkKind_Chunk,
+        ChunkKind_ChunkArray,
 
-    template<typename TChunkType, typename TSize>
-    struct ChunkPointerT
+        ChunkKind_ChunkTree,
+        ChunkKind_ChunkArrayTree,
+    };
+
+
+    template<typename TChunkType>
+    struct ChunkPointerT// : public IdentifiableChunk<TChunkType>
     {
     public:
         using ChunkType_t = TChunkType;
-        using Size_t = TSize;
+        using Size_t = typename ChunkType_t::Size_t;
         using ChunkPointer_t = ChunkPointerT;
 
     protected:
         const ChunkType_t* Type;
         void** ComponentData;
-        Size_t Size;
+        Size_t NodeCount;
 
     public:
         /// <summary>
@@ -27,7 +36,7 @@ namespace PNC
         /// The size can grow up to the capacity without having to reallocate the component's memory
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
-        Size_t GetSize()const { return Size; }
+        Size_t GetNodeCount()const { return NodeCount; }
 
         /// <summary>
         /// Get the chunk type of this chunk
@@ -51,27 +60,26 @@ namespace PNC
         /// <summary>
         /// Create a null ChunkRefT without chunk type.
         /// IsNull() will evaluate to true.
-        /// Size() and Capacity() will evaluate to 0
         /// </summary>
         ChunkPointerT()
             : Type(nullptr)
-            , Size(0)
             , ComponentData(nullptr)
+            , NodeCount(0)
         {
         }
 
-        ChunkPointerT(const ChunkType_t* chunkType, Size_t size, void** componentData)
+        ChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData)
             : Type(chunkType)
-            , Size(size)
             , ComponentData(componentData)
+            , NodeCount(nodeCount)
         {
         }
     protected:
 
-        ChunkPointerT(const ChunkType_t* chunkType, Size_t size)
+        ChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount)
             : Type(chunkType)
-            , Size(size)
             , ComponentData(nullptr)
+            , NodeCount(nodeCount)
         {
         }
     public:
@@ -85,7 +93,7 @@ namespace PNC
         /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(Size_t componentTypeIndexInChunk)
         {
-            assert(!IsNull());
+            assert_pnc(!IsNull());
             return ComponentData[componentTypeIndexInChunk];
         }
 
@@ -99,7 +107,7 @@ namespace PNC
         /// <returns>Const pointer to the component memory array</returns>
         const void* GetComponentData(Size_t componentIndexInChunk)const
         {
-            assert(!IsNull());
+            assert_pnc(!IsNull());
             return ComponentData[componentIndexInChunk];
         }
 
@@ -114,7 +122,7 @@ namespace PNC
         /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(const type_info* componentType)
         {
-            assert(!IsNull());
+            assert_pnc(!IsNull());
             auto index = Type->Components.GetComponentTypeIndexInChunk(componentType);
             if (index < 0)
                 return nullptr;
@@ -132,7 +140,7 @@ namespace PNC
         /// <returns>Const pointer to the component memory array</returns>
         const void* GetComponentData(const type_info* componentType)const
         {
-            assert(!IsNull());
+            assert_pnc(!IsNull());
             auto index = Type->Components.GetComponentTypeIndexInChunk(componentType);
             if (index < 0)
                 return nullptr;
@@ -152,7 +160,7 @@ namespace PNC
         template<typename TComponent>
         TComponent* GetComponentData()
         {
-            assert(!IsNull());
+            assert_pnc(!IsNull());
             return (TComponent*)GetComponentData(&typeid(TComponent));
         }
 
@@ -168,7 +176,7 @@ namespace PNC
         template<typename TComponent>
         const TComponent* GetComponentData()const
         {
-            assert(!IsNull());
+            assert_pnc(!IsNull());
             return (TComponent*)GetComponentData(&typeid(TComponent));
         }
 
@@ -186,13 +194,13 @@ namespace PNC
                 return (Size_t)-1;
             auto chunkType = destination.Type;
             auto componentCount = chunkType->Components.ComponentTypes.size();
-            Size_t count = std::min(destination.GetSize(), source.GetSize());
+            Size_t count = std::min(destination.GetNodeCount(), source.GetNodeCount());
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = chunkType->Components[i];
                 componentTypeInfo->Copy(destination.ComponentData[i], source.ComponentData[i], count);
             }
-            destination.Size = count;
+            destination.NodeCount = count;
             return count;
         }
 
@@ -228,22 +236,18 @@ namespace PNC
         }
     };
 
-    /// <summary>
-    /// Chunk of multiple nodes with the same component types (same set of component).
-    /// </summary>
-    /// <typeparam name="TChunkType">ChunkType type represent the structure of the chunk and what component types it has.</typeparam>
-    /// <typeparam name="TSize">Size unit for indexing nodes in the chunk</typeparam>
-    template<typename TChunkType, typename TSize>
-    struct ChunkT : public ChunkPointerT<TChunkType, TSize>
+
+    template<typename TBase>
+    struct ChunkAllocationT : public TBase
     {
     public:
-        using Base_t = ChunkPointerT<TChunkType, TSize>;
-        using ChunkType_t = TChunkType;
-        using Size_t = TSize;
-        using Chunk_t = ChunkT;
+        using Base_t = TBase;
+        using ChunkType_t = typename TBase::ChunkType_t;
+        using Size_t = typename TBase::Size_t;
+        using Self_t = ChunkAllocationT<TBase>;
 
     private:
-        Size_t Capacity;
+        Size_t NodeCapacity;
 
     public:
         /// <summary>
@@ -252,22 +256,22 @@ namespace PNC
         /// Algorithms will only process nodes up to the chunk's size.
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
-        Size_t GetCapacity()const { return Capacity; }
+        Size_t GetNodeCapacity()const { return NodeCapacity; }
 
         /// <summary>
         /// Create a null chunk without chunk type nor component data.
         /// </summary>
         /// <returns></returns>
-        static Chunk_t Null() { return Chunk_t(); }
+        static Self_t Null() { return Self_t(); }
 
     public:
         /// <summary>
         /// Create a null chunk without chunk type.
         /// IsNull() will evaluate to true.
-        /// Size() and Capacity() will evaluate to 0
         /// </summary>
-        ChunkT()
-            : Capacity(0)
+        ChunkAllocationT()
+            : Base_t()
+            , NodeCapacity(0)
         {
         }
 
@@ -276,13 +280,14 @@ namespace PNC
         /// The result chunk will have the same size and capacity as the original.
         /// </summary>
         /// <param name="o"></param>
-        ChunkT(const ChunkT& o)
+        ChunkAllocationT(const Self_t& o)
             : Base_t(o)
-            , Capacity(o.Capacity)
+            , NodeCapacity(o.NodeCapacity)
         {
+            if (o.IsNull())
+                return;
             AllocateComponentDataArray();
-            if(!o.IsNull())
-                AllocateDataCopy(o);
+            AllocateDataCopy(o);
         }
 
         /// <summary>
@@ -291,14 +296,16 @@ namespace PNC
         /// The result chunk will have the same size and capacity as the original.
         /// </summary>
         /// <param name="o"></param>
-        ChunkT& operator=(const ChunkT& o) 
+        Self_t& operator=(const Self_t& o)
         {
             if (this == &o)
                 return *this;
             DeallocateData();
             DeallocateComponentDataArray();
             Base_t::operator=(o);
-            Capacity = o.Capacity;
+            NodeCapacity = o.NodeCapacity;
+            if (o.IsNull())
+                return *this;
             AllocateComponentDataArray();
             AllocateDataCopy(o);
             return *this;
@@ -310,11 +317,11 @@ namespace PNC
         /// Any computation perform in this chunk will only process node within the chunk's size and not it's capacity.
         /// </summary>
         /// <param name="chunkType"></param>
-        /// <param name="capacity"></param>
-        /// <param name="size"></param>
-        ChunkT(const ChunkType_t* chunkType, Size_t capacity, Size_t size = 0)
-            : Base_t(chunkType, size)
-            , Capacity(capacity)
+        /// <param name="nodeCapacity"></param>
+        /// <param name="nodeCount"></param>
+        ChunkAllocationT(const ChunkType_t* chunkType, Size_t nodeCapacity, Size_t nodeCount = 0)
+            : Base_t(chunkType, nodeCount)
+            , NodeCapacity(nodeCapacity)
         {
             AllocateComponentDataArray();
             AllocateData();
@@ -323,7 +330,7 @@ namespace PNC
         /// <summary>
         /// Deallocate data if not a null chunk
         /// </summary>
-        ~ChunkT() 
+        ~ChunkAllocationT()
         {
             DeallocateData();
             DeallocateComponentDataArray();
@@ -350,40 +357,38 @@ namespace PNC
     private:
 
 
-        void AllocateData() 
+        void AllocateData()
         {
-            assert(!this->IsNull());
+            assert_pnc(!this->IsNull());
             auto componentCount = this->Type->Components.GetSize();
-            std::vector<void*> componentsData(componentCount);
-            for (size_t i = 0; i < componentCount; ++i) 
+            for (Size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = this->Type->Components[i];
-                this->ComponentData[i] = componentTypeInfo->Allocate(Capacity);
+                this->ComponentData[i] = componentTypeInfo->Allocate(NodeCapacity);
             }
         }
 
-        void AllocateDataCopy(const ChunkT& o) 
+        void AllocateDataCopy(const Self_t& o)
         {
-            assert(!this->IsNull());
-            assert(IsSameChunkType(*this, o));
+            assert_pnc(!this->IsNull());
+            assert_pnc(this->IsSameChunkType(*this, o));
             auto componentCount = this->Type->Components.GetSize();
-            for (size_t i = 0; i < componentCount; ++i) 
+            for (Size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = this->Type->Components[i];
-                this->ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], o.Capacity, o.Size);
+                this->ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], o.NodeCapacity, o.NodeCount);
             }
         }
 
-        void DeallocateData() 
+        void DeallocateData()
         {
             if (this->Type == nullptr)
                 return;
-            assert(IsDataAllocated());
             auto componentCount = this->Type->Components.GetSize();
-            for (size_t i = 0; i < componentCount; ++i) 
+            for (Size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = this->Type->Components[i];
-                componentTypeInfo->Deallocate(this->ComponentData[i], Capacity);
+                componentTypeInfo->Deallocate(this->ComponentData[i], NodeCapacity);
             }
         }
 
@@ -393,13 +398,15 @@ namespace PNC
         }
         void DeallocateComponentDataArray()
         {
+            if (this->Type == nullptr)
+                return;
             FMemory::Free(this->ComponentData);
         }
 
         void CopyComponentDataArray(void** componentData)const
         {
             auto componentCount = this->Type->Components.GetSize();
-            for (int32 i = 0; i < componentCount; ++i)
+            for (Size_t i = 0; i < componentCount; ++i)
             {
                 this->ComponentData[i] = componentData[i];
             }
@@ -407,124 +414,248 @@ namespace PNC
     };
 
 
-    template<typename TChunkPointer, typename TChunkType, typename TSize>
-    struct ChunkArrayPointerT : public ChunkPointerT<TChunkType, TSize>
+    /// <summary>
+    /// Chunk of multiple nodes with the same component types (same set of component).
+    /// </summary>
+    /// <typeparam name="TChunkType">ChunkType type represent the structure of the chunk and what component types it has.</typeparam>
+    /// <typeparam name="TSize">Size unit for indexing nodes in the chunk</typeparam>
+    template<typename TChunkType>
+    struct ChunkT : public ChunkAllocationT<ChunkPointerT<TChunkType>>
     {
     public:
-        using Base_t = ChunkPointerT<TChunkType, TSize>;
-        using ChunkArrayPointer_t = ChunkArrayPointerT;
-        using ChunkPointer_t = TChunkPointer;
+        using Base_t = ChunkPointerT<TChunkType>;
         using ChunkType_t = TChunkType;
-        using Size_t = TSize;
+        using Size_t = typename ChunkType_t::Size_t;
+        using Chunk_t = ChunkT;
+
+    public:
+        /// <summary>
+        /// Create a null chunk without chunk type nor component data.
+        /// </summary>
+        /// <returns></returns>
+        static Chunk_t Null() { return Chunk_t(); }
+
+    public:
+        /// <summary>
+        /// Create a null chunk without chunk type.
+        /// IsNull() will evaluate to true.
+        /// </summary>
+        ChunkT()
+            : Base_t()
+        {
+        }
+
+        /// <summary>
+        /// Create a chunk of a given chunk type and allocate the component's memory
+        /// The components' memory can fit as many instances of each component as the chunk's capacity.
+        /// Any computation perform in this chunk will only process node within the chunk's size and not it's capacity.
+        /// </summary>
+        /// <param name="chunkType"></param>
+        /// <param name="nodeCapacity"></param>
+        /// <param name="nodeCount"></param>
+        ChunkT(const ChunkType_t* chunkType, Size_t nodeCapacity, Size_t nodeCount = 0)
+            : Base_t(chunkType, nodeCapacity, nodeCount)
+        {
+        }
+
+
+    };
+
+
+
+    template<typename TChunkPointerElement>
+    struct ChunkArrayPointerT : public ChunkPointerT<typename TChunkPointerElement::ChunkType_t>
+    {
+    public:
+        using ChunkType_t = typename TChunkPointerElement::ChunkType_t;
+        using Size_t = typename TChunkPointerElement::Size_t;
+        using ChunkArrayPointer_t = ChunkArrayPointerT<TChunkPointerElement>;
+        using Base_t = ChunkPointerT<ChunkType_t>;
+        using ChunkPointerElement_t = TChunkPointerElement;
 
     protected:
-        ChunkPointer_t** Chunks;
+        ChunkPointerElement_t* Chunks;
         Size_t ChunkCount;
-        //Size_t CapacityPerChunk;
-        //Size_t SizePerChunk;
+
+    public:
 
         Size_t GetChunkCount()const { return ChunkCount; }
-    public:
-        //const ChunkType_t* chunkType, Size_t size, void** componentData
-        ChunkArrayPointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointer_t** chunks, Size_t chunkCount, Size_t capacityPerChunk)
+
+        ChunkArrayPointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t capacityPerChunk)
             : Base_t(chunkType, chunkCount* capacityPerChunk, componentData)
             , Chunks(chunks)
             , ChunkCount(chunkCount)
-            //, CapacityPerChunk(capacityPerChunk)
-            //, SizePerChunk(sizePerChunk)
         {
 
         }
     protected:
 
         ChunkArrayPointerT(const ChunkType_t* chunkType, Size_t capacityPerChunk, Size_t chunkCount = 0)
-            : Base_t(chunkType, chunkCount* capacityPerChunk)
+            : Base_t(chunkType, chunkCount * capacityPerChunk)
             , Chunks(nullptr)
             , ChunkCount(chunkCount)
-            //, CapacityPerChunk(capacityPerChunk)
-            //, SizePerChunk(sizePerChunk)
         {
         }
     public:
-        const ChunkPointer_t& operator[](Size_t index)const
+        const ChunkPointerElement_t& operator[](Size_t index)const
         {
-            return *Chunks[index];
+            return Chunks[index];
+        }
+        ChunkPointerElement_t& operator[](Size_t index)
+        {
+            return Chunks[index];
         }
 
 
     };
 
-    template<typename TChunkPointer, typename TChunkType, typename TSize>
-    struct ChunkArrayT : public ChunkArrayPointerT<TChunkPointer, TChunkType, TSize>
+
+    template<typename TBase>
+    struct ChunkArrayAllocationT : public TBase
     {
+        // TODO specialization when TChunkPointer is a ChunkArrayPointerT
     public:
-        using Base_t = ChunkArrayPointerT<TChunkPointer, TChunkType, TSize>;
-        //using ChunkArrayPointer_t = ChunkArrayPointerT;
-        using ChunkPointer_t = TChunkPointer;
-        //using ChunkPointer_t = ChunkPointerT<TChunkType, TSize>;
-        using ChunkType_t = TChunkType;
-        using Size_t = TSize;
-        using ChunkArray_t = ChunkArrayT<TChunkPointer, TChunkType, TSize>;
+        using Base_t = TBase;
+        using ChunkType_t = typename TBase::ChunkType_t;
+        using Size_t = typename TBase::Size_t;
+
+        using ChunkPointerElement_t = typename TBase::ChunkPointerElement_t;
+        using Self_t = ChunkArrayAllocationT<TBase>;
+        //using ChunkArray_t = ChunkArrayT<TChunkPointerElement>;
 
     protected:
-        //Max total nodes
-        Size_t Capacity;
-        //Max chunks
+        Size_t NodeCapacityPerChunk;
         Size_t ChunkCapacity;
-        Size_t GetCapacityPerChunk()const { return Capacity / ChunkCapacity; }
 
-        ChunkArrayT(const ChunkType_t* chunkType, Size_t capacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0)
-            : Base_t(chunkType, capacityPerChunk, chunkCount)
-            , Capacity(chunkCapacity * capacityPerChunk)
+    public:
+        Size_t GetNodeCapacityTotal()const { return NodeCapacityPerChunk * ChunkCapacity; }
+        Size_t GetNodeCapacityPerChunk()const { return NodeCapacityPerChunk; }
+        Size_t GetChunkCapacity()const { return ChunkCapacity; }
+        const ChunkPointerElement_t& operator[](Size_t index)const { return Base_t::operator[](index); }
+        ChunkPointerElement_t& operator[](Size_t index) { return Base_t::operator[](index); }
+
+        ChunkArrayAllocationT()
+            : NodeCapacityPerChunk(0)
+            , ChunkCapacity(0)
+        {
+        }
+        ChunkArrayAllocationT(const ChunkType_t* chunkType, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
+            : Base_t(chunkType, nodeCapacityPerChunk, chunkCount)
+            , NodeCapacityPerChunk(nodeCapacityPerChunk)
             , ChunkCapacity(chunkCapacity)
         {
             AllocateComponentDataArray();
             AllocateData();
-            for (int i = 0; i < chunkCount; ++i)
-            {
-                this->Chunks[i] = ChunkPointer_t(chunkType, 0, GetComponentDataForChunk(i));
-            }
+            AllocateChunkArray();
+            InitChunkArray(nodeCountPerChunk);
+        }
+
+        ChunkArrayAllocationT(const ChunkArrayAllocationT& o)
+            : Base_t(o)
+            , NodeCapacityPerChunk(o.NodeCapacityPerChunk)
+            , ChunkCapacity(o.ChunkCapacity)
+        {
+            if (o.IsNull())
+                return;
+            AllocateComponentDataArray();
+            AllocateDataCopy(o);
+            AllocateChunkArray();
+            CopyChunkArray(o);
+        }
+
+        Self_t& operator=(const Self_t& o)
+        {
+            if (this == &o)
+                return *this;
+            DeallocateData();
+            DeallocateComponentDataArray();
+            Base_t::operator=(o);
+            NodeCapacityPerChunk = o.NodeCapacityPerChunk;
+            if (o.IsNull())
+                return;
+            AllocateComponentDataArray();
+            AllocateDataCopy(o);
+            AllocateChunkArray();
+            CopyChunkArray(o);
+            return *this;
+        }
+
+        ~ChunkArrayAllocationT()
+        {
+            DeallocateChunkArray();
+            DeallocateData();
+            DeallocateComponentDataArray();
+        }
+    protected:
+
+        void CopyChunkArray(const Self_t& o)
+        {
+            for (int i = 0; i < ChunkCapacity; ++i)
+                this->Chunks[i] = ChunkPointerElement_t(this->Type, o[i].GetNodeCount(), GetComponentDataForChunk(i));
+        }
+        void InitChunkArray(Size_t nodeCountPerChunk = 0)
+        {
+            if (this->IsNull())
+                for (int i = 0; i < ChunkCapacity; ++i)
+                    this->Chunks[i] = ChunkPointerElement_t::Null();
+            else
+                for (int i = 0; i < ChunkCapacity; ++i)
+                    this->Chunks[i] = ChunkPointerElement_t(this->Type, nodeCountPerChunk, GetComponentDataForChunk(i));
         }
 
         void** GetComponentDataForChunk(Size_t chunkIndex)
         {
-            return &this->ComponentData[chunkIndex * GetCapacityPerChunk()];
-            
+            return &this->ComponentData[chunkIndex * this->Type->Components.GetSize()];
+        }
+
+        void AllocateChunkArray()
+        {
+            this->Chunks = (ChunkPointerElement_t*)FMemory::Malloc(this->ChunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
+        }
+        void DeallocateChunkArray()
+        {
+            FMemory::Free(this->Chunks);
         }
         void AllocateComponentDataArray()
         {
             this->ComponentData = (void**)FMemory::Malloc(this->ChunkCapacity * this->Type->Components.GetSize() * sizeof(void*), alignof(void*));
         }
+
         void DeallocateComponentDataArray()
         {
             FMemory::Free(this->ComponentData);
         }
+
         void AllocateData()
         {
-            assert(!this->IsNull());
+            assert_pnc(!this->IsNull());
             auto componentCount = this->Type->Components.GetSize();
-            auto capacityPerChunk = GetCapacityPerChunk();
-            std::vector<void*> componentsData(componentCount);
+            auto nodeCapacityTotal = GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = this->Type->Components[i];
-                this->ComponentData[i] = componentTypeInfo->Allocate(Capacity, ChunkCapacity);
+                this->ComponentData[i] = componentTypeInfo->Allocate(nodeCapacityTotal, ChunkCapacity);
                 for (size_t k = 1; k < ChunkCapacity; ++k)
                 {
-                    this->ComponentData[k * componentCount + i] = componentTypeInfo->Forward(this->ComponentData[i], capacityPerChunk);
+                    this->ComponentData[k * componentCount + i] = componentTypeInfo->Forward(this->ComponentData[i], NodeCapacityPerChunk);
                 }
             }
         }
 
-        void AllocateDataCopy(const ChunkArray_t& o)
+        void AllocateDataCopy(const Self_t& o)
         {
-            assert(!this->IsNull());
-            assert(IsSameChunkType(*this, o));
+            assert_pnc(!this->IsNull());
+            assert_pnc(this->IsSameChunkType(*this, o));
             auto componentCount = this->Type->Components.GetSize();
+            auto nodeCapacityTotal = o.GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = this->Type->Components[i];
-                this->ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], o.Capacity, o.Size, ChunkCapacity);
+                this->ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], nodeCapacityTotal, o.GetChunkCount() * o.GetNodeCapacityPerChunk(), ChunkCapacity);
+                for (size_t k = 1; k < ChunkCapacity; ++k)
+                {
+                    this->ComponentData[k * componentCount + i] = componentTypeInfo->Forward(this->ComponentData[i], NodeCapacityPerChunk);
+                }
             }
         }
 
@@ -532,16 +663,433 @@ namespace PNC
         {
             if (this->Type == nullptr)
                 return;
-            assert(IsDataAllocated());
             auto componentCount = this->Type->Components.GetSize();
+            auto nodeCapacityTotal = GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
             {
                 auto componentTypeInfo = this->Type->Components[i];
-                componentTypeInfo->Deallocate(this->ComponentData[i], Capacity, ChunkCapacity);
+                componentTypeInfo->Deallocate(this->ComponentData[i], nodeCapacityTotal, ChunkCapacity);
             }
         }
 
     };
+
+
+    template<typename TChunkPointerElement>
+    struct ChunkArrayT : public ChunkArrayAllocationT<ChunkArrayPointerT<TChunkPointerElement>>
+    {
+        // TODO specialization when TChunkPointer is a ChunkArrayPointerT
+    public:
+        using Base_t = ChunkArrayAllocationT<ChunkArrayPointerT<TChunkPointerElement>>;
+        using ChunkPointerElement_t = TChunkPointerElement;
+        using ChunkType_t = typename TChunkPointerElement::ChunkType_t;
+        using Size_t = typename TChunkPointerElement::Size_t;
+        using ChunkArray_t = ChunkArrayT<TChunkPointerElement>;
+
+    public:
+        const ChunkPointerElement_t& operator[](Size_t index)const { return Base_t::operator[](index); }
+        ChunkPointerElement_t& operator[](Size_t index) { return Base_t::operator[](index); }
+
+        ChunkArrayT() {}
+        ChunkArrayT(const ChunkType_t* chunkType, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
+            : Base_t(chunkType, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk)
+        {
+        }
+
+    };
+
+
+
+
+
+
+
+
+    template<typename TChunkType>
+    struct IdentifiableChunk
+    {
+    public:
+        using ChunkType_t = TChunkType;
+        using Size_t = typename ChunkType_t::Size_t;
+        ChunkKind Kind;
+        IdentifiableChunk(ChunkKind kind)
+            :Kind(kind)
+        {
+        }
+    };
+    template<typename TChunkType>
+    struct IdentifiableChunkPointerT : public IdentifiableChunk<TChunkType>, public ChunkPointerT<TChunkType>
+    {
+    public:
+        using base_t = IdentifiableChunk<TChunkType>;
+        using base2_t = ChunkPointerT<TChunkType>;
+        using ChunkType_t = TChunkType;
+        using Size_t = typename ChunkType_t::Size_t;
+        using ChunkPointer_t = ChunkPointerT;
+
+    public:
+        /// <summary>
+        /// Create a null ChunkRefT without chunk type.
+        /// IsNull() will evaluate to true.
+        /// </summary>
+        IdentifiableChunkPointerT(ChunkKind kind = ChunkKind_Chunk)
+            : base_t(kind)
+            , base2_t()
+        {
+        }
+
+        IdentifiableChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData, ChunkKind kind = ChunkKind_ChunkTree)
+            : base_t(kind)
+            , base2_t(chunkType, nodeCount, componentData)
+        {
+        }
+    };
+
+
+
+
+
+    ///// <summary>
+    ///// Chunk of multiple nodes with the same component types (same set of component).
+    ///// </summary>
+    ///// <typeparam name="TChunkType">ChunkType type represent the structure of the chunk and what component types it has.</typeparam>
+    ///// <typeparam name="TSize">Size unit for indexing nodes in the chunk</typeparam>
+    //template<typename TChunkType>
+    //struct ChunkT : public ChunkPointerT<TChunkType>
+    //{
+    //public:
+    //    using Base_t = ChunkPointerT<TChunkType>;
+    //    using ChunkType_t = TChunkType;
+    //    using Size_t = typename ChunkType_t::Size_t;
+    //    using Chunk_t = ChunkT;
+
+    //private:
+    //    Size_t NodeCapacity;
+
+    //public:
+    //    /// <summary>
+    //    /// Get the capacity of the chunk.
+    //    /// The capacity is the max size the chunk can be without reallocating the component's memory.
+    //    /// Algorithms will only process nodes up to the chunk's size.
+    //    /// </summary>
+    //    /// <returns>The capacity of the chunk</returns>
+    //    Size_t GetNodeCapacity()const { return NodeCapacity; }
+
+    //    /// <summary>
+    //    /// Create a null chunk without chunk type nor component data.
+    //    /// </summary>
+    //    /// <returns></returns>
+    //    static Chunk_t Null() { return Chunk_t(); }
+
+    //public:
+    //    /// <summary>
+    //    /// Create a null chunk without chunk type.
+    //    /// IsNull() will evaluate to true.
+    //    /// </summary>
+    //    ChunkT()
+    //        : Base_t()
+    //        , NodeCapacity(0)
+    //    {
+    //    }
+
+    //    /// <summary>
+    //    /// Deep copy a chunk and its component data.
+    //    /// The result chunk will have the same size and capacity as the original.
+    //    /// </summary>
+    //    /// <param name="o"></param>
+    //    ChunkT(const ChunkT& o)
+    //        : Base_t(o)
+    //        , NodeCapacity(o.NodeCapacity)
+    //    {
+    //        if (o.IsNull())
+    //            return;
+    //        AllocateComponentDataArray();
+    //        AllocateDataCopy(o);
+    //    }
+
+    //    /// <summary>
+    //    /// Deep copy a chunk and its component data.
+    //    /// It will deallocate any previous chunk data.
+    //    /// The result chunk will have the same size and capacity as the original.
+    //    /// </summary>
+    //    /// <param name="o"></param>
+    //    ChunkT& operator=(const ChunkT& o) 
+    //    {
+    //        if (this == &o)
+    //            return *this;
+    //        DeallocateData();
+    //        DeallocateComponentDataArray();
+    //        Base_t::operator=(o);
+    //        NodeCapacity = o.NodeCapacity;
+    //        if (o.IsNull())
+    //            return *this;
+    //        AllocateComponentDataArray();
+    //        AllocateDataCopy(o);
+    //        return *this;
+    //    }
+
+    //    /// <summary>
+    //    /// Create a chunk of a given chunk type and allocate the component's memory
+    //    /// The components' memory can fit as many instances of each component as the chunk's capacity.
+    //    /// Any computation perform in this chunk will only process node within the chunk's size and not it's capacity.
+    //    /// </summary>
+    //    /// <param name="chunkType"></param>
+    //    /// <param name="capacity"></param>
+    //    /// <param name="size"></param>
+    //    ChunkT(const ChunkType_t* chunkType, Size_t capacity, Size_t size = 0)
+    //        : Base_t(chunkType, size)
+    //        , NodeCapacity(capacity)
+    //    {
+    //        AllocateComponentDataArray();
+    //        AllocateData();
+    //    }
+
+    //    /// <summary>
+    //    /// Deallocate data if not a null chunk
+    //    /// </summary>
+    //    ~ChunkT() 
+    //    {
+    //        DeallocateData();
+    //        DeallocateComponentDataArray();
+    //    }
+
+    //public:
+    //    //Chunk_t SubChunk(Size_t first, Size_t capacity, Size_t size)const
+    //    //{
+    //    //    assert(capacity >= size);
+    //    //    assert(first + capacity < Capacity);
+    //    //    Chunk_t subChunk;
+    //    //    subChunk.Type = Type;
+    //    //    subChunk.Capacity = capacity;
+    //    //    subChunk.Size = size;
+    //    //    subChunk.ComponentData = ComponentData;
+    //    //    subChunk.IsSubChunk = true;
+    //    //    for (int i = 0; i < subChunk.ComponentData.size(); ++i)
+    //    //    {
+    //    //        subChunk.ComponentData[i] = Type->Components[i]->SubChunk(ComponentData[i], first);
+    //    //    }
+    //    //    return subChunk;
+    //    //dd
+
+    //private:
+
+
+    //    void AllocateData() 
+    //    {
+    //        assert_pnc(!this->IsNull());
+    //        auto componentCount = this->Type->Components.GetSize();
+    //        for (size_t i = 0; i < componentCount; ++i) 
+    //        {
+    //            auto componentTypeInfo = this->Type->Components[i];
+    //            this->ComponentData[i] = componentTypeInfo->Allocate(NodeCapacity);
+    //        }
+    //    }
+
+    //    void AllocateDataCopy(const ChunkT& o) 
+    //    {
+    //        assert_pnc(!this->IsNull());
+    //        assert_pnc(this->IsSameChunkType(*this, o));
+    //        auto componentCount = this->Type->Components.GetSize();
+    //        for (size_t i = 0; i < componentCount; ++i) 
+    //        {
+    //            auto componentTypeInfo = this->Type->Components[i];
+    //            this->ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], o.NodeCapacity, o.NodeCount);
+    //        }
+    //    }
+
+    //    void DeallocateData() 
+    //    {
+    //        if (this->Type == nullptr)
+    //            return;
+    //        auto componentCount = this->Type->Components.GetSize();
+    //        for (size_t i = 0; i < componentCount; ++i) 
+    //        {
+    //            auto componentTypeInfo = this->Type->Components[i];
+    //            componentTypeInfo->Deallocate(this->ComponentData[i], NodeCapacity);
+    //        }
+    //    }
+
+    //    void AllocateComponentDataArray()
+    //    {
+    //        this->ComponentData = (void**)FMemory::Malloc(this->Type->Components.GetSize() * sizeof(void*), alignof(void*));
+    //    }
+    //    void DeallocateComponentDataArray()
+    //    {
+    //        if (this->Type == nullptr)
+    //            return;
+    //        FMemory::Free(this->ComponentData);
+    //    }
+
+    //    void CopyComponentDataArray(void** componentData)const
+    //    {
+    //        auto componentCount = this->Type->Components.GetSize();
+    //        for (int32 i = 0; i < componentCount; ++i)
+    //        {
+    //            this->ComponentData[i] = componentData[i];
+    //        }
+    //    }
+    //};
+//
+//
+//template<typename TChunkPointerElement>
+//struct ChunkArrayT : public ChunkArrayPointerT<TChunkPointerElement>
+//{
+//    // TODO specialization when TChunkPointer is a ChunkArrayPointerT
+//public:
+//    using ChunkPointerElement_t = TChunkPointerElement;
+//    using ChunkType_t = typename TChunkPointerElement::ChunkType_t;
+//    using Size_t = typename TChunkPointerElement::Size_t;
+//    using Base_t = ChunkArrayPointerT<TChunkPointerElement>;
+//    //using ChunkArrayPointer_t = ChunkArrayPointerT;
+//    //using ChunkPointer_t = ChunkPointerT<TChunkType>;
+//    using ChunkArray_t = ChunkArrayT<TChunkPointerElement>;
+//
+//protected:
+//    Size_t NodeCapacityPerChunk;
+//    Size_t ChunkCapacity;
+//
+//public:
+//    Size_t GetNodeCapacityTotal()const { return NodeCapacityPerChunk * ChunkCapacity; }
+//    Size_t GetNodeCapacityPerChunk()const { return NodeCapacityPerChunk; }
+//    Size_t GetChunkCapacity()const { return ChunkCapacity; }
+//    const ChunkPointerElement_t& operator[](Size_t index)const { return Base_t::operator[](index); }
+//    ChunkPointerElement_t& operator[](Size_t index) { return Base_t::operator[](index); }
+//
+//    ChunkArrayT(const ChunkType_t* chunkType, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
+//        : Base_t(chunkType, nodeCapacityPerChunk, chunkCount)
+//        , NodeCapacityPerChunk(nodeCapacityPerChunk)
+//        , ChunkCapacity(chunkCapacity)
+//    {
+//        AllocateComponentDataArray();
+//        AllocateData();
+//        AllocateChunkArray();
+//        InitChunkArray(nodeCountPerChunk);
+//    }
+//
+//    ChunkArrayT(const ChunkArrayT& o)
+//        : Base_t(o)
+//        , NodeCapacityPerChunk(o.NodeCapacityPerChunk)
+//        , ChunkCapacity(o.ChunkCapacity)
+//    {
+//        if (o.IsNull())
+//            return;
+//        AllocateComponentDataArray();
+//        AllocateDataCopy(o);
+//        AllocateChunkArray();
+//        CopyChunkArray(o);
+//    }
+//
+//    ChunkArrayT& operator=(const ChunkArrayT& o)
+//    {
+//        if (this == &o)
+//            return *this;
+//        DeallocateData();
+//        DeallocateComponentDataArray();
+//        Base_t::operator=(o);
+//        NodeCapacityPerChunk = o.NodeCapacityPerChunk;
+//        if (o.IsNull())
+//            return;
+//        AllocateComponentDataArray();
+//        AllocateDataCopy(o);
+//        AllocateChunkArray();
+//        CopyChunkArray(o);
+//        return *this;
+//    }
+//
+//    ~ChunkArrayT()
+//    {
+//        DeallocateChunkArray();
+//        DeallocateData();
+//        DeallocateComponentDataArray();
+//    }
+//protected:
+//
+//    void CopyChunkArray(const ChunkArrayT& o)
+//    {
+//        for (int i = 0; i < ChunkCapacity; ++i)
+//            this->Chunks[i] = ChunkPointerElement_t(this->Type, o[i].GetNodeCount(), GetComponentDataForChunk(i));
+//    }
+//    void InitChunkArray(Size_t nodeCountPerChunk = 0)
+//    {
+//        if (this->IsNull())
+//            for (int i = 0; i < ChunkCapacity; ++i)
+//                this->Chunks[i] = ChunkPointerElement_t::Null();
+//        else
+//            for (int i = 0; i < ChunkCapacity; ++i)
+//                this->Chunks[i] = ChunkPointerElement_t(this->Type, nodeCountPerChunk, GetComponentDataForChunk(i));
+//    }
+//
+//    void** GetComponentDataForChunk(Size_t chunkIndex)
+//    {
+//        return &this->ComponentData[chunkIndex * this->Type->Components.GetSize()];
+//    }
+//
+//    void AllocateChunkArray()
+//    {
+//        this->Chunks = (ChunkPointerElement_t*)FMemory::Malloc(this->ChunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
+//    }
+//    void DeallocateChunkArray()
+//    {
+//        FMemory::Free(this->Chunks);
+//    }
+//    void AllocateComponentDataArray()
+//    {
+//        this->ComponentData = (void**)FMemory::Malloc(this->ChunkCapacity * this->Type->Components.GetSize() * sizeof(void*), alignof(void*));
+//    }
+//
+//    void DeallocateComponentDataArray()
+//    {
+//        FMemory::Free(this->ComponentData);
+//    }
+//
+//    void AllocateData()
+//    {
+//        assert_pnc(!this->IsNull());
+//        auto componentCount = this->Type->Components.GetSize();
+//        auto nodeCapacityTotal = GetNodeCapacityTotal();
+//        for (size_t i = 0; i < componentCount; ++i)
+//        {
+//            auto componentTypeInfo = this->Type->Components[i];
+//            this->ComponentData[i] = componentTypeInfo->Allocate(nodeCapacityTotal, ChunkCapacity);
+//            for (size_t k = 1; k < ChunkCapacity; ++k)
+//            {
+//                this->ComponentData[k * componentCount + i] = componentTypeInfo->Forward(this->ComponentData[i], NodeCapacityPerChunk);
+//            }
+//        }
+//    }
+//
+//    void AllocateDataCopy(const ChunkArray_t& o)
+//    {
+//        assert_pnc(!this->IsNull());
+//        assert_pnc(IsSameChunkType(*this, o));
+//        auto componentCount = this->Type->Components.GetSize();
+//        auto nodeCapacityTotal = o.GetNodeCapacityTotal();
+//        for (size_t i = 0; i < componentCount; ++i)
+//        {
+//            auto componentTypeInfo = this->Type->Components[i];
+//            this->ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], nodeCapacityTotal, o.GetChunkCount() * o.GetNodeCapacityPerChunk(), ChunkCapacity);
+//            for (size_t k = 1; k < ChunkCapacity; ++k)
+//            {
+//                this->ComponentData[k * componentCount + i] = componentTypeInfo->Forward(this->ComponentData[i], NodeCapacityPerChunk);
+//            }
+//        }
+//    }
+//
+//    void DeallocateData()
+//    {
+//        if (this->Type == nullptr)
+//            return;
+//        auto componentCount = this->Type->Components.GetSize();
+//        auto nodeCapacityTotal = GetNodeCapacityTotal();
+//        for (size_t i = 0; i < componentCount; ++i)
+//        {
+//            auto componentTypeInfo = this->Type->Components[i];
+//            componentTypeInfo->Deallocate(this->ComponentData[i], nodeCapacityTotal, ChunkCapacity);
+//        }
+//    }
+//
+//};
+//
 
     //template<typename TChunk, typename TChunkType, typename TSize>
     //struct MultiChunk 
