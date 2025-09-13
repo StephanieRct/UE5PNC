@@ -6,12 +6,11 @@
 
 namespace PNC
 {
-
     template<typename TChunkType>
     struct PipelineRequirementMatchForChunkType
     {
     public:
-        typedef TChunkType TChunkType_t;
+        using TChunkType_t = TChunkType;
 
     protected:
         const TChunkType* ChunkType;
@@ -29,16 +28,13 @@ namespace PNC
         }
     };
 
-
-
-
     template<typename TPipeline, typename TChunkType, typename TSize>
     struct PipelineT
     {
     public:
-        typedef TChunkType ChunkType_t;
-        typedef TSize Size_t;
-        typedef TPipeline Pipeline_t;
+        using ChunkType_t = TChunkType;
+        using Size_t = TSize;
+        using Pipeline_t = TPipeline;
 
     protected:
         typedef std::unordered_map<const ChunkType_t*, bool> CacheMap_t;
@@ -59,64 +55,41 @@ namespace PNC
             return iMatching->second;
         }
 
-
-
-        template<typename TChunk>
-        bool TryRun(TChunk& chunk)
+        template<typename TChunkPointer>
+        bool TryRun(TChunkPointer& chunkPointer)
         {
+            auto& chunk = *chunkPointer;
             assert(!chunk.IsNull());
             const auto* chunkType = &chunk.GetChunkType();
             if (!Match(chunkType))
                 return false;
-            Impl()->Execute(chunk);
+            Impl()->Execute(chunkPointer);
             return true;
         }
 
-        template<typename TChunk>
-        void TryRun(TChunk* chunk) = delete;
+        template<typename TChunkPointer>
+        void TryRun(TChunkPointer* chunkPointer) = delete;
 
-
-        template<typename TChunk>
-        void Run(TChunk& chunk)
+        template<typename TChunkPointer>
+        void Run(TChunkPointer& chunkPointer)
         {
-            if (!TryRun(chunk))
+            if (!TryRun(chunkPointer))
             {
-                checkf(false, TEXT("Could not run pipeline '%hs' on chunk '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TChunk).name());
+                checkf(false, TEXT("Could not run pipeline '%hs' on chunk '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TChunkPointer).name());
             }
         }
-        template<typename TChunk>
-        void Run(TChunk* chunk) = delete;
+        template<typename TChunkPointer>
+        void Run(TChunkPointer* chunkPointer) = delete;
 
-
-
-        //template<typename TChunk, typename TChunkType>
-        //bool TryRunSameType(TChunk** chunk, Size_t count, const TChunkType* chunkType)
-        //{
-        //    assert(chunk != null);
-        //    assert(chunkType != null);
-        //    auto iMatching = ChunkTypeMatching.find(chunkType);
-        //    if (iMatching == ChunkTypeMatching.end())
-        //    {
-        //        bool bMatch = Impl()->Requirements(PipelineRequirementMatchForChunkType<TChunkType>(chunkType));
-        //        iMatching = ChunkTypeMatching.insert(iMatching, typename CacheMap_t::value_type(chunkType, bMatch));
-        //    }
-        //    if (!iMatching->second)
-        //        return false;
-        //    Impl()->Execute(chunk, count);
-        //    return true;
-        //}
-        //template<typename TChunk>
-        //void Run(TChunk** chunk, Size_t count)
     private:
         Pipeline_t* Impl() { return (reinterpret_cast<Pipeline_t*>(this)); }
     };
-
 
     template<typename TSize>
     struct AlgorithmRouteT
     {
     public:
-        typedef TSize Size_t;
+        using Size_t = TSize;
 
     public:
         std::vector<Size_t> Components;
@@ -140,24 +113,24 @@ namespace PNC
         }
     };
 
-    template<typename TChunk, typename TSize>
-    struct AlgorithmRouteToCacheT
+    template<typename TChunkPointer, typename TSize>
+    struct AlgorithmRouteToCacheT : public SetAlgorithmChunk<TChunkPointer>
     {
     public:
-        typedef TChunk Chunk_t;
-        typedef TSize Size_t;
-        typedef AlgorithmRouteT<Size_t> AlgorithmRoute_t;
+        using Base_t = SetAlgorithmChunk<TChunkPointer>;
+        using ChunkPointer_t = TChunkPointer;
+        using Size_t = TSize;
+        using AlgorithmRoute_t = AlgorithmRouteT<Size_t>;
 
     public:
         bool MatchForChunk;
     protected:
-        Chunk_t* Chunk;
         AlgorithmRoute_t* Route;
 
     public:
-        AlgorithmRouteToCacheT(Chunk_t* chunk, AlgorithmRoute_t* route)
-            : MatchForChunk(true)
-            , Chunk(chunk)
+        AlgorithmRouteToCacheT(ChunkPointer_t* chunkPointer, AlgorithmRoute_t* route)
+            : Base_t(chunkPointer)
+            , MatchForChunk(true)
             , Route(route)
         {
         }
@@ -165,7 +138,8 @@ namespace PNC
         template<typename T>
         bool Component(T*& component)
         {
-            const auto& chunkType = Chunk->GetChunkType();
+            auto& chunk = this->ChunkPointer->GetChunk();
+            const auto& chunkType = chunk.GetChunkType();
             auto componentTypeIndexInChunk = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
             Route->AddRoute(componentTypeIndexInChunk);
 
@@ -175,46 +149,28 @@ namespace PNC
                 MatchForChunk = false;
                 return false;
             }
-            component = (T*)Chunk->GetComponentData(componentTypeIndexInChunk);
+            component = (T*)chunk.GetComponentData(componentTypeIndexInChunk);
             return true;
         }
 
-        template<typename T>
-        bool ParentComponent(T*& component)
-        {
-            auto parentChunk = Chunk->GetParentChunk();
-            if (parentChunk == nullptr)
-                return false;
-            const auto& chunkType = parentChunk->GetChunkType();
-            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
-            if (index < 0)
-                return false;
-            component = (T*)parentChunk->GetComponentData(index);
-            return true;
-        }
-        bool ChunkIndex(Size_t& index)
-        {
-            index = 0;
-            return true;
-        }
     };
 
-    template<typename TChunk, typename TSize>
-    struct AlgorithmRouteWithCacheT
+    template<typename TChunkPointer, typename TSize>
+    struct AlgorithmRouteWithCacheT : public SetAlgorithmChunk<TChunkPointer>
     {
     public:
-        typedef TChunk Chunk_t;
-        typedef TSize Size_t;
-        typedef typename AlgorithmRouteT<TSize> AlgorithmRoute_t;
+        using Base_t = SetAlgorithmChunk<TChunkPointer>;
+        using ChunkPointer_t = TChunkPointer;
+        using Size_t = TSize;
+        using AlgorithmRoute_t = typename AlgorithmRouteT<TSize>;
 
     protected:
-        Chunk_t* Chunk;
         AlgorithmRoute_t* Route;
         Size_t CurrentComponentRoute;
 
     public:
-        AlgorithmRouteWithCacheT(Chunk_t* chunk, AlgorithmRoute_t* route)
-            : Chunk(chunk)
+        AlgorithmRouteWithCacheT(ChunkPointer_t* chunkPointer, AlgorithmRoute_t* route)
+            : Base_t(chunkPointer)
             , Route(route)
             , CurrentComponentRoute(0)
         {
@@ -231,44 +187,27 @@ namespace PNC
             if (componentTypeIndexInChunk == (Size_t)-1)
                 return false;
 
-            component = (T*)Chunk->GetComponentData(componentTypeIndexInChunk);
+            auto& chunk = this->ChunkPointer->GetChunk();
+            component = (T*)chunk.GetComponentData(componentTypeIndexInChunk);
             return true;
         }
 
-        template<typename T>
-        bool ParentComponent(T*& component)
-        {
-            auto parentChunk = Chunk->GetParentChunk();
-            if (parentChunk == nullptr)
-                return false;
-            const auto& chunkType = parentChunk->GetChunkType();
-            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
-            if (index < 0)
-                return false;
-            component = (T*)parentChunk->GetComponentData(index);
-            return true;
-        }
-        bool ChunkIndex(Size_t& index)
-        {
-            index = 0;
-            return true;
-        }
     };
 
-
     template<typename TAlgorithm, typename TChunkType, typename TSize>
-    struct AlgorithmRoutingCacheT
+    struct AlgorithmRoutingCacheT 
     {
     public:
-        typedef TSize Size_t;
-        typedef TChunkType ChunkType_t;
-        typedef TAlgorithm Algorithm_t;
-        typedef AlgorithmRouteT<TSize> AlgorithmRoute_t;
+        using Size_t = TSize;
+        using ChunkType_t = TChunkType;
+        using Algorithm_t = TAlgorithm;
+        using AlgorithmRoute_t = AlgorithmRouteT<TSize>;
 
     protected:
-        typedef std::unordered_map<const ChunkType_t*, AlgorithmRoute_t*> Map_t;
+        using Map_t = std::unordered_map<const ChunkType_t*, AlgorithmRoute_t*>;
         mutable Map_t Cache;
         mutable std::list<AlgorithmRoute_t> CachedRoutes;
+
     public:
         AlgorithmRoutingCacheT() {}
         // Non-copyable
@@ -281,10 +220,11 @@ namespace PNC
             return ((TAlgorithm*)nullptr)->Requirements(req);
         }
 
-        template<typename TChunk>
-        bool RouteAlgorithm(Algorithm_t& algorithm, TChunk& chunk) const
+        template<typename TChunkPointer>
+        bool RouteAlgorithm(Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
         {
             //TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("Routing"));
+            auto& chunk = *chunkPointer;
             const ChunkType_t* chunkType = &chunk.GetChunkType();
             
             typename Map_t::iterator i = Cache.find(chunkType);
@@ -293,8 +233,8 @@ namespace PNC
                 CachedRoutes.push_back(AlgorithmRoute_t());
                 AlgorithmRoute_t * route = &CachedRoutes.back();
                 Cache[chunkType] = route;
-                AlgorithmRouteToCacheT<TChunk, Size_t> routeToCache(&chunk, route);
-                bool matches = algorithm.Requirements<AlgorithmRouteToCacheT<TChunk, Size_t>&>(routeToCache);
+                AlgorithmRouteToCacheT<TChunkPointer, Size_t> routeToCache(&chunkPointer, route);
+                bool matches = algorithm.Requirements<AlgorithmRouteToCacheT<TChunkPointer, Size_t>&>(routeToCache);
                 //UE_LOG(LogTemp, Warning, TEXT("Algorithm '%hs' matches: %i, components: %i"), typeid(Algorithm_t).name(), matches, route->Components.size());
                 if (!routeToCache.MatchForChunk)
                 {
@@ -309,8 +249,8 @@ namespace PNC
                 ////UE_LOG(LogTemp, Warning, TEXT("Algorithm '%hs' cahed matches: %i, components: %i"), typeid(Algorithm_t).name(), i->second->IsMismatch(), i->second->Components.size());
                 if (i->second->IsMismatch())
                     return false;
-                AlgorithmRouteWithCacheT<TChunk, Size_t> router(&chunk, i->second);
-                return algorithm.Requirements<AlgorithmRouteWithCacheT<TChunk, Size_t>&>(router);
+                AlgorithmRouteWithCacheT<TChunkPointer, Size_t> router(&chunkPointer, i->second);
+                return algorithm.Requirements<AlgorithmRouteWithCacheT<TChunkPointer, Size_t>&>(router);
             }
         }
     };

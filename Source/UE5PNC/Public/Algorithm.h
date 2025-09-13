@@ -4,36 +4,45 @@
 #pragma once
 #include "common.h"
 
+#include "ChunkTree.h"
+
 namespace PNC 
 {
-    template< typename TChunkAlgorithm, typename TChunk>
+    template< typename TChunkAlgorithm, typename TChunkPointer>
     struct ChunkAlgorithmRunner
     {
     public:
         using ChunkAlgorithm_t = TChunkAlgorithm;
-        using Chunk_t = TChunk;
+        using ChunkPointer_t = TChunkPointer;
 
-        static bool TryRun(TChunkAlgorithm& algorithm, Chunk_t& chunk)
+        static bool TryRun(TChunkAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
         {
-            
+            auto& chunk = *chunkPtr;
             if (chunk.IsNull())
                 return false;
-            if (!algorithm.Requirements(SetAlgorithmChunk<Chunk_t>(&chunk)))
+            if (!algorithm.Requirements(SetAlgorithmChunk<ChunkPointer_t>(&chunkPtr)))
                 return false;
             algorithm.Execute(chunk.GetNodeCount());
             return true;
         }
 
         template<typename TRouting>
-        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, Chunk_t& chunk)
+        static bool TryRunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkPointer_t& chunkPtr)
         {
+            auto& chunk = *chunkPtr;
             assert_pnc(!chunk.IsNull());
-            if (!routing.RouteAlgorithm(algorithm, chunk))
+            if (!routing.RouteAlgorithm(algorithm, chunkPtr))
+                return false;
+            algorithm.Execute(chunk.GetNodeCount());
+            return true;
+        }
+        template<typename TRouting>
+        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkPointer_t& chunkPtr)
+        {
+            if (!TryRunWithRouting(routing, algorithm, chunkPtr))
             {
-                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(Chunk_t).name());
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(ChunkPointer_t).name());
             }
-            else
-                algorithm.Execute(chunk.GetNodeCount());
         }
     };
 
@@ -47,43 +56,359 @@ namespace PNC
         using ChunkAlgorithm_t = TChunkAlgorithm;
         using ChunkArrayPointer_t = ChunkArrayPointerT<TChunkPointerElement>;
 
-        static bool TryRun(ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkArray)
+        static bool TryRun(ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
         {
+            auto& chunkArray = *chunkPtr;
             if (chunkArray.IsNull())
                 return false;
-            if (!algorithm.Requirements(SetAlgorithmChunk<ChunkArrayPointer_t>(&chunkArray)))
+            if (!algorithm.Requirements(SetAlgorithmChunk<ChunkArrayPointer_t>(&chunkPtr)))
                 return false;
             for (Size_t i = 0; i < chunkArray.GetChunkCount(); ++i)
             {
                 auto& chunk = chunkArray[i];
-                algorithm.Execute(chunk.GetNodeCount());
-                if (!algorithm.Requirements(SetAlgorithmChunkArrayNext<ChunkArrayPointer_t>(&chunkArray)))
+                auto nodeCount = chunk.GetNodeCount();
+                algorithm.Execute(nodeCount);
+                if (!algorithm.Requirements(OffsetAlgorithmNode<ChunkArrayPointer_t>(nodeCount)))
                     return false;
             }
             return true;
         }
 
         template<typename TRouting>
-        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkArray)
+        static bool TryRunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
         {
+            auto& chunkArray = *chunkPtr;
             assert_pnc(!chunkArray.IsNull());
-            if (!routing.RouteAlgorithm(algorithm, chunkArray))
+            if (!routing.RouteAlgorithm(algorithm, chunkPtr))
+                return false;
+
+            for (Size_t i = 0; i < chunkArray.GetChunkCount(); ++i)
+            {
+                auto& chunk = chunkArray[i];
+                auto nodeCount = chunk.GetNodeCount();
+                algorithm.Execute(nodeCount);
+                bool nextOk = algorithm.Requirements(OffsetAlgorithmNode<ChunkArrayPointer_t>(nodeCount));
+                assert_pnc(nextOk);
+            }
+            return true;
+        }
+        template<typename TRouting>
+        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
+        {
+            if (!TryRunWithRouting(routing, algorithm, chunkPtr))
             {
                 checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(ChunkArrayPointer_t).name());
             }
-            else
-            {
+        }
+    };
 
-                for (Size_t i = 0; i < chunkArray.GetChunkCount(); ++i)
-                {
-                    auto& chunk = chunkArray[i];
-                    algorithm.Execute(chunk.GetNodeCount());
-                    if (!algorithm.Requirements(SetAlgorithmChunkArrayNext<ChunkArrayPointer_t>(&chunkArray)))
-                        return false;
-                }
+    template< typename TChunkAlgorithm, typename TChunkPointerElement>
+    struct ChunkAlgorithmRunner<TChunkAlgorithm, ChunkArrayTreePointerT<TChunkPointerElement>>
+    {
+    public:
+        using ChunkType_t = typename TChunkPointerElement::ChunkType_t;
+        using Size_t = typename TChunkPointerElement::Size_t;
+        using ChunkPointerElement_t = TChunkPointerElement;
+        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using ChunkArrayTreePointer_t = ChunkArrayTreePointerT<TChunkPointerElement>;
+
+        static bool TryRun(ChunkAlgorithm_t& algorithm, ChunkArrayTreePointer_t& chunkPtr)
+        {
+            auto& chunkArray = *chunkPtr;
+            if (chunkArray.IsNull())
+                return false;
+            if (!algorithm.Requirements(SetAlgorithmChunk<ChunkArrayTreePointer_t>(&chunkPtr)))
+                return false;
+            for (Size_t i = 0; i < chunkArray.GetChunkCount(); ++i)
+            {
+                auto& chunk = chunkArray[i];
+                auto nodeCount = chunk.GetNodeCount();
+                algorithm.Execute(nodeCount);
+                if (!algorithm.Requirements(OffsetAlgorithmNode<ChunkArrayTreePointer_t>(nodeCount)))
+                    return false;
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static bool TryRunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkArrayTreePointer_t& chunkPtr)
+        {
+            auto& chunkArray = *chunkPtr;
+            assert_pnc(!chunkArray.IsNull());
+            if (!routing.RouteAlgorithm(algorithm, chunkPtr))
+                return false;
+
+            for (Size_t i = 0; i < chunkArray.GetChunkCount(); ++i)
+            {
+                auto& chunk = chunkArray[i];
+                auto nodeCount = chunk.GetNodeCount();
+                algorithm.Execute(nodeCount);
+                bool nextOk = algorithm.Requirements(OffsetAlgorithmNode<ChunkArrayTreePointer_t>(nodeCount));
+                assert_pnc(nextOk);
+            }
+            return true;
+        }
+        template<typename TRouting>
+        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, ChunkArrayTreePointer_t& chunkPtr)
+        {
+            if (!TryRunWithRouting(routing, algorithm, chunkPtr))
+            {
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(ChunkArrayTreePointer_t).name());
             }
         }
     };
+
+    template< typename TChunkAlgorithm, typename TChunkPointer>
+    struct IdentifiableChunkAlgorithmRunner
+    {
+    public:
+        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using ChunkType_t = typename TChunkPointer::ChunkType_t;
+
+        using Size_t = typename TChunkPointer::Size_t;
+
+        using IdentifiableChunk_t = IdentifiableChunkT<ChunkType_t>;
+
+        
+
+        using ChunkPointer_t = ChunkPointerT<ChunkType_t>;
+        using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkPointer_t>;
+        using IdentifiableChunkPointer_t = IdentifiableChunkPointerT<ChunkType_t>;
+        using IdentifiableChunkArrayPointer_t = IdentifiableChunkArrayPointerT<ChunkPointer_t>;
+        using ChunkTreePointer_t = ChunkTreePointerT<ChunkType_t>;
+        using ChunkArrayTreePointer_t = ChunkArrayTreePointerT<ChunkPointer_t>;
+        
+
+        static bool TryRun(ChunkAlgorithm_t& algorithm, IdentifiableChunk_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkPointer_t>::TryRun(algorithm, *(IdentifiableChunkPointer_t&)chunkPtr);
+            case ChunkKind_ChunkArray:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayPointer_t>::TryRun(algorithm, *(IdentifiableChunkArrayPointer_t&)chunkPtr);
+            case ChunkKind_ChunkTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkTreePointer_t>::TryRun(algorithm, (ChunkTreePointer_t&)chunkPtr);
+            case ChunkKind_ChunkArrayTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayTreePointer_t>::TryRun(algorithm, (ChunkArrayTreePointer_t&)chunkPtr);
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static bool TryRunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, IdentifiableChunk_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkPointer_t>::TryRunWithRouting(routing, algorithm, *(IdentifiableChunkPointer_t&)chunkPtr);
+            case ChunkKind_ChunkArray:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayPointer_t>::TryRunWithRouting(routing, algorithm, *(IdentifiableChunkArrayPointer_t&)chunkPtr);
+            case ChunkKind_ChunkTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkTreePointer_t>::TryRunWithRouting(routing, algorithm, (ChunkTreePointer_t&)chunkPtr);
+            case ChunkKind_ChunkArrayTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayTreePointer_t>::TryRunWithRouting(routing, algorithm, (ChunkArrayTreePointer_t&)chunkPtr);
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, IdentifiableChunk_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+                ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkPointer_t>::RunWithRouting(routing, algorithm, *(IdentifiableChunkPointer_t&)chunkPtr);
+                break;
+            case ChunkKind_ChunkArray:
+                ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayPointer_t>::RunWithRouting(routing, algorithm, *(IdentifiableChunkArrayPointer_t&)chunkPtr);
+                break;
+            case ChunkKind_ChunkTree:
+                ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkTreePointer_t>::RunWithRouting(routing, algorithm, (ChunkTreePointer_t&)chunkPtr);
+                break;
+            case ChunkKind_ChunkArrayTree:
+                ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayTreePointer_t>::RunWithRouting(routing, algorithm, (ChunkArrayTreePointer_t&)chunkPtr);
+                break;
+            }
+        }
+    };
+
+    // IdentifiableTreePointerT
+    template< typename TChunkAlgorithm, typename TChunkType>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, IdentifiableTreePointerT<TChunkType>>
+    {
+    public:
+        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using ChunkType_t = TChunkType;
+
+        using Size_t = typename TChunkType::Size_t;
+
+        using IdentifiableTreePointer_t = IdentifiableTreePointerT<ChunkType_t>;
+
+
+
+        using ChunkPointer_t = ChunkPointerT<ChunkType_t>;
+        using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkPointer_t>;
+        using IdentifiableChunkPointer_t = IdentifiableChunkPointerT<ChunkType_t>;
+        using IdentifiableChunkArrayPointer_t = IdentifiableChunkArrayPointerT<ChunkType_t>;
+        using ChunkTreePointer_t = ChunkTreePointerT<ChunkType_t>;
+        using ChunkArrayTreePointer_t = ChunkArrayTreePointerT<ChunkPointer_t>;
+
+
+        static bool TryRun(ChunkAlgorithm_t& algorithm, IdentifiableTreePointer_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+            case ChunkKind_ChunkArray:
+                checkNoEntry();
+                return false;
+            case ChunkKind_ChunkTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkTreePointer_t>::TryRun(algorithm, (ChunkTreePointer_t&)chunkPtr);
+            case ChunkKind_ChunkArrayTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayTreePointer_t>::TryRun(algorithm, (ChunkArrayTreePointer_t&)chunkPtr);
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static bool TryRunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, IdentifiableTreePointer_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+            case ChunkKind_ChunkArray:
+                checkNoEntry();
+                return false;
+            case ChunkKind_ChunkTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkTreePointer_t>::TryRunWithRouting(routing, algorithm, (ChunkTreePointer_t&)chunkPtr);
+            case ChunkKind_ChunkArrayTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayTreePointer_t>::TryRunWithRouting(routing, algorithm, (ChunkArrayTreePointer_t&)chunkPtr);
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, IdentifiableTreePointer_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+            case ChunkKind_ChunkArray:
+                checkNoEntry();
+                return;
+            case ChunkKind_ChunkTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkTreePointer_t>::RunWithRouting(routing, algorithm, (ChunkTreePointer_t&)chunkPtr);
+            case ChunkKind_ChunkArrayTree:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayTreePointer_t>::RunWithRouting(routing, algorithm, (ChunkArrayTreePointer_t&)chunkPtr);
+            }
+            return true;
+        }
+    };
+
+    // IdentifiableChunkPointerT
+    template< typename TChunkAlgorithm, typename TChunkType>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, IdentifiableChunkPointerT<TChunkType>>
+    {
+    public:
+        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using ChunkType_t = TChunkType;
+
+        using Size_t = typename TChunkType::Size_t;
+
+        using IdentifiableChunkPointer_t = IdentifiableChunkPointerT<ChunkType_t>;
+
+        using ChunkPointer_t = ChunkPointerT<ChunkType_t>;
+        using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkPointer_t>;
+        using IdentifiableChunkPointer_t = IdentifiableChunkPointerT<ChunkType_t>;
+        using IdentifiableChunkArrayPointer_t = IdentifiableChunkArrayPointerT<ChunkType_t>;
+
+
+        static bool TryRun(ChunkAlgorithm_t& algorithm, IdentifiableChunkPointer_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkPointer_t>::TryRun(algorithm, *(IdentifiableChunkPointer_t&)chunkPtr);
+            case ChunkKind_ChunkArray:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayPointer_t>::TryRun(algorithm, *(IdentifiableChunkArrayPointer_t&)chunkPtr);
+            case ChunkKind_ChunkTree:
+            case ChunkKind_ChunkArrayTree:
+                checkNoEntry();
+                return false;
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static bool TryRunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, IdentifiableChunkPointer_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkPointer_t>::TryRunWithRouting(routing, algorithm, *(IdentifiableChunkPointer_t&)chunkPtr);
+            case ChunkKind_ChunkArray:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayPointer_t>::TryRunWithRouting(routing, algorithm, *(IdentifiableChunkArrayPointer_t&)chunkPtr);
+            case ChunkKind_ChunkTree:
+            case ChunkKind_ChunkArrayTree:
+                checkNoEntry();
+                return false;
+            }
+            return true;
+        }
+
+        template<typename TRouting>
+        static void RunWithRouting(const TRouting& routing, ChunkAlgorithm_t& algorithm, IdentifiableChunkPointer_t& chunkPtr)
+        {
+            switch (chunkPtr.Kind)
+            {
+            case ChunkKind_Chunk:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkPointer_t>::RunWithRouting(routing, algorithm, *(IdentifiableChunkPointer_t&)chunkPtr);
+            case ChunkKind_ChunkArray:
+                return ChunkAlgorithmRunner<ChunkAlgorithm_t, ChunkArrayPointer_t>::RunWithRouting(routing, algorithm, *(IdentifiableChunkArrayPointer_t&)chunkPtr);
+            case ChunkKind_ChunkTree:
+            case ChunkKind_ChunkArrayTree:
+                checkNoEntry();
+                return;
+            }
+        }
+    };
+
+    // IdentifiableChunkArrayPointerT
+    template< typename TChunkAlgorithm, typename TChunkPointerElement>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, IdentifiableChunkArrayPointerT<TChunkPointerElement>>
+        : public IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, IdentifiableChunkPointerT<typename TChunkPointerElement::Chunk_t>>
+    {
+    };
+
+    // ChunkTreePointerT
+    template< typename TChunkAlgorithm, typename TChunkType>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, ChunkTreePointerT<TChunkType>>
+        : public IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, IdentifiableTreePointerT<TChunkType>>
+    {
+    };
+
+    // ChunkArrayTreePointerT
+    template< typename TChunkAlgorithm, typename TChunkPointerElement>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, ChunkArrayTreePointerT<TChunkPointerElement>>
+        : public IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, IdentifiableTreePointerT<typename TChunkPointerElement::Chunk_t>>
+    {
+    };
+
+    // ChunkPointerT
+    template< typename TChunkAlgorithm, typename TChunkType>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, ChunkPointerT<TChunkType>>
+        : public ChunkAlgorithmRunner<TChunkAlgorithm, ChunkPointerT<TChunkType>>
+    {
+    };
+
+    // ChunkArrayPointerT
+    template< typename TChunkAlgorithm, typename TChunkPointerElement>
+    struct IdentifiableChunkAlgorithmRunner<TChunkAlgorithm, ChunkArrayPointerT<TChunkPointerElement>>
+        : public ChunkAlgorithmRunner<TChunkAlgorithm, ChunkArrayPointerT<TChunkPointerElement>>
+    {
+    };
+
     /// <summary>
     /// Extend this template struct to write your own algorithm that processes any chunk's component data as input or output
     /// </summary>
@@ -102,70 +427,73 @@ namespace PNC
         /// <typeparam name="TChunk">Typename of the chunk to execute the algorithm on.</typeparam>
         /// <param name="chunk">The chunk to execute the algorithm on.</param>
         /// <returns>If it successfully executed the algorithm on the chunk.</returns>
-        template<typename TChunk>
-        bool TryRun(TChunk& chunk) 
+        template<typename TChunkPointer>
+        bool TryRun(TChunkPointer& chunkPointer)
         {
-            return ChunkAlgorithmRunner<ChunkAlgorithm_t, TChunk>::TryRun(*Impl(), chunk);
+            return IdentifiableChunkAlgorithmRunner<ChunkAlgorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
         }
-        template<typename TChunk>
-        void TryRun(TChunk* chunk) = delete;
+        template<typename TChunkPointer>
+        void TryRun(TChunkPointer* chunkPointer) = delete;
 
         /// <summary>
         /// Will execute the algorithm on a matching chunk.
         /// The chunk must not be null and must match the algorithm or it halt execution
         /// </summary>
-        /// <typeparam name="TChunk"></typeparam>
+        /// <typeparam name="TChunkPointer"></typeparam>
         /// <param name="chunk"></param>
-        template<typename TChunk>
-        void Run(TChunk& chunk) 
+        template<typename TChunkPointer>
+        void Run(TChunkPointer& chunkPointer)
         {
-            if (!TryRun(chunk))
+            if (!TryRun(chunkPointer))
             {
-                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunk).name());
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunkPointer).name());
             }
         }
-        template<typename TChunk>
-        void Run(TChunk* chunk) = delete;
+        template<typename TChunkPointer>
+        void Run(TChunkPointer* chunkPointer) = delete;
 
 
-        template<typename TRouting, typename TChunk>
-        void RunWithRouting(const TRouting& routing, TChunk& chunk)
+        template<typename TRouting, typename TChunkPointer>
+        bool TryRunWithRouting(const TRouting& routing, TChunkPointer& chunkPointer)
         {
-            return ChunkAlgorithmRunner<ChunkAlgorithm_t, TChunk>::RunWithRouting(routing, *Impl(), chunk);
+            return IdentifiableChunkAlgorithmRunner<ChunkAlgorithm_t, TChunkPointer>::TryRunWithRouting(routing, *Impl(), chunkPointer);
+        }
+        template<typename TRouting, typename TChunkPointer>
+        void RunWithRouting(const TRouting& routing, TChunkPointer& chunkPointer)
+        {
+            return IdentifiableChunkAlgorithmRunner<ChunkAlgorithm_t, TChunkPointer>::RunWithRouting(routing, *Impl(), chunkPointer);
         }
 
     private:
         ChunkAlgorithm_t* Impl() { return (reinterpret_cast<ChunkAlgorithm_t*>(this)); }
     };
 
-    /// <summary>
-    /// Will set the required component pointers on an algorithm from a given chunk.
-    /// </summary>
-    /// <typeparam name="TChunk"></typeparam>
-    template<typename TChunk>
-    struct SetAlgorithmChunk
+    template<typename TChunkPointer>
+    struct SetAlgorithmChunkBase
     {
     public:
-        using Chunk_t = TChunk;
-        using Size_t = typename Chunk_t::Size_t;
+        using ChunkPointer_t = TChunkPointer;
+        using ChunkType_t = typename ChunkPointer_t::ChunkType_t;
+        using Size_t = typename ChunkPointer_t::Size_t;
 
     protected:
-        Chunk_t* Chunk;
+        ChunkPointer_t* ChunkPointer;
 
     public:
-        SetAlgorithmChunk(Chunk_t* chunk)
-            :Chunk(chunk) 
+        SetAlgorithmChunkBase(ChunkPointer_t* chunkPointer)
+            :ChunkPointer(chunkPointer)
         {
         }
 
         template<typename T>
-        bool Component(T*& component) 
+        bool Component(T*& component)
         {
-            const auto& chunkType = Chunk->GetChunkType();
+            auto& chunk = ChunkPointer->GetChunk();
+            const auto& chunkType = chunk.GetChunkType();
             auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
             if (index < 0)
                 return false;
-            component = (T*)Chunk->GetComponentData(index);
+            component = (T*)chunk.GetComponentData(index);
             return true;
         }
 
@@ -178,67 +506,111 @@ namespace PNC
         template<typename T>
         bool ParentComponent(T*& component)
         {
-            auto parentChunk = Chunk->GetParentChunk();
-            if (parentChunk == nullptr)
-                return false;
-            const auto& chunkType = parentChunk->GetChunkType();
-            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
-            if (index < 0)
-                return false;
-            component = (T*)parentChunk->GetComponentData(index);
-            return true;
+            return false;
         }
 
-        bool ParentChunk(Chunk_t*& parent)
+        bool ParentChunk(ChunkPointer_t*& parent)
         {
-            parent = Chunk->GetParentChunk();
+            parent = ChunkPointer->GetParentChunk();
             return parent != nullptr;
         }
-        bool ChildrenChunk(Chunk_t*& children)
+        bool ChildrenChunk(ChunkPointer_t*& children)
         {
-            children = Chunk->GetFirstChildChunk();
+            children = ChunkPointer->GetFirstChildChunk();
             return children != nullptr;
         }
     };
 
-    //template<typename TChunkPointer>
-    //struct SetAlgorithmChunk<ChunkArrayT<TChunkPointer>>
-    //    : public SetAlgorithmChunk<ChunkArrayPointerT<TChunkPointer>>
-    //{
-    //public:
-    //    using Size_t = typename TChunkPointer::Size_t;
-    //    using Chunk_t = ChunkArrayT<TChunkPointer>;
+    /// <summary>
+    /// Will set the required component pointers on an algorithm from a given chunk.
+    /// </summary>
+    /// <typeparam name="TChunkPointer"></typeparam>
+    template<typename TChunkPointer>
+    struct SetAlgorithmChunk : public SetAlgorithmChunkBase<TChunkPointer>
+    {
+    public:
+        using Base_t = SetAlgorithmChunkBase<TChunkPointer>;
+        using ChunkPointer_t = TChunkPointer;
+        using ChunkType_t = typename ChunkPointer_t::ChunkType_t;
+        using Size_t = typename ChunkPointer_t::Size_t;
 
-    //protected:
-    //    Chunk_t* Chunk;
 
-    //public:
-    //    SetAlgorithmChunk(Chunk_t* chunk)
-    //        :Chunk(chunk)
-    //    {
-    //    }
+    public:
+        SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
+            :Base_t(chunkPointer)
+        {
+        }
+    };
 
-    //    bool ChunkIndex(Size_t& index)
-    //    {
-    //        index = 0;
-    //        return true;
-    //    }
+    template<typename TChunkType>
+    struct SetAlgorithmChunk<ChunkTreePointerT<TChunkType>> : public SetAlgorithmChunkBase<ChunkTreePointerT<TChunkType>>
+    {
+    public:
+        using Base_t = SetAlgorithmChunkBase<ChunkTreePointerT<TChunkType>>;
+        using ChunkType_t = TChunkType;
+        using ChunkPointer_t = ChunkTreePointerT<ChunkType_t>;
+        using Size_t = typename ChunkPointer_t::Size_t;
 
-    //};
+        SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
+            :Base_t(chunkPointer)
+        {
+        }
+
+        template<typename T>
+        bool ParentComponent(T*& component)
+        {
+            if (this->ChunkPointer->GetParentChunk() == nullptr)
+                return false;
+            auto& parentChunk = this->ChunkPointer->GetParentChunk()->GetChunk();
+            const auto& chunkType = parentChunk.GetChunkType();
+            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
+            if (index < 0)
+                return false;
+            component = (T*)parentChunk.GetComponentData(index);
+            return true;
+        }
+
+        bool ParentChunk(ChunkPointer_t*& parent)
+        {
+            parent = this->ChunkPointer->GetParentChunk();
+            return parent != nullptr;
+        }
+        bool ChildrenChunk(ChunkPointer_t*& children)
+        {
+            children = this->ChunkPointer->GetFirstChildChunk();
+            return children != nullptr;
+        }
+    };
+
+    template<typename TChunkPointerElement>
+    struct SetAlgorithmChunk<ChunkArrayTreePointerT<TChunkPointerElement>> : public SetAlgorithmChunk<ChunkTreePointerT<typename TChunkPointerElement::ChunkType_t>>
+    {
+    public:
+        using Base_t = SetAlgorithmChunk<ChunkTreePointerT<typename TChunkPointerElement::ChunkType_t>>;
+        using ChunkPointerElement_t = TChunkPointerElement;
+        using ChunkType_t = typename ChunkPointerElement_t::ChunkType_t;
+        using ChunkPointer_t = ChunkArrayTreePointerT<TChunkPointerElement>;
+        using Size_t = typename ChunkPointer_t::Size_t;
+
+        SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
+            :Base_t(chunkPointer)
+        {
+        }
+
+    };
 
     template<typename TChunkArray>
-    struct SetAlgorithmChunkArrayNext
+    struct OffsetAlgorithmNode
     {
     public:
         using ChunkArray_t = TChunkArray;
         using Size_t = typename TChunkArray::Size_t;
 
     protected:
-        ChunkArray_t* ChunkArray;
-
+        Size_t NodeOffset;
     public:
-        SetAlgorithmChunkArrayNext(ChunkArray_t* chunkArray)
-            :ChunkArray(chunkArray)
+        OffsetAlgorithmNode(Size_t nodeOffset)
+            : NodeOffset(nodeOffset)
         {
         }
 
@@ -251,7 +623,7 @@ namespace PNC
                 ++component;
                 break;
             case ComponentOwner_Node:
-                component += ChunkArray->GetNodeCapacityPerChunk();
+                component += NodeOffset;
                 break;
             }
             return true;
@@ -279,56 +651,6 @@ namespace PNC
             return true;
         }
     };
-    //template<typename TChunkPointer, typename TChunkType, typename TSize>
-    //struct SetAlgorithmChunk<ChunkArrayPointerT<TChunkPointer, TChunkType, TSize>>
-    //{
-    //public:
-    //    using Chunk_t = ChunkArrayPointerT<TChunkPointer, TChunkType, TSize>;
-
-    //protected:
-    //    Chunk_t* Chunk;
-
-    //public:
-    //    SetAlgorithmChunk(Chunk_t* chunkArray, Size_t chunkIndex)
-    //        :Chunk(chunk)
-    //    {
-    //    }
-
-    //    template<typename T>
-    //    bool Component(T*& component)
-    //    {
-    //        const auto& chunkType = Chunk->GetChunkType();
-    //        auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
-    //        if (index < 0)
-    //            return false;
-    //        component = (T*)Chunk->GetComponentData(index);
-    //        return true;
-    //    }
-
-    //    template<typename T>
-    //    bool ParentComponent(T*& component)
-    //    {
-    //        auto parentChunk = Chunk->GetParentChunk();
-    //        if (parentChunk == nullptr)
-    //            return false;
-    //        const auto& chunkType = parentChunk->GetChunkType();
-    //        auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
-    //        if (index < 0)
-    //            return false;
-    //        component = (T*)parentChunk->GetComponentData(index);
-    //        return true;
-    //    }
-
-    //    bool ParentChunk(Chunk_t*& parent)
-    //    {
-    //        parent = Chunk->GetParentChunk();
-    //    }
-    //    bool ChildrenChunk(Chunk_t*& children)
-    //    {
-    //        children = Chunk->GetFirstChildChunk();
-    //    }
-    //};
-
 
     template<typename TChunkType>
     struct AlgorithmRequirementMatchForChunkType
@@ -370,99 +692,4 @@ namespace PNC
             return true;
         }
     };
-
-
-
-
-    //template<typename TChunkTree>
-    //struct SetAlgorithmChunkTree {
-    //public:
-    //    TChunkTree* chunk;
-    //    SetAlgorithmChunkTree(TChunkTree* aChunk)
-    //        :chunk(aChunk) {
-
-    //    }
-    //    template<typename T>
-    //    bool NodeComponent(T*& aComponent) {
-    //        auto chunkType = chunk->getChunkType();
-    //        auto index = chunkType.components.getComponentTypeIndexInChunk(&typeid(T));
-    //        if (index < 0)
-    //            return false;
-    //        aComponent = (T*)chunk->getComponentData(index);
-    //        return true;
-    //    }
-    //    template<typename T>
-    //    bool ParentComponent(T*& aComponent) {
-    //        //auto chunkType = chunk->getChunkType();
-    //        //auto index = chunkType.components.getComponentTypeIndexInChunk(&typeid(T));
-    //        //if (index < 0)
-    //        //    return false;
-    //        //aComponent = (T*)chunk->getComponentData(index);
-    //        return true;
-    //    }
-    //    template<typename T>
-    //    bool ChildrenComponent(T*& aComponent) {
-    //        //auto chunkType = chunk->getChunkType();
-    //        //auto index = chunkType.components.getComponentTypeIndexInChunk(&typeid(T));
-    //        //if (index < 0)
-    //        //    return false;
-    //        //aComponent = (T*)chunk->getComponentData(index);
-    //        return true;
-    //    }
-    //};
-    ////template<typename TChildrenRequirements>
-    ////struct ChildrenWithRequirementsIterator {
-    ////public:
-    ////    ChunkTree* firstChunk;
-    ////    ChunkTree* currentChunk;
-    ////    TChildrenRequirements currentChildChunk;
-    ////    unsigned int cycleCount = 0;
-    ////    ChildrenWithRequirementsIterator(ChunkTree* first, const TChildrenRequirements& currentChildChunk) {}
-    ////    bool operator==(const ChildrenWithRequirementsIterator& o)const { return currentChunk == o.currentChunk; }
-    ////    bool operator!=(const ChildrenWithRequirementsIterator& o)const { return currentChunk != o.currentChunk; }
-    ////    const ChildrenWithRequirementsIterator& operator++() {
-    ////        do {
-    ////            currentChunk = currentChunk->nextSibling;
-    ////            if (currentChunk == firstChunk) {
-    ////                ++cycleCount;
-    ////                break;
-    ////            }
-    ////        } while (currentChildChunk.requirements(SetAlgorithmChunk<TChunk>(currentChunk)))
-    ////            return *this;
-    ////    }
-    ////    const ChildrenWithRequirementsIterator& operator--() {
-    ////        do {
-    ////            currentChunk = currentChunk->previousSibling;
-    ////            if (currentChunk == firstChunk) {
-    ////                ++cycleCount;
-    ////                break;
-    ////            }
-    ////        } while (currentChildChunk.requirements(SetAlgorithmChunk<TChunk>(currentChunk)));
-    ////        return *this;
-    ////    }
-    ////    ChildrenWithRequirementsIterator operator++(int) {
-    ////        ChildrenWithRequirementsIterator o(*this);
-    ////        operator++();
-    ////        return o;
-    ////    }
-    ////    ChildrenWithRequirementsIterator operator--(int) {
-    ////        ChildrenWithRequirementsIterator o(*this);
-    ////        operator--();
-    ////        return o;
-    ////    }
-    ////};
-
-    //template< typename TRequirements >
-    //struct ParentRequirements {
-    //};
-
-    //template< typename TRequirements >
-    //struct ChildrenRequirements {
-    //public:
-    //    ChunkTree* first;
-    //    //ChildrenWithRequirementsIterator<TRequirements> begin()const {
-    //    //    return ChildrenWithRequirementsIterator(first, *(TRequirements*)this);
-    //    //}
-    //};
-
 }

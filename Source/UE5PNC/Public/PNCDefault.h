@@ -63,12 +63,12 @@ namespace PNC
     /// <summary>
     /// A IdentifiableChunk can be reinterpret_cast-ed to ChunkTreePointer if its kind is ChunkKind_ChunkTree
     /// </summary>
-    using ChunkTreePointer = ChunkTreePointerT<ChunkPointer>;
+    using ChunkTreePointer = ChunkTreePointerT<ChunkType>;
 
     /// <summary>
     /// A IdentifiableChunk or ChunkTreePointer can be reinterpret_cast-ed to ChunkArrayTreePointer if its kind is ChunkKind_ChunkArrayTree
     /// </summary>
-    using ChunkArrayTreePointer = ChunkTreePointerT<ChunkArrayPointer>;
+    using ChunkArrayTreePointer = ChunkArrayTreePointerT<ChunkArrayPointer>;
 
 
     using ChunkTree = ChunkTreeT<ChunkType>;
