@@ -24,12 +24,17 @@
 #include "ComponentType.h"
 #include "ComponentTypeSet.h"
 #include "ChunkType.h"
-#include "Chunk.h"
-#include "Algorithm.h"
+#include "ChunkPointer.h"
+#include "ChunkAllocation.h"
+#include "ChunkArrayPointer.h"
+#include "ChunkArrayAllocation.h"
+#include "IdentifiableChunk.h"
+#include "IdentifiableChunkArrayPointer.h"
+#include "ChunkAlgorithm.h"
 #include "Pipeline.h"
 #include "Components.h"
-#include "ChunkTree.h"
 
+#include "IdentifiableChunk.inl.h"
 namespace PNC
 {
     using Size_t = int32;
@@ -39,10 +44,10 @@ namespace PNC
     using ChunkType = ChunkTypeT<Size_t>;
 
     using ChunkPointer = ChunkPointerT<ChunkType>;
-    using Chunk = ChunkT<ChunkType>;
+    using Chunk = ChunkAllocationT<ChunkPointerT<ChunkType>>;// ChunkT<ChunkType>;
 
-    using ChunkArrayPointer = ChunkArrayPointerT<ChunkPointer>;
-    using ChunkArray = ChunkArrayT<ChunkPointer>;
+    using ChunkArrayPointer = ChunkArrayPointerT<ChunkType, ChunkPointer>;
+    using ChunkArray = ChunkArrayAllocationT<ChunkArrayPointer>;
 
     using CoParentInChunk = CoParentInChunkT<Size_t>;
     using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
@@ -68,10 +73,10 @@ namespace PNC
     /// <summary>
     /// A IdentifiableChunk or ChunkTreePointer can be reinterpret_cast-ed to ChunkArrayTreePointer if its kind is ChunkKind_ChunkArrayTree
     /// </summary>
-    using ChunkArrayTreePointer = ChunkArrayTreePointerT<ChunkArrayPointer>;
+    using ChunkArrayTreePointer = ChunkArrayTreePointerT<ChunkType, ChunkPointer>;
 
 
-    using ChunkTree = ChunkTreeT<ChunkType>;
-    using ChunkArrayTree = ChunkArrayTreeT<ChunkPointer>;
+    using ChunkTree = ChunkAllocationT<ChunkTreePointer>;
+    using ChunkArrayTree = ChunkArrayAllocationT< ChunkArrayTreePointer>;
 
 }
