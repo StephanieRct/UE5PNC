@@ -7,11 +7,11 @@
 namespace PNC
 {
     /// <summary>
-    /// A ChunkPointer points to a chunk's component data memory within a range of nodes.
-    /// A ChunkPointer is also a Chunk by itself and provides access to the component data.
+    /// A ChunkPointer points to a Chunk's Component data memory within a range of Nodes.
+    /// A ChunkPointer is also a Chunk by itself and provides access to the Component data.
     /// Copying a ChunkPointer does not copy the data.
     /// </summary>
-    /// <typeparam name="TChunkType">Structure of the chunk's component data.</typeparam>
+    /// <typeparam name="TChunkType">Structure of the Chunk's Component data.</typeparam>
     template<typename TChunkType>
     struct ChunkPointerT : private ChunkPointerInternalT<TChunkType>
     {
@@ -33,6 +33,33 @@ namespace PNC
         using Chunk_t = ChunkPointerT; 
 
     public:
+        /// <summary>
+        /// Create a null ChunkPointer without chunk type.
+        /// IsNull() will evaluate to true.
+        /// </summary>
+        ChunkPointerT()
+            : Base_t()
+        {
+        }
+
+        /// <summary>
+        /// Contructs from its member data fields.
+        /// </summary>
+        /// <param name="chunkType">Structure of the Chunk's Component data.</param>
+        /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
+        /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
+        ChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData)
+            : Base_t(chunkType, nodeCount, componentData)
+        {
+        }
+
+    protected:
+        ChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount)
+            : Base_t(chunkType, nullptr, nodeCount)
+        {
+        }
+
+    public:
         using Base_t::IsNull;
         using Base_t::GetNodeCount;
         using Base_t::GetChunkType;
@@ -49,33 +76,6 @@ namespace PNC
         Chunk_t* operator->() { return this; }
         const Chunk_t& GetChunk()const { return *this; }
         Chunk_t& GetChunk() { return *this; }
-
-    public:
-        /// <summary>
-        /// Create a null ChunkPointer without chunk type.
-        /// IsNull() will evaluate to true.
-        /// </summary>
-        ChunkPointerT()
-            : Base_t()
-        {
-        }
-
-        /// <summary>
-        /// Contructs from its member data fields.
-        /// </summary>
-        /// <param name="chunkType">Structure of the chunk's component data.</param>
-        /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
-        /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
-        ChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData)
-            : Base_t(chunkType, nodeCount, componentData)
-        {
-        }
-
-    protected:
-        ChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount)
-            : Base_t(chunkType, nullptr, nodeCount)
-        {
-        }
 
     public:
         /// <summary>

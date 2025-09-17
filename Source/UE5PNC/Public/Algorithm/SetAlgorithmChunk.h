@@ -4,8 +4,8 @@
 #pragma once
 #include "common.h"
 
-#include "..\ChunkTreePointer.h"
-#include "..\ChunkArrayTreePointer.h"
+#include "..\KChunkTreePointer.h"
+#include "..\KChunkArrayTreePointer.h"
 
 namespace PNC
 {
@@ -84,13 +84,13 @@ namespace PNC
     };
 
     template<typename TChunkType>
-    struct SetAlgorithmChunk<ChunkTreePointerT<TChunkType>> : public SetAlgorithmChunkBase<ChunkTreePointerT<TChunkType>>
+    struct SetAlgorithmChunk<KChunkTreePointerT<TChunkType>> : public SetAlgorithmChunkBase<KChunkTreePointerT<TChunkType>>
     {
     public:
-        using Base_t = SetAlgorithmChunkBase<ChunkTreePointerT<TChunkType>>;
+        using Base_t = SetAlgorithmChunkBase<KChunkTreePointerT<TChunkType>>;
         using ChunkType_t = TChunkType;
         using Size_t = typename ChunkType_t::Size_t;
-        using ChunkPointer_t = ChunkTreePointerT<ChunkType_t>;
+        using ChunkPointer_t = KChunkTreePointerT<ChunkType_t>;
 
         SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
             :Base_t(chunkPointer)
@@ -124,14 +124,14 @@ namespace PNC
     };
 
     template<typename TChunkType, typename TChunkPointerElement>
-    struct SetAlgorithmChunk<ChunkArrayTreePointerT<TChunkType, TChunkPointerElement>> : public SetAlgorithmChunk<ChunkTreePointerT<TChunkType>>
+    struct SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkType, TChunkPointerElement>> : public SetAlgorithmChunk<KChunkTreePointerT<TChunkType>>
     {
     public:
-        using Base_t = SetAlgorithmChunk<ChunkTreePointerT<TChunkType>>;
+        using Base_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkType>>;
         using ChunkType_t = TChunkType;
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename TChunkType::Size_t;
-        using ChunkPointer_t = ChunkArrayTreePointerT<ChunkType_t, ChunkPointerElement_t>;
+        using ChunkPointer_t = KChunkArrayTreePointerT<ChunkType_t, ChunkPointerElement_t>;
 
         SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
             :Base_t(chunkPointer)

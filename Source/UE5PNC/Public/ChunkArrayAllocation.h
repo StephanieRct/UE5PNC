@@ -6,35 +6,52 @@
 
 namespace PNC
 {
+    /// <summary>
+    /// Decorator struct that allocates an Array of Chunks with the same capacity of Nodes per Chunks.
+    /// </summary>
+    /// <typeparam name="TBase">A ChunkPointer. TODO: ChunkArrayPointer are not yet implemented</typeparam>
     template<typename TBase>
     struct ChunkArrayAllocationT : public TBase
     {
-        // TODO specialization when TChunkPointer is a ChunkArrayPointerT
     public:
         using Base_t = TBase;
+        using Self_t = ChunkArrayAllocationT<TBase>;
         using ChunkType_t = typename TBase::ChunkType_t;
         using Size_t = typename TBase::Size_t;
-
         using ChunkPointerElement_t = typename TBase::ChunkPointerElement_t;
-        using Self_t = ChunkArrayAllocationT<TBase>;
-        //using ChunkArray_t = ChunkArrayT<TChunkPointerElement>;
-        using Internal_t = ChunkArrayPointerInternalT<ChunkType_t, ChunkPointerElement_t>;
+
     protected:
+        using Internal_t = ChunkArrayPointerInternalT<ChunkType_t, ChunkPointerElement_t>;
+
+    protected:
+        /// <summary>
+        /// Maximum number of Nodes each Chunk can grow to.
+        /// </summary>
         Size_t NodeCapacityPerChunk;
+
+        /// <summary>
+        /// Maximum number of Chunks this Array can grow to.
+        /// </summary>
         Size_t ChunkCapacity;
 
     public:
-        Size_t GetNodeCapacityTotal()const { return NodeCapacityPerChunk * ChunkCapacity; }
-        Size_t GetNodeCapacityPerChunk()const { return NodeCapacityPerChunk; }
-        Size_t GetChunkCapacity()const { return ChunkCapacity; }
-        const ChunkPointerElement_t& operator[](Size_t index)const { return Base_t::operator[](index); }
-        ChunkPointerElement_t& operator[](Size_t index) { return Base_t::operator[](index); }
-
+        /// <summary>
+        /// Create a Null Chunk
+        /// </summary>
         ChunkArrayAllocationT()
             : NodeCapacityPerChunk(0)
             , ChunkCapacity(0)
         {
         }
+
+        /// <summary>
+        /// Allocate a Chunk Array with a maximum number of Chunks and Nodes per Chunks.
+        /// </summary>
+        /// <param name="chunkType">Structure of the Chunk's Component data.</param>
+        /// <param name="nodeCapacityPerChunk">Maximum number of Nodes each Chunks in the Array can grow to.</param>
+        /// <param name="chunkCapacity">Maximum number of Chunks this Array can grow to.</param>
+        /// <param name="chunkCount">Number of valid Chunks in the Array.</param>
+        /// <param name="nodeCountPerChunk">Number of valid Nodes in each Chunks in the Array.</param>
         ChunkArrayAllocationT(const ChunkType_t* chunkType, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
             : Base_t(chunkType, chunkCapacity * nodeCapacityPerChunk, chunkCount)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
@@ -59,7 +76,7 @@ namespace PNC
             CopyChunkArray(o);
         }
 
-        Self_t& operator=(const Self_t& o)
+        ChunkArrayAllocationT& operator=(const ChunkArrayAllocationT& o)
         {
             if (this == &o)
                 return *this;
@@ -83,14 +100,38 @@ namespace PNC
             DeallocateComponentDataArray();
         }
 
+    public:
+        using Base_t::operator[];
+
+        /// <summary>
+        /// The total maximum number of Nodes the Array can grow to.
+        /// </summary>
+        /// <returns></returns>
+        Size_t GetNodeCapacityTotal()const { return NodeCapacityPerChunk * ChunkCapacity; }
+
+        /// <summary>
+        /// The maximum number of Nodes each Chunks in the Array can grow to.
+        /// </summary>
+        /// <returns></returns>
+        Size_t GetNodeCapacityPerChunk()const { return NodeCapacityPerChunk; }
+
+        /// <summary>
+        /// The macimum number of Chunks the Array can grow to.
+        /// </summary>
+        /// <returns></returns>
+        Size_t GetChunkCapacity()const { return ChunkCapacity; }
+
+
     protected:
         Internal_t& GetInternalChunk() { return (Internal_t&)this->GetChunk(); }
+
         void CopyChunkArray(const Self_t& o)
         {
             auto& chunk = GetInternalChunk();
             for (int i = 0; i < ChunkCapacity; ++i)
                 chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Type, o[i].GetNodeCount(), GetComponentDataForChunk(i));
         }
+
         void InitChunkArray(Size_t nodeCountPerChunk = 0)
         {
             auto& chunk = GetInternalChunk();
@@ -113,10 +154,12 @@ namespace PNC
             auto& chunk = GetInternalChunk();
             chunk.Array.Chunks = (ChunkPointerElement_t*)FMemory::Malloc(ChunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
+
         void DeallocateChunkArray()
         {
             FMemory::Free(GetInternalChunk().Array.Chunks);
         }
+
         void AllocateComponentDataArray()
         {
             auto& chunk = GetInternalChunk();
@@ -163,6 +206,7 @@ namespace PNC
                 }
             }
         }
+
         void DeallocateData()
         {
             auto& chunk = GetInternalChunk();
@@ -176,6 +220,5 @@ namespace PNC
                 componentTypeInfo->Deallocate(chunk.ComponentData[i], nodeCapacityTotal, ChunkCapacity);
             }
         }
-
     };
 }

@@ -28,13 +28,13 @@
 #include "ChunkAllocation.h"
 #include "ChunkArrayPointer.h"
 #include "ChunkArrayAllocation.h"
-#include "IdentifiableChunk.h"
-#include "IdentifiableChunkArrayPointer.h"
+#include "KindPointer.h"
+#include "KChunkArrayPointer.h"
 #include "ChunkAlgorithm.h"
 #include "Pipeline.h"
 #include "Components.h"
 
-#include "IdentifiableChunk.inl.h"
+#include "KindPointer.inl.h"
 namespace PNC
 {
     using Size_t = int32;
@@ -60,7 +60,6 @@ namespace PNC
     template<typename TPipeline>
     using Pipeline = PipelineT<TPipeline, ChunkType, Size_t>;
 
-    using CoParentInOrOutsideIndex = CoParentInOrOutsideIndexT<Size_t>;
 
 
 
@@ -68,12 +67,12 @@ namespace PNC
     /// <summary>
     /// A IdentifiableChunk can be reinterpret_cast-ed to ChunkTreePointer if its kind is ChunkKind_ChunkTree
     /// </summary>
-    using ChunkTreePointer = ChunkTreePointerT<ChunkType>;
+    using ChunkTreePointer = KChunkTreePointerT<ChunkType>;
 
     /// <summary>
     /// A IdentifiableChunk or ChunkTreePointer can be reinterpret_cast-ed to ChunkArrayTreePointer if its kind is ChunkKind_ChunkArrayTree
     /// </summary>
-    using ChunkArrayTreePointer = ChunkArrayTreePointerT<ChunkType, ChunkPointer>;
+    using ChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkType, ChunkPointer>;
 
 
     using ChunkTree = ChunkAllocationT<ChunkTreePointer>;

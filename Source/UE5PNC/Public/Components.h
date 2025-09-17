@@ -6,45 +6,62 @@
 
 namespace PNC 
 {
+    /// <summary>
+    /// Inherit of this struct to declare a Node Component.
+    /// A Node Component will be instantiated for each Nodes created in a Chunk.
+    /// </summary>
     struct NodeComponent 
     {
     public:
         static const ComponentOwner Owner = ComponentOwner_Node;
-
     };
 
+    /// <summary>
+    /// Inherit of this struct to declare a Chunk Component.
+    /// A Chunk Component will be instantiated only once per Chunk and is shared
+    /// among all Nodes in the Chunk.
+    /// </summary>
     struct ChunkComponent
     {
     public:
         static const ComponentOwner Owner = ComponentOwner_Chunk;
-
     };
 
     /// <summary>
     /// Each node in the chunk has a parent at the given index in the same chunk
-    /// except for root nodes who have a parent index of -1.
+    /// except for root nodes which will have a parent Index of -1.
     /// </summary>
     template< typename TSize>
     struct CoParentInChunkT : public NodeComponent
     {
     public:
-        typedef TSize Size_t;
+        using Self_t = CoParentInChunkT<TSize>;
+        using Base_t = NodeComponent;
+        using Size_t = TSize;
 
     public:
+        /// <summary>
+        /// Index of the parent inside the same chunk or -1 for root nodes.
+        /// </summary>
         Size_t Index;
     };
 
     /// <summary>
     /// Each node has a parent node at a given index in the parent chunk 
-    /// except for child node inside the same chunk
+    /// except for child node inside the same chunk which will have an outside parent Index of -1
     /// </summary>
     template< typename TSize>
     struct CoParentOutsideChunkT : public NodeComponent
     {
     public:
-        typedef TSize Size_t;
+        using Self_t = CoParentOutsideChunkT<TSize>;
+        using Base_t = NodeComponent;
+        using Size_t = TSize;
 
     public:
+        /// <summary>
+        /// Index of the parent node in the parent chunk or -1.
+        /// </summary>
         Size_t Index;
     };
 
@@ -55,84 +72,37 @@ namespace PNC
     struct CoSingleParentOutsideChunkT : public ChunkComponent
     {
     public:
-        typedef TSize Size_t;
+        using Self_t = CoSingleParentOutsideChunkT<TSize>;
+        using Base_t = ChunkComponent;
+        using Size_t = TSize;
 
     public:
+        /// <summary>
+        /// Index of the parent node in the parent chunk for all root nodes in the chunk.
+        /// </summary>
         Size_t Index;
     };
 
     /// <summary>
-    /// Each node has a parent node either in the same chunk (positive index) or in
-    /// the parent chunk (negative index)
+    /// Each node in the chunk has a number (0 or more) of sequential children in the same chunk.
     /// </summary>
-    /// <typeparam name="TSize">Must be a signed integer type.</typeparam>
-    template< typename TSize>
-    struct CoParentInOrOutsideIndexT : public NodeComponent
-    {
-    public:
-        typedef TSize Size_t;
-
-    public:
-        Size_t Index;
-        bool IsInSameChunk()const { return Index >= 0; }
-        bool IsInParentChunk()const { return Index < 0; }
-        Size_t GetIndexInParentChunk()const 
-        { 
-            assert_pnc(IsInParentChunk());
-            return -Index - 1; 
-        }
-        Size_t GetIndexInSameChunk()const 
-        {
-            assert_pnc(IsInSameChunk());
-            return Index; 
-        }
-        void SetIndexInParentChunk(Size_t index)
-        {
-            Index = -index - 1;
-        }
-        void SetIndexInSameChunk(Size_t index)
-        {
-            Index = index;
-        }
-    };
-
     template< typename TSize>
     struct CoChildrenInChunkT : public NodeComponent
     {
     public:
-        typedef TSize Size_t;
+        using Self_t = CoChildrenInChunkT<TSize>;
+        using Base_t = NodeComponent;
+        using Size_t = TSize;
 
     public:
+        /// <summary>
+        /// Index of the first child Node in the same Chunk or -1 if no children.
+        /// </summary>
         Size_t FirstIndex;
+
+        /// <summary>
+        /// Number of adjacent child Nodes starting at FirstIndex.
+        /// </summary>
         Size_t Count;
-    };
-
-    template< typename TChunk>
-    struct CoChunkTreeT : public ChunkComponent
-    {
-    public:
-        using CoChunkTree_t = CoChunkTreeT<TChunk>;
-        using Chunk_t = TChunk;
-
-    public:
-        Chunk_t* Parent = nullptr;
-        Chunk_t* FirstChild = nullptr;
-        /// <summary>
-        /// Circular linked list of previous siblings.
-        /// Will point to itself if single child.
-        /// Will be null only when the ChunkTree is extracted (i.e. not part of a tree)
-        /// </summary>
-        Chunk_t* PreviousSibling = nullptr;
-
-        /// <summary>
-        /// Circular linked list of next siblings.
-        /// Will point to itself if single child.
-        /// Will be null only when the ChunkTree is extracted (i.e. not part of a tree)
-        /// </summary>
-        Chunk_t* NextSibling = nullptr;
-
-        bool HasParent()const { return Parent != nullptr; }
-        bool HasChildren()const { return FirstChild != nullptr; }
-        bool IsExtracted()const { return NextSibling == nullptr; }
     };
 }

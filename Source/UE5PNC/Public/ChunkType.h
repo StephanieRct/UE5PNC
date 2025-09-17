@@ -11,16 +11,16 @@ namespace PNC
     /// A chunk type defines the structure of a chunk.
     /// Pointers to ChunkType are used to uniquely identify ChunkType between chunks
     /// </summary>
-    template< typename TSize = size_t>
+    template< typename TSize>
     struct ChunkTypeT 
     {
     public:
-        typedef TSize Size_t;
-        typedef ComponentTypeSetT<TSize> ComponentTypeSet_t;
-        typedef typename ComponentTypeSet_t::ComponentType_t ComponentType_t;
+        using Self = ChunkTypeT<TSize>;
+        using Size_t = TSize;
+        using ComponentTypeSet_t = ComponentTypeSetT<TSize>;
+        using ComponentType_t = typename ComponentTypeSet_t::ComponentType_t;
 
     public:
-
         /// <summary>
         /// Set of component types this chunk type defines
         /// </summary>
@@ -39,5 +39,4 @@ namespace PNC
         /// <returns></returns>
         int GetComponentTypeIndexInChunk(const type_info* type)const { return Components.GetComponentTypeIndexInChunk(type); }
     };
-
 }

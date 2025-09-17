@@ -7,7 +7,7 @@
 namespace PNC
 {
     /// <summary>
-    /// Decorator struct that adds allocation of chunk's component data
+    /// Decorator struct that adds allocation of Chunk's Component data
     /// </summary>
     /// <typeparam name="TBase"></typeparam>
     template<typename TBase>
@@ -21,26 +21,27 @@ namespace PNC
         using Internal_t = ChunkPointerInternalT<ChunkType_t>;
 
     private:
+        /// <summary>
+        /// Maximum number of Nodes this Chunk can grow to.
+        /// </summary>
         Size_t NodeCapacity;
 
     public:
         /// <summary>
-        /// Get the capacity of the chunk.
-        /// The capacity is the max size the chunk can be without reallocating the component's memory.
-        /// Algorithms will only process nodes up to the chunk's size.
+        /// Get the maximum number of Nodes the Chunk can grow to.
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
         Size_t GetNodeCapacity()const { return NodeCapacity; }
 
         /// <summary>
-        /// Create a null chunk without chunk type nor component data.
+        /// Create a Null Chunk without ChunkType nor Component data.
         /// </summary>
         /// <returns></returns>
         static Self_t Null() { return Self_t(); }
 
     public:
         /// <summary>
-        /// Create a null chunk without chunk type.
+        /// Create a Null Chunk without ChunkType.
         /// IsNull() will evaluate to true.
         /// </summary>
         ChunkAllocationT()
@@ -50,8 +51,8 @@ namespace PNC
         }
 
         /// <summary>
-        /// Deep copy a chunk and its component data.
-        /// The result chunk will have the same size and capacity as the original.
+        /// Copy a Chunk and its Component data.
+        /// The result chunk will have the same node count and capacity as the original.
         /// </summary>
         /// <param name="o"></param>
         ChunkAllocationT(const Self_t& o)
@@ -65,9 +66,9 @@ namespace PNC
         }
 
         /// <summary>
-        /// Deep copy a chunk and its component data.
-        /// It will deallocate any previous chunk data.
-        /// The result chunk will have the same size and capacity as the original.
+        /// Copy a Chunk and its Component data.
+        /// It will deallocate any previous data.
+        /// The result Chunk will have the same node count and capacity as the one being copied.
         /// </summary>
         /// <param name="o"></param>
         Self_t& operator=(const Self_t& o)
@@ -86,12 +87,12 @@ namespace PNC
         }
 
         /// <summary>
-        /// Create a chunk of a given chunk type and allocate the component's memory
-        /// The components' memory can fit as many instances of each component as the chunk's capacity.
-        /// Any computation perform in this chunk will only process node within the chunk's size and not it's capacity.
+        /// Create a Chunk of a given ChunkType and allocate the Component's memory
+        /// The Components' memory can fit as many instances of each Components as the Chunk's capacity.
+        /// Any computation performed on this Chunk will only process node within the chunk's Node count and not it's capacity.
         /// </summary>
-        /// <param name="chunkType"></param>
-        /// <param name="nodeCapacity"></param>
+        /// <param name="chunkType">Structure of the Chunk's component data.</param>
+        /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
         /// <param name="nodeCount"></param>
         ChunkAllocationT(const ChunkType_t* chunkType, Size_t nodeCapacity, Size_t nodeCount = 0)
             : Base_t(chunkType, nodeCount)
@@ -102,7 +103,7 @@ namespace PNC
         }
 
         /// <summary>
-        /// Deallocate data if not a null chunk
+        /// Deallocate data if not a Null Chunk
         /// </summary>
         ~ChunkAllocationT()
         {

@@ -8,32 +8,55 @@ namespace PNC
 {
     enum ChunkKind
     {
+        /// <summary>
+        /// The Chunk is a ChunkPointer
+        /// </summary>
         ChunkKind_Chunk,
+
+        /// <summary>
+        /// The Chunk is a ChunkArrayPointer
+        /// </summary>
         ChunkKind_ChunkArray,
 
+        /// <summary>
+        /// The Chunk is a ChunkTreePointer
+        /// </summary>
         ChunkKind_ChunkTree,
+
+        /// <summary>
+        /// The Chunk is a ChunkArrayTreePointer
+        /// </summary>
         ChunkKind_ChunkArrayTree,
     };
 
+    /// <summary>
+    /// A KindPointer is an abstract Pointer with a differnt implementation according to the Chunk's kind.
+    /// </summary>
+    /// <typeparam name="TChunkType">Structure of the Chunk's Component data.</typeparam>
     template<typename TChunkType>
-    struct IdentifiableChunkT
+    struct KindPointerT
     {
     public:
+        using Self_t = KindPointerT<TChunkType>;
         using ChunkType_t = TChunkType;
         using Size_t = typename ChunkType_t::Size_t;
         using ChunkPointer_t = ChunkPointerT<TChunkType>;
-        using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkType_t, ChunkPointer_t>;
-        using Chunk_t = ChunkPointer_t;
-        using ChunkArray_t = ChunkArrayPointer_t;
-    public:
-        ChunkKind Kind;
+        using Chunk_t = ChunkPointerT<TChunkType>;
+        using ChunkArray_t = ChunkArrayPointerT<ChunkType_t, ChunkPointerT<TChunkType>>;
 
     public:
-        IdentifiableChunkT(ChunkKind kind)
+        /// <summary>
+        /// The kind of the Chunk being pointed at.
+        /// </summary>
+        ChunkKind Kind;
+
+    protected:
+        KindPointerT(ChunkKind kind)
             :Kind(kind)
         {
         }
 
+    public:
         bool IsTree()const
         {
             switch (Kind)
@@ -49,7 +72,7 @@ namespace PNC
             }
         }
 
-        bool isArray()const
+        bool IsArray()const
         {
             switch (Kind)
             {
@@ -63,23 +86,13 @@ namespace PNC
                 return true;
             }
         }
-
         const Chunk_t& operator*()const { return GetChunk(); }
         Chunk_t& operator*() { return GetChunk(); }
         const Chunk_t* operator->()const { return &GetChunk(); }
         Chunk_t* operator->() { return &GetChunk(); }
-
         const Chunk_t& GetChunk()const;
         Chunk_t& GetChunk();
         const ChunkArray_t& GetChunkArray()const;
         ChunkArray_t& GetChunkArray();
-
-        //Size_t GetNodeCount()const { return GetChunk().GetNodeCount(); }
-        //const ChunkType_t& GetChunkType()const { return GetChunk().GetChunkType(); }
-        //bool IsNull()const { return GetChunk().IsNull(); }
-
-        //operator ChunkPointer_t&() { return GetChunkPointer(); }
-        //operator const ChunkPointer_t& ()const { return GetChunkPointer(); }
     };
-
 }

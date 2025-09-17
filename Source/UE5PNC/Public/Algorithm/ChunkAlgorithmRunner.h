@@ -116,7 +116,7 @@ namespace PNC
     };
 
 
-    template<typename TChunkType, typename TChunkAlgorithm, typename TIdentifiableChunkPointer = IdentifiableChunkT<TChunkType>>
+    template<typename TChunkType, typename TChunkAlgorithm, typename TIdentifiableChunkPointer = KindPointerT<TChunkType>>
     struct IdentifiableChunkAlgorithmRunner
     {
     public:
@@ -126,12 +126,12 @@ namespace PNC
         using Size_t = typename ChunkType_t::Size_t;
 
         using ChunkPointer_t = ChunkPointerT<ChunkType_t>;
-        using IdentifiableChunk_t = IdentifiableChunkT<ChunkType_t>;
+        using IdentifiableChunk_t = KindPointerT<ChunkType_t>;
         using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkType_t, ChunkPointer_t>;
         //using IdentifiableChunkPointer_t = IdentifiableChunkPointerT<ChunkType_t>;
-        using IdentifiableChunkArrayPointer_t = IdentifiableChunkArrayPointerT<ChunkType_t, ChunkPointer_t>;
-        using ChunkTreePointer_t = ChunkTreePointerT<ChunkType_t>;
-        using ChunkArrayTreePointer_t = ChunkArrayTreePointerT<ChunkType_t, ChunkPointer_t>;
+        using IdentifiableChunkArrayPointer_t = KChunkArrayPointerT<ChunkType_t, ChunkPointer_t>;
+        using ChunkTreePointer_t = KChunkTreePointerT<ChunkType_t>;
+        using ChunkArrayTreePointer_t = KChunkArrayTreePointerT<ChunkType_t, ChunkPointer_t>;
 
 
         static bool TryRun(ChunkAlgorithm_t& algorithm, IdentifiableChunk_t& chunkPtr)

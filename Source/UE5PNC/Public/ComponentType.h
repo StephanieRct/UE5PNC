@@ -26,15 +26,15 @@ namespace PNC
         ComponentOwner__End = 2,
     };
 
-
     /// <summary>
     /// Provide a way to uniquely identify each component types, their owner and how to allocate component memory on demand.
     /// </summary>
-    template< typename TSize = size_t >
+    template< typename TSize>
     struct ComponentTypeT 
     {
     public:
-        typedef TSize Size_t;
+        using Self_t = ComponentTypeT<TSize>;
+        using Size_t = TSize;
 
     public:
         const type_info* TypeInfo;
@@ -170,6 +170,4 @@ namespace PNC
             }
         }
     };
-
-
 }
