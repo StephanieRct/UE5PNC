@@ -56,8 +56,8 @@ namespace PNC
         }
 
         //TODO change capacityPerChunk to totalNodeCount
-        ChunkArrayPointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t capacityPerChunk)
-            : Base_t(chunkType, chunkCount* capacityPerChunk, componentData)
+        ChunkArrayPointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t totalNodeCount)
+            : Base_t(chunkType, totalNodeCount, componentData)
             , Array(chunks, chunkCount)
         {
 
@@ -65,8 +65,8 @@ namespace PNC
 
     protected:
         //TODO change capacityPerChunk to totalNodeCount
-        ChunkArrayPointerT(const ChunkType_t* chunkType, Size_t capacityPerChunk, Size_t chunkCount = 0)
-            : Base_t(chunkType, chunkCount* capacityPerChunk)
+        ChunkArrayPointerT(const ChunkType_t* chunkType, Size_t totalNodeCount, Size_t chunkCount = 0)
+            : Base_t(chunkType, totalNodeCount)
             , Array(chunkCount)
         {
         }

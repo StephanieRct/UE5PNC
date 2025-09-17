@@ -30,21 +30,21 @@ namespace PNC
         {
         }
 
-        ChunkArrayTreePointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t capacityPerChunk)
-            : Base_t(chunkType, componentData, capacityPerChunk* chunkCount, ChunkKind_ChunkArrayTree)
+        ChunkArrayTreePointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t totalNodeCount)
+            : Base_t(chunkType, componentData, totalNodeCount, ChunkKind_ChunkArrayTree)
             , Array(chunks, chunkCount)
         {
         }
 
     protected:
-        ChunkArrayTreePointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t capacityPerChunk, ChunkKind kind)
-            : Base_t(chunkType, componentData, capacityPerChunk* chunkCount, kind)
+        ChunkArrayTreePointerT(const ChunkType_t* chunkType, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t totalNodeCount, ChunkKind kind)
+            : Base_t(chunkType, componentData, totalNodeCount, kind)
             , Array(chunks, chunkCount)
         {
         }
 
-        ChunkArrayTreePointerT(const ChunkType_t* chunkType, Size_t capacityPerChunk, Size_t chunkCount = 0, ChunkKind kind = ChunkKind_ChunkArrayTree)
-            : Base_t(chunkType, capacityPerChunk* chunkCount, kind)
+        ChunkArrayTreePointerT(const ChunkType_t* chunkType, Size_t totalNodeCount, Size_t chunkCount = 0, ChunkKind kind = ChunkKind_ChunkArrayTree)
+            : Base_t(chunkType, totalNodeCount, kind)
             , Array(chunkCount)
         {
         }

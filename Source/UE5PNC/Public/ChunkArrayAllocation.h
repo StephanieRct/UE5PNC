@@ -36,7 +36,7 @@ namespace PNC
         {
         }
         ChunkArrayAllocationT(const ChunkType_t* chunkType, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
-            : Base_t(chunkType, nodeCapacityPerChunk, chunkCount)
+            : Base_t(chunkType, chunkCapacity * nodeCapacityPerChunk, chunkCount)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
             , ChunkCapacity(chunkCapacity)
         {
