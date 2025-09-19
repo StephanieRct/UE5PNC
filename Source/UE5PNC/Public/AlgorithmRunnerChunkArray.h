@@ -12,13 +12,13 @@ namespace PNC
     /// <summary>
     /// Execute an algorithm on each element Chunks in Chunk array.
     /// </summary>
-    /// <typeparam name="TChunkAlgorithm"></typeparam>
+    /// <typeparam name="TAlgorithm"></typeparam>
     /// <typeparam name="TChunkArrayPointer"></typeparam>
-    template< typename TChunkAlgorithm, typename TChunkArrayPointer>
+    template< typename TAlgorithm, typename TChunkArrayPointer>
     struct AlgorithmRunnerChunkArray
     {
     public:
-        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using Algorithm_t = TAlgorithm;
         using ChunkArrayPointer_t = TChunkArrayPointer;
         using ChunkType_t = typename TChunkArrayPointer::ChunkType_t;
         using Size_t = typename TChunkArrayPointer::Size_t;
@@ -30,7 +30,7 @@ namespace PNC
         /// <param name="algorithm"></param>
         /// <param name="chunkPtr"></param>
         /// <returns></returns>
-        static bool TryRun(ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
+        static bool TryRun(Algorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
         {
             auto& chunkArray = *chunkPtr;
             if (chunkArray.IsNull())
@@ -57,7 +57,7 @@ namespace PNC
         /// <param name="chunkPtr"></param>
         /// <returns></returns>
         template<typename TRouter>
-        static bool TryRun(const TRouter& router, ChunkAlgorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
+        static bool TryRun(const TRouter& router, Algorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
         {
             auto& chunkArray = *chunkPtr;
             assert_pnc(!chunkArray.IsNull());

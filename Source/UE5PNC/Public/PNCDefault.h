@@ -30,7 +30,7 @@
 #include "ChunkArrayAllocation.h"
 #include "KindPointer.h"
 #include "KChunkArrayPointer.h"
-#include "ChunkAlgorithm.h"
+#include "Algorithm.h"
 #include "Pipeline.h"
 #include "Components.h"
 

@@ -14,14 +14,14 @@ namespace PNC
     /// execute the algorithm using the appropriate AlgorithmRunner Chunk/ChunkArray
     /// </summary>
     /// <typeparam name="TChunkType"></typeparam>
-    /// <typeparam name="TChunkAlgorithm"></typeparam>
-    template<typename TChunkType, typename TChunkAlgorithm>
+    /// <typeparam name="TAlgorithm"></typeparam>
+    template<typename TChunkType, typename TAlgorithm>
     struct AlgorithmRunnerKindPointerSwitch
     {
     public:
-        using Self_t = AlgorithmRunnerKindPointerSwitch<TChunkType, TChunkAlgorithm>;
+        using Self_t = AlgorithmRunnerKindPointerSwitch<TChunkType, TAlgorithm>;
         using ChunkType_t = TChunkType;
-        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using Algorithm_t = TAlgorithm;
         using Size_t = typename ChunkType_t::Size_t;
         using KindPointer_t = KindPointerT<ChunkType_t>;
         using ChunkPointer_t = ChunkPointerT<ChunkType_t>;
@@ -38,18 +38,18 @@ namespace PNC
         /// <param name="algorithm"></param>
         /// <param name="chunkPtr"></param>
         /// <returns></returns>
-        static bool TryRun(ChunkAlgorithm_t& algorithm, KindPointer_t& chunkPtr)
+        static bool TryRun(Algorithm_t& algorithm, KindPointer_t& chunkPtr)
         {
             switch (chunkPtr.Kind)
             {
             case ChunkKind_Chunk:
-                return AlgorithmRunnerChunk<ChunkAlgorithm_t, ChunkPointer_t>::TryRun(algorithm, *(KChunkPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunk<Algorithm_t, ChunkPointer_t>::TryRun(algorithm, *(KChunkPointer_t&)chunkPtr);
             case ChunkKind_ChunkArray:
-                return AlgorithmRunnerChunkArray<ChunkAlgorithm_t, ChunkArrayPointer_t>::TryRun(algorithm, *(KChunkArrayPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunkArray<Algorithm_t, ChunkArrayPointer_t>::TryRun(algorithm, *(KChunkArrayPointer_t&)chunkPtr);
             case ChunkKind_ChunkTree:
-                return AlgorithmRunnerChunk<ChunkAlgorithm_t, KChunkTreePointer_t>::TryRun(algorithm, (KChunkTreePointer_t&)chunkPtr);
+                return AlgorithmRunnerChunk<Algorithm_t, KChunkTreePointer_t>::TryRun(algorithm, (KChunkTreePointer_t&)chunkPtr);
             case ChunkKind_ChunkArrayTree:
-                return AlgorithmRunnerChunkArray<ChunkAlgorithm_t, KChunkArrayTreePointer_t>::TryRun(algorithm, (KChunkArrayTreePointer_t&)chunkPtr);
+                return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayTreePointer_t>::TryRun(algorithm, (KChunkArrayTreePointer_t&)chunkPtr);
             }
             return true;
         }
@@ -63,18 +63,18 @@ namespace PNC
         /// <param name="chunkPtr"></param>
         /// <returns></returns>
         template<typename TRouter>
-        static bool TryRun(const TRouter& router, ChunkAlgorithm_t& algorithm, KindPointer_t& chunkPtr)
+        static bool TryRun(const TRouter& router, Algorithm_t& algorithm, KindPointer_t& chunkPtr)
         {
             switch (chunkPtr.Kind)
             {
             case ChunkKind_Chunk:
-                return AlgorithmRunnerChunk<ChunkAlgorithm_t, ChunkPointer_t>::TryRun(router, algorithm, *(KChunkPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunk<Algorithm_t, ChunkPointer_t>::TryRun(router, algorithm, *(KChunkPointer_t&)chunkPtr);
             case ChunkKind_ChunkArray:
-                return AlgorithmRunnerChunkArray<ChunkAlgorithm_t, ChunkArrayPointer_t>::TryRun(router, algorithm, *(KChunkArrayPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunkArray<Algorithm_t, ChunkArrayPointer_t>::TryRun(router, algorithm, *(KChunkArrayPointer_t&)chunkPtr);
             case ChunkKind_ChunkTree:
-                return AlgorithmRunnerChunk<ChunkAlgorithm_t, KChunkTreePointer_t>::TryRun(router, algorithm, (KChunkTreePointer_t&)chunkPtr);
+                return AlgorithmRunnerChunk<Algorithm_t, KChunkTreePointer_t>::TryRun(router, algorithm, (KChunkTreePointer_t&)chunkPtr);
             case ChunkKind_ChunkArrayTree:
-                return AlgorithmRunnerChunkArray<ChunkAlgorithm_t, KChunkArrayTreePointer_t>::TryRun(router, algorithm, (KChunkArrayTreePointer_t&)chunkPtr);
+                return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayTreePointer_t>::TryRun(router, algorithm, (KChunkArrayTreePointer_t&)chunkPtr);
             }
             return true;
         }

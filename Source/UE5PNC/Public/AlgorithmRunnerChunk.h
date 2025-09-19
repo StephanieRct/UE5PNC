@@ -14,14 +14,14 @@ namespace PNC
     /// If TChunkPointer is an array pointer (ChunkArrayPointer), the algorithm will execute only once on the whole array as a single Chunk.
     /// Use ChunkArrayAlgorithmRunner to execute the algorithm on each elements of an array pointer
     /// </summary>
-    /// <typeparam name="TChunkAlgorithm"></typeparam>
+    /// <typeparam name="TAlgorithm"></typeparam>
     /// <typeparam name="TChunkPointer"></typeparam>
-    template< typename TChunkAlgorithm, typename TChunkPointer>
+    template< typename TAlgorithm, typename TChunkPointer>
     struct AlgorithmRunnerChunk
     {
     public:
-        using Self_t = AlgorithmRunnerChunk<TChunkAlgorithm, TChunkPointer>;
-        using ChunkAlgorithm_t = TChunkAlgorithm;
+        using Self_t = AlgorithmRunnerChunk<TAlgorithm, TChunkPointer>;
+        using Algorithm_t = TAlgorithm;
         using ChunkPointer_t = TChunkPointer;
 
     public:
@@ -31,7 +31,7 @@ namespace PNC
         /// <param name="algorithm"></param>
         /// <param name="chunkPtr"></param>
         /// <returns></returns>
-        static bool TryRun(TChunkAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
+        static bool TryRun(TAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
         {
             auto& chunk = *chunkPtr;
             if (chunk.IsNull())
@@ -51,7 +51,7 @@ namespace PNC
         /// <param name="chunkPtr"></param>
         /// <returns></returns>
         template<typename TRouter>
-        static bool TryRun(const TRouter& router, TChunkAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
+        static bool TryRun(const TRouter& router, TAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
         {
             auto& chunk = *chunkPtr;
             assert_pnc(!chunk.IsNull());
