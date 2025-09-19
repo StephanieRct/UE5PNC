@@ -3,11 +3,12 @@
 
 #pragma once
 #include "common.h"
+#include "AlgorithmRequirementFulfiller.h"
 
-namespace PNC
+namespace PNC::Routing
 {
     template<typename TChunkType>
-    struct AlgorithmRequirementMatchForChunkType
+    struct AlgorithmRequirementMatchForChunkType : public AlgorithmRequirementFulfiller
     {
     public:
         typedef TChunkType TChunkType_t;

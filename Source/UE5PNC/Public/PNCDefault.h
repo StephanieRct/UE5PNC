@@ -55,7 +55,7 @@ namespace PNC
     using CoChildrenInChunk = CoChildrenInChunkT<Size_t>;
 
     template<typename TAlgorithm>
-    using AlgorithmRoutingCache = AlgorithmRoutingCacheT<TAlgorithm, ChunkType, Size_t>;
+    using AlgorithmRoutingCache = Routing::AlgorithmRoutingCacheT<TAlgorithm, ChunkType, Size_t>;
 
     template<typename TPipeline>
     using Pipeline = PipelineT<TPipeline, ChunkType, Size_t>;

@@ -3,11 +3,12 @@
 
 #pragma once
 #include "common.h"
+#include "AlgorithmRequirementFulfiller.h"
 
-namespace PNC
+namespace PNC::Routing
 {
     template<typename TChunkArray>
-    struct OffsetAlgorithmNode
+    struct OffsetAlgorithmNode : public AlgorithmRequirementFulfiller
     {
     public:
         using ChunkArray_t = TChunkArray;

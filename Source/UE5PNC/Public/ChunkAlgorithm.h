@@ -3,7 +3,7 @@
 
 #pragma once
 #include "common.h"
-#include "Algorithm\ChunkAlgorithmRunner.h"
+#include "AlgorithmRunner.h"
 
 namespace PNC
 {
@@ -15,10 +15,11 @@ namespace PNC
     struct ChunkAlgorithm
     {
     public:
+        using Self_t = ChunkAlgorithm<TChunkAlgorithm>;
         using ChunkAlgorithm_t = TChunkAlgorithm;
 
     public:
-        /// <summary>
+        /// <summary>  
         /// Will execute the algorithm on the chunk if all requirements are fulfilled and return true.
         /// Returns false if the chunk is null or if it doesn't fulfill the algorithm requirements.
         /// </summary>
@@ -28,10 +29,25 @@ namespace PNC
         template<typename TChunkPointer>
         bool TryRun(TChunkPointer& chunkPointer)
         {
-            return IdentifiableChunkAlgorithmRunner<typename TChunkPointer::ChunkType_t, ChunkAlgorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
+            return AlgorithmRunner<typename TChunkPointer::ChunkType_t, ChunkAlgorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
         }
+
         template<typename TChunkPointer>
         void TryRun(TChunkPointer* chunkPointer) = delete;
+
+        /// <summary>
+        /// Route using a router and execute an algorithm on a chunk if all requirements are fulfilled and return true.
+        /// </summary>
+        /// <typeparam name="TRouter"></typeparam>
+        /// <typeparam name="TChunkPointer"></typeparam>
+        /// <param name="router"></param>
+        /// <param name="chunkPointer"></param>
+        /// <returns></returns>
+        template<typename TRouter, typename TChunkPointer>
+        bool TryRun(const TRouter& router, TChunkPointer& chunkPointer)
+        {
+            return AlgorithmRunner<typename TChunkPointer::ChunkType_t, ChunkAlgorithm_t, TChunkPointer>::TryRun(router, *Impl(), chunkPointer);
+        }
 
         /// <summary>
         /// Will execute the algorithm on a matching chunk.
@@ -47,19 +63,25 @@ namespace PNC
                 checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunkPointer).name());
             }
         }
+
         template<typename TChunkPointer>
         void Run(TChunkPointer* chunkPointer) = delete;
 
-
-        template<typename TRouting, typename TChunkPointer>
-        bool TryRunWithRouting(const TRouting& routing, TChunkPointer& chunkPointer)
+        /// <summary>
+        /// Route using a router and execute an algorithm on a chunk
+        /// The chunk must not be null and must match the algorithm or it halt execution
+        /// </summary>
+        /// <typeparam name="TRouter"></typeparam>
+        /// <typeparam name="TChunkPointer"></typeparam>
+        /// <param name="router"></param>
+        /// <param name="chunkPointer"></param>
+        template<typename TRouter, typename TChunkPointer>
+        void Run(const TRouter& router, TChunkPointer& chunkPointer)
         {
-            return IdentifiableChunkAlgorithmRunner<typename TChunkPointer::ChunkType_t, ChunkAlgorithm_t, TChunkPointer>::TryRunWithRouting(routing, *Impl(), chunkPointer);
-        }
-        template<typename TRouting, typename TChunkPointer>
-        void RunWithRouting(const TRouting& routing, TChunkPointer& chunkPointer)
-        {
-            return IdentifiableChunkAlgorithmRunner<typename TChunkPointer::ChunkType_t, ChunkAlgorithm_t, TChunkPointer>::RunWithRouting(routing, *Impl(), chunkPointer);
+            if (!TryRun(router, chunkPointer))
+            {
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunkPointer).name());
+            }
         }
 
     private:
