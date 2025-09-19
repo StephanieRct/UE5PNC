@@ -3,182 +3,88 @@
 
 #pragma once
 #include "common.h"
+#include "AlgorithmRunner.h"
 
-namespace PNC 
+namespace PNC
 {
     /// <summary>
-    /// Extend this template struct to write your own algorithm that processes any chunk's component data as input or output
+    /// Extend this template struct to write your own algorithm that processes any Chunk's Component data as input or output
     /// </summary>
-    /// <typeparam name="TChunkAlgorithm">The typename of your extended struct. ex.: struct MyAlgo : public ChunkAlgorithm<MyAlgo> {};</typeparam>
-    template< typename TChunkAlgorithm >
-    struct ChunkAlgorithm 
+    /// <typeparam name="TDerivedAlgorithm">Derived type. ex.: struct MyAlgo : public Algorithm<MyAlgo> {};</typeparam>
+    template< typename TDerivedAlgorithm >
+    struct Algorithm
     {
     public:
-        typedef TChunkAlgorithm ChunkAlgorithm_t;
+        using Self_t = Algorithm<TDerivedAlgorithm>;
+        using Algorithm_t = TDerivedAlgorithm;
 
     public:
-        /// <summary>
+        /// <summary>  
         /// Will execute the algorithm on the chunk if all requirements are fulfilled and return true.
         /// Returns false if the chunk is null or if it doesn't fulfill the algorithm requirements.
         /// </summary>
         /// <typeparam name="TChunk">Typename of the chunk to execute the algorithm on.</typeparam>
         /// <param name="chunk">The chunk to execute the algorithm on.</param>
         /// <returns>If it successfully executed the algorithm on the chunk.</returns>
-        template<typename TChunk>
-        bool TryRun(TChunk& chunk) 
+        template<typename TChunkPointer>
+        bool TryRun(TChunkPointer& chunkPointer)const
         {
-            if (chunk.IsNull())
-                return false;
-            if (!Impl()->Requirements(SetAlgorithmChunk<TChunk>(&chunk)))
-                return false;
-            Impl()->Execute(chunk.GetSize());
-            return true;
+            return AlgorithmRunner<typename TChunkPointer::ChunkType_t, Algorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
+        }
+
+        template<typename TChunkPointer>
+        void TryRun(TChunkPointer* chunkPointer) = delete;
+
+        /// <summary>
+        /// Route using a router and execute an algorithm on a chunk if all requirements are fulfilled and return true.
+        /// </summary>
+        /// <typeparam name="TRouter"></typeparam>
+        /// <typeparam name="TChunkPointer"></typeparam>
+        /// <param name="router"></param>
+        /// <param name="chunkPointer"></param>
+        /// <returns></returns>
+        template<typename TRouter, typename TChunkPointer>
+        bool TryRun(const TRouter& router, TChunkPointer& chunkPointer)const
+        {
+            return AlgorithmRunner<typename TChunkPointer::ChunkType_t, Algorithm_t, TChunkPointer>::TryRun(router, *Impl(), chunkPointer);
         }
 
         /// <summary>
         /// Will execute the algorithm on a matching chunk.
         /// The chunk must not be null and must match the algorithm or it halt execution
         /// </summary>
-        /// <typeparam name="TChunk"></typeparam>
+        /// <typeparam name="TChunkPointer"></typeparam>
         /// <param name="chunk"></param>
-        template<typename TChunk>
-        void Run(TChunk& chunk) 
+        template<typename TChunkPointer>
+        void Run(TChunkPointer& chunkPointer)const
         {
-            check(!chunk.IsNull());
-            if (!Impl()->Requirements(SetAlgorithmChunk<TChunk>(&chunk)))
+            if (!TryRun(chunkPointer))
             {
-                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(ChunkAlgorithm_t).name(), typeid(TChunk).name());
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
             }
-            Impl()->Execute(chunk.GetSize());
+        }
+
+        template<typename TChunkPointer>
+        void Run(TChunkPointer* chunkPointer) = delete;
+
+        /// <summary>
+        /// Route using a router and execute an algorithm on a chunk
+        /// The chunk must not be null and must match the algorithm or it halt execution
+        /// </summary>
+        /// <typeparam name="TRouter"></typeparam>
+        /// <typeparam name="TChunkPointer"></typeparam>
+        /// <param name="router"></param>
+        /// <param name="chunkPointer"></param>
+        template<typename TRouter, typename TChunkPointer>
+        void Run(const TRouter& router, TChunkPointer& chunkPointer)const
+        {
+            if (!TryRun(router, chunkPointer))
+            {
+                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+            }
         }
 
     private:
-        ChunkAlgorithm_t* Impl() { return (reinterpret_cast<ChunkAlgorithm_t*>(this)); }
+        Algorithm_t* Impl()const { return (const_cast<Algorithm_t*>(reinterpret_cast<const Algorithm_t*>(this))); }
     };
-
-    /// <summary>
-    /// Will set the required component pointers on an algorithm from a given chunk.
-    /// </summary>
-    /// <typeparam name="TChunk"></typeparam>
-    template<typename TChunk>
-    struct SetAlgorithmChunk
-    {
-    public:
-        typedef TChunk Chunk_t;
-
-    protected:
-        Chunk_t* Chunk;
-
-    public:
-        SetAlgorithmChunk(Chunk_t* chunk)
-            :Chunk(chunk) 
-        {
-        }
-
-        template<typename T>
-        bool Component(T*& component) 
-        {
-            const auto& chunkType = Chunk->GetChunkType();
-            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
-            if (index < 0)
-                return false;
-            component = (T*)Chunk->GetComponentData(index);
-            return true;
-        }
-    };
-
-
-
-
-    //template<typename TChunkTree>
-    //struct SetAlgorithmChunkTree {
-    //public:
-    //    TChunkTree* chunk;
-    //    SetAlgorithmChunkTree(TChunkTree* aChunk)
-    //        :chunk(aChunk) {
-
-    //    }
-    //    template<typename T>
-    //    bool NodeComponent(T*& aComponent) {
-    //        auto chunkType = chunk->getChunkType();
-    //        auto index = chunkType.components.getComponentTypeIndexInChunk(&typeid(T));
-    //        if (index < 0)
-    //            return false;
-    //        aComponent = (T*)chunk->getComponentData(index);
-    //        return true;
-    //    }
-    //    template<typename T>
-    //    bool ParentComponent(T*& aComponent) {
-    //        //auto chunkType = chunk->getChunkType();
-    //        //auto index = chunkType.components.getComponentTypeIndexInChunk(&typeid(T));
-    //        //if (index < 0)
-    //        //    return false;
-    //        //aComponent = (T*)chunk->getComponentData(index);
-    //        return true;
-    //    }
-    //    template<typename T>
-    //    bool ChildrenComponent(T*& aComponent) {
-    //        //auto chunkType = chunk->getChunkType();
-    //        //auto index = chunkType.components.getComponentTypeIndexInChunk(&typeid(T));
-    //        //if (index < 0)
-    //        //    return false;
-    //        //aComponent = (T*)chunk->getComponentData(index);
-    //        return true;
-    //    }
-    //};
-    ////template<typename TChildrenRequirements>
-    ////struct ChildrenWithRequirementsIterator {
-    ////public:
-    ////    ChunkTree* firstChunk;
-    ////    ChunkTree* currentChunk;
-    ////    TChildrenRequirements currentChildChunk;
-    ////    unsigned int cycleCount = 0;
-    ////    ChildrenWithRequirementsIterator(ChunkTree* first, const TChildrenRequirements& currentChildChunk) {}
-    ////    bool operator==(const ChildrenWithRequirementsIterator& o)const { return currentChunk == o.currentChunk; }
-    ////    bool operator!=(const ChildrenWithRequirementsIterator& o)const { return currentChunk != o.currentChunk; }
-    ////    const ChildrenWithRequirementsIterator& operator++() {
-    ////        do {
-    ////            currentChunk = currentChunk->nextSibling;
-    ////            if (currentChunk == firstChunk) {
-    ////                ++cycleCount;
-    ////                break;
-    ////            }
-    ////        } while (currentChildChunk.requirements(SetAlgorithmChunk<TChunk>(currentChunk)))
-    ////            return *this;
-    ////    }
-    ////    const ChildrenWithRequirementsIterator& operator--() {
-    ////        do {
-    ////            currentChunk = currentChunk->previousSibling;
-    ////            if (currentChunk == firstChunk) {
-    ////                ++cycleCount;
-    ////                break;
-    ////            }
-    ////        } while (currentChildChunk.requirements(SetAlgorithmChunk<TChunk>(currentChunk)));
-    ////        return *this;
-    ////    }
-    ////    ChildrenWithRequirementsIterator operator++(int) {
-    ////        ChildrenWithRequirementsIterator o(*this);
-    ////        operator++();
-    ////        return o;
-    ////    }
-    ////    ChildrenWithRequirementsIterator operator--(int) {
-    ////        ChildrenWithRequirementsIterator o(*this);
-    ////        operator--();
-    ////        return o;
-    ////    }
-    ////};
-
-    //template< typename TRequirements >
-    //struct ParentRequirements {
-    //};
-
-    //template< typename TRequirements >
-    //struct ChildrenRequirements {
-    //public:
-    //    ChunkTree* first;
-    //    //ChildrenWithRequirementsIterator<TRequirements> begin()const {
-    //    //    return ChildrenWithRequirementsIterator(first, *(TRequirements*)this);
-    //    //}
-    //};
-
 }

@@ -24,15 +24,47 @@
 #include "ComponentType.h"
 #include "ComponentTypeSet.h"
 #include "ChunkType.h"
-#include "Chunk.h"
+#include "ChunkPointer.h"
+#include "ChunkAllocation.h"
+#include "ChunkArrayPointer.h"
+#include "ChunkArrayAllocation.h"
+#include "KindPointer.h"
+#include "KChunkArrayPointer.h"
 #include "Algorithm.h"
+#include "Pipeline.h"
+#include "Components.h"
+#include "routing\AlgorithmRouter.h"
+#include "routing\AlgorithmCacheRouter.h"
+#include "KindPointer.inl.h"
 
 namespace PNC
 {
-    typedef int32 SizeDefault;
-    typedef ComponentTypeT<SizeDefault> ComponentType;
-    typedef ComponentTypeSetT<SizeDefault> ComponentTypeSet;
-    typedef ChunkTypeT<SizeDefault> ChunkType;
-    typedef PNC::ChunkT<ChunkType, SizeDefault> Chunk;
+    using Size_t = int32;
+    using ComponentType = ComponentTypeT<Size_t>;
+    using ComponentTypeSet = ComponentTypeSetT<Size_t>;
+    using ChunkType = ChunkTypeT<Size_t>;
 
+    using ChunkPointer = ChunkPointerT<ChunkType>;
+    using Chunk = ChunkAllocationT<ChunkPointerT<ChunkType>>;
+
+    using ChunkArrayPointer = ChunkArrayPointerT<ChunkType, ChunkPointer>;
+    using ChunkArray = ChunkArrayAllocationT<ChunkArrayPointer>;
+
+    using KChunkTreePointer = KChunkTreePointerT<ChunkType>;
+    using KChunkTree = ChunkAllocationT<KChunkTreePointer>;
+
+    using KChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkType, ChunkPointer>;
+    using KChunkArrayTree = ChunkArrayAllocationT< KChunkArrayTreePointer>;
+
+    template<typename TAlgorithm>
+    using AlgorithmRouter = Routing::AlgorithmRouterT<TAlgorithm>;
+    template<typename TAlgorithm>
+    using AlgorithmCacheRouter = Routing::AlgorithmCacheRouterT<TAlgorithm, ChunkType, Size_t>;
+
+    template<typename TPipeline>
+    using Pipeline = PipelineT<TPipeline, ChunkType, Size_t>;
+
+    using CoParentInChunk = CoParentInChunkT<Size_t>;
+    using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
+    using CoChildrenInChunk = CoChildrenInChunkT<Size_t>;
 }
