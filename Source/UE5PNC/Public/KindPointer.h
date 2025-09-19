@@ -19,12 +19,12 @@ namespace PNC
         ChunkKind_ChunkArray,
 
         /// <summary>
-        /// The Chunk is a ChunkTreePointer
+        /// The Chunk is a KChunkTreePointer
         /// </summary>
         ChunkKind_ChunkTree,
 
         /// <summary>
-        /// The Chunk is a ChunkArrayTreePointer
+        /// The Chunk is a KChunkArrayTreePointer
         /// </summary>
         ChunkKind_ChunkArrayTree,
     };

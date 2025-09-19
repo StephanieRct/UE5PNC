@@ -10,13 +10,13 @@ namespace PNC
     /// <summary>
     /// Extend this template struct to write your own algorithm that processes any Chunk's Component data as input or output
     /// </summary>
-    /// <typeparam name="TAlgorithm">The typename of your extended struct. ex.: struct MyAlgo : public Algorithm<MyAlgo> {};</typeparam>
-    template< typename TAlgorithm >
+    /// <typeparam name="TDerivedAlgorithm">Derived type. ex.: struct MyAlgo : public Algorithm<MyAlgo> {};</typeparam>
+    template< typename TDerivedAlgorithm >
     struct Algorithm
     {
     public:
-        using Self_t = Algorithm<TAlgorithm>;
-        using Algorithm_t = TAlgorithm;
+        using Self_t = Algorithm<TDerivedAlgorithm>;
+        using Algorithm_t = TDerivedAlgorithm;
 
     public:
         /// <summary>  
@@ -27,7 +27,7 @@ namespace PNC
         /// <param name="chunk">The chunk to execute the algorithm on.</param>
         /// <returns>If it successfully executed the algorithm on the chunk.</returns>
         template<typename TChunkPointer>
-        bool TryRun(TChunkPointer& chunkPointer)
+        bool TryRun(TChunkPointer& chunkPointer)const
         {
             return AlgorithmRunner<typename TChunkPointer::ChunkType_t, Algorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
         }
@@ -44,7 +44,7 @@ namespace PNC
         /// <param name="chunkPointer"></param>
         /// <returns></returns>
         template<typename TRouter, typename TChunkPointer>
-        bool TryRun(const TRouter& router, TChunkPointer& chunkPointer)
+        bool TryRun(const TRouter& router, TChunkPointer& chunkPointer)const
         {
             return AlgorithmRunner<typename TChunkPointer::ChunkType_t, Algorithm_t, TChunkPointer>::TryRun(router, *Impl(), chunkPointer);
         }
@@ -56,7 +56,7 @@ namespace PNC
         /// <typeparam name="TChunkPointer"></typeparam>
         /// <param name="chunk"></param>
         template<typename TChunkPointer>
-        void Run(TChunkPointer& chunkPointer)
+        void Run(TChunkPointer& chunkPointer)const
         {
             if (!TryRun(chunkPointer))
             {
@@ -76,7 +76,7 @@ namespace PNC
         /// <param name="router"></param>
         /// <param name="chunkPointer"></param>
         template<typename TRouter, typename TChunkPointer>
-        void Run(const TRouter& router, TChunkPointer& chunkPointer)
+        void Run(const TRouter& router, TChunkPointer& chunkPointer)const
         {
             if (!TryRun(router, chunkPointer))
             {
@@ -85,6 +85,6 @@ namespace PNC
         }
 
     private:
-        Algorithm_t* Impl() { return (reinterpret_cast<Algorithm_t*>(this)); }
+        Algorithm_t* Impl()const { return (const_cast<Algorithm_t*>(reinterpret_cast<const Algorithm_t*>(this))); }
     };
 }

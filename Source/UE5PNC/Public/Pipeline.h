@@ -3,19 +3,25 @@
 
 #pragma once
 #include "common.h"
-#include "routing\AlgorithmRoutingCache.h"
+#include "routing\AlgorithmCacheRouter.h"
 #include "routing\AlgorithmRequirementMatchForChunkType.h"
 
 namespace PNC
 {
-
-    template<typename TPipeline, typename TChunkType, typename TSize>
+    /// <summary>
+    /// Extend this template struct to write your own pipeline to process Chunks
+    /// </summary>
+    /// <typeparam name="TDerivedPipeline">Derived type. ex.: struct MyPipeline : public PipelineT<MyPipeline> {};</typeparam>
+    /// <typeparam name="TChunkType"></typeparam>
+    /// <typeparam name="TSize"></typeparam>
+    template<typename TDerivedPipeline, typename TChunkType, typename TSize>
     struct PipelineT
     {
     public:
+        using Self_t = PipelineT<TDerivedPipeline, TChunkType, TSize>;
+        using Pipeline_t = TDerivedPipeline;
         using ChunkType_t = TChunkType;
         using Size_t = TSize;
-        using Pipeline_t = TPipeline;
 
     protected:
         typedef std::unordered_map<const ChunkType_t*, bool> CacheMap_t;

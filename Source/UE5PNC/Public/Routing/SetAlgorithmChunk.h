@@ -141,30 +141,4 @@ namespace PNC::Routing
 
     };
 
-    template<typename TAlgorithm>
-    struct AlgorithmRoutingT : public AlgorithmRequirementFulfiller
-    {
-    public:
-        using Algorithm_t = TAlgorithm;
-
-    public:
-        /// <summary>
-        /// A AlgorithmRoutingCacheT can be passed as an Algorithm inside a Pipeline so it must
-        /// passthrough the algorithm requirements.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="req"></param>
-        /// <returns></returns>
-        template<typename T>
-        bool Requirements(T req)
-        {
-            return ((TAlgorithm*)nullptr)->Requirements(req);
-        }
-
-        template<typename TChunkPointer>
-        bool RouteAlgorithm(Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
-        {
-            return algorithm.Requirements(SetAlgorithmChunk<TChunkPointer>());
-        }
-    };
 }

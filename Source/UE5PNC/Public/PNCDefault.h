@@ -33,49 +33,38 @@
 #include "Algorithm.h"
 #include "Pipeline.h"
 #include "Components.h"
-
+#include "routing\AlgorithmRouter.h"
+#include "routing\AlgorithmCacheRouter.h"
 #include "KindPointer.inl.h"
+
 namespace PNC
 {
     using Size_t = int32;
-
     using ComponentType = ComponentTypeT<Size_t>;
     using ComponentTypeSet = ComponentTypeSetT<Size_t>;
     using ChunkType = ChunkTypeT<Size_t>;
 
     using ChunkPointer = ChunkPointerT<ChunkType>;
-    using Chunk = ChunkAllocationT<ChunkPointerT<ChunkType>>;// ChunkT<ChunkType>;
+    using Chunk = ChunkAllocationT<ChunkPointerT<ChunkType>>;
 
     using ChunkArrayPointer = ChunkArrayPointerT<ChunkType, ChunkPointer>;
     using ChunkArray = ChunkArrayAllocationT<ChunkArrayPointer>;
 
-    using CoParentInChunk = CoParentInChunkT<Size_t>;
-    using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
-    
-    using CoChildrenInChunk = CoChildrenInChunkT<Size_t>;
+    using KChunkTreePointer = KChunkTreePointerT<ChunkType>;
+    using KChunkTree = ChunkAllocationT<KChunkTreePointer>;
+
+    using KChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkType, ChunkPointer>;
+    using KChunkArrayTree = ChunkArrayAllocationT< KChunkArrayTreePointer>;
 
     template<typename TAlgorithm>
-    using AlgorithmRoutingCache = Routing::AlgorithmRoutingCacheT<TAlgorithm, ChunkType, Size_t>;
+    using AlgorithmRouter = Routing::AlgorithmRouterT<TAlgorithm>;
+    template<typename TAlgorithm>
+    using AlgorithmCacheRouter = Routing::AlgorithmCacheRouterT<TAlgorithm, ChunkType, Size_t>;
 
     template<typename TPipeline>
     using Pipeline = PipelineT<TPipeline, ChunkType, Size_t>;
 
-
-
-
-
-    /// <summary>
-    /// A IdentifiableChunk can be reinterpret_cast-ed to ChunkTreePointer if its kind is ChunkKind_ChunkTree
-    /// </summary>
-    using ChunkTreePointer = KChunkTreePointerT<ChunkType>;
-
-    /// <summary>
-    /// A IdentifiableChunk or ChunkTreePointer can be reinterpret_cast-ed to ChunkArrayTreePointer if its kind is ChunkKind_ChunkArrayTree
-    /// </summary>
-    using ChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkType, ChunkPointer>;
-
-
-    using ChunkTree = ChunkAllocationT<ChunkTreePointer>;
-    using ChunkArrayTree = ChunkArrayAllocationT< ChunkArrayTreePointer>;
-
+    using CoParentInChunk = CoParentInChunkT<Size_t>;
+    using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
+    using CoChildrenInChunk = CoChildrenInChunkT<Size_t>;
 }
