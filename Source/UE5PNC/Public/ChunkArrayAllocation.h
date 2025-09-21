@@ -16,12 +16,12 @@ namespace PNC
     public:
         using Base_t = TBase;
         using Self_t = ChunkArrayAllocationT<TBase>;
-        using ChunkType_t = typename TBase::ChunkType_t;
+        using ChunkStructure_t = typename TBase::ChunkStructure_t;
         using Size_t = typename TBase::Size_t;
         using ChunkPointerElement_t = typename TBase::ChunkPointerElement_t;
 
     protected:
-        using Internal_t = ChunkArrayPointerInternalT<ChunkType_t, ChunkPointerElement_t>;
+        using Internal_t = ChunkArrayPointerInternalT<ChunkStructure_t, ChunkPointerElement_t>;
 
     protected:
         /// <summary>
@@ -47,13 +47,13 @@ namespace PNC
         /// <summary>
         /// Allocate a Chunk Array with a maximum number of Chunks and Nodes per Chunks.
         /// </summary>
-        /// <param name="chunkType">Structure of the Chunk's Component data.</param>
+        /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
         /// <param name="nodeCapacityPerChunk">Maximum number of Nodes each Chunks in the Array can grow to.</param>
         /// <param name="chunkCapacity">Maximum number of Chunks this Array can grow to.</param>
         /// <param name="chunkCount">Number of valid Chunks in the Array.</param>
         /// <param name="nodeCountPerChunk">Number of valid Nodes in each Chunks in the Array.</param>
-        ChunkArrayAllocationT(const ChunkType_t* chunkType, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
-            : Base_t(chunkType, chunkCapacity * nodeCapacityPerChunk, chunkCount)
+        ChunkArrayAllocationT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
+            : Base_t(chunkStructure, chunkCapacity * nodeCapacityPerChunk, chunkCount)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
             , ChunkCapacity(chunkCapacity)
         {
@@ -129,7 +129,7 @@ namespace PNC
         {
             auto& chunk = GetInternalChunk();
             for (int i = 0; i < ChunkCapacity; ++i)
-                chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Type, o[i].GetNodeCount(), GetComponentDataForChunk(i));
+                chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Structure, o[i].GetNodeCount(), GetComponentDataForChunk(i));
         }
 
         void InitChunkArray(Size_t nodeCountPerChunk = 0)
@@ -140,13 +140,13 @@ namespace PNC
                     chunk.Array.Chunks[i] = ChunkPointerElement_t::Null();
             else
                 for (int i = 0; i < ChunkCapacity; ++i)
-                    chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Type, nodeCountPerChunk, GetComponentDataForChunk(i));
+                    chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Structure, nodeCountPerChunk, GetComponentDataForChunk(i));
         }
 
         void** GetComponentDataForChunk(Size_t chunkIndex)
         {
             auto& chunk = GetInternalChunk();
-            return &chunk.ComponentData[chunkIndex * chunk.Type->Components.GetSize()];
+            return &chunk.ComponentData[chunkIndex * chunk.Structure->Components.GetSize()];
         }
 
         void AllocateChunkArray()
@@ -163,7 +163,7 @@ namespace PNC
         void AllocateComponentDataArray()
         {
             auto& chunk = GetInternalChunk();
-            chunk.ComponentData = (void**)FMemory::Malloc(ChunkCapacity * chunk.Type->Components.GetSize() * sizeof(void*), alignof(void*));
+            chunk.ComponentData = (void**)FMemory::Malloc(ChunkCapacity * chunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         void DeallocateComponentDataArray()
@@ -176,11 +176,11 @@ namespace PNC
         {
             auto& chunk = GetInternalChunk();
             assert_pnc(!chunk.IsNull());
-            auto componentCount = chunk.Type->Components.GetSize();
+            auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
             {
-                auto componentTypeInfo = chunk.Type->Components[i];
+                auto componentTypeInfo = chunk.Structure->Components[i];
                 chunk.ComponentData[i] = componentTypeInfo->Allocate(nodeCapacityTotal, ChunkCapacity);
                 for (size_t k = 1; k < ChunkCapacity; ++k)
                 {
@@ -193,12 +193,12 @@ namespace PNC
         {
             auto& chunk = (Internal_t&)GetInternalChunk();
             assert_pnc(!chunk.IsNull());
-            assert_pnc(chunk.IsSameChunkType(*this, o));
-            auto componentCount = chunk.Type->Components.GetSize();
+            assert_pnc(chunk.IsSameChunkStructure(*this, o));
+            auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = o.GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
             {
-                auto componentTypeInfo = chunk.Type->Components[i];
+                auto componentTypeInfo = chunk.Structure->Components[i];
                 chunk.ComponentData[i] = componentTypeInfo->AllocateCopy(o.ComponentData[i], nodeCapacityTotal, o.GetChunkCount() * o.GetNodeCapacityPerChunk(), ChunkCapacity);
                 for (size_t k = 1; k < ChunkCapacity; ++k)
                 {
@@ -210,13 +210,13 @@ namespace PNC
         void DeallocateData()
         {
             auto& chunk = GetInternalChunk();
-            if (&chunk.Type == nullptr)
+            if (&chunk.Structure == nullptr)
                 return;
-            auto componentCount = chunk.Type->Components.GetSize();
+            auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
             {
-                auto componentTypeInfo = chunk.Type->Components[i];
+                auto componentTypeInfo = chunk.Structure->Components[i];
                 componentTypeInfo->Deallocate(chunk.ComponentData[i], nodeCapacityTotal, ChunkCapacity);
             }
         }

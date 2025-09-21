@@ -63,8 +63,8 @@ namespace PNC::Routing
         bool Component(T*& component)
         {
             auto& chunk = this->ChunkPointer->GetChunk();
-            const auto& chunkType = chunk.GetChunkType();
-            auto componentTypeIndexInChunk = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
+            const auto& chunkStructure = chunk.GetChunkStructure();
+            auto componentTypeIndexInChunk = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             Route->AddRoute(componentTypeIndexInChunk);
 
             if (componentTypeIndexInChunk == -1)
@@ -106,7 +106,7 @@ namespace PNC::Routing
             auto componentTypeIndexInChunk = (*Route)[CurrentComponentRoute];
             ++CurrentComponentRoute;
             // Make sure the cache is valid
-            //assert(componentTypeIndexInChunk == Chunk->GetChunkType().GetComponentTypeIndexInChunk(&typeid(T)));
+            //assert(componentTypeIndexInChunk == Chunk->GetChunkStructure().GetComponentTypeIndexInChunk(&typeid(T)));
 
             if (componentTypeIndexInChunk == (Size_t)-1)
                 return false;
@@ -122,19 +122,19 @@ namespace PNC::Routing
     /// Route algorithms and cache the routes for each ChunkTypes the algorithm matches with.
     /// </summary>
     /// <typeparam name="TAlgorithm"></typeparam>
-    /// <typeparam name="TChunkType"></typeparam>
+    /// <typeparam name="TChunkStructure"></typeparam>
     /// <typeparam name="TSize"></typeparam>
-    template<typename TAlgorithm, typename TChunkType, typename TSize>
+    template<typename TAlgorithm, typename TChunkStructure, typename TSize>
     struct AlgorithmCacheRouterT : public AlgorithmRequirementFulfiller
     {
     public:
         using Size_t = TSize;
-        using ChunkType_t = TChunkType;
+        using ChunkStructure_t = TChunkStructure;
         using Algorithm_t = TAlgorithm;
         using AlgorithmRoute_t = RouteT<TSize>;
 
     protected:
-        using Map_t = std::unordered_map<const ChunkType_t*, AlgorithmRoute_t*>;
+        using Map_t = std::unordered_map<const ChunkStructure_t*, AlgorithmRoute_t*>;
         mutable Map_t Cache;
         mutable std::list<AlgorithmRoute_t> CachedRoutes;
 
@@ -164,14 +164,14 @@ namespace PNC::Routing
             using AlgorithmRouteWithCache_t = RouteAlgorithmWithCacheT<TChunkPointer, Size_t>;
             //TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("Routing"));
             auto& chunk = *chunkPointer;
-            const ChunkType_t* chunkType = &chunk.GetChunkType();
+            const ChunkStructure_t* chunkStructure = &chunk.GetChunkStructure();
 
-            typename Map_t::iterator i = Cache.find(chunkType);
+            typename Map_t::iterator i = Cache.find(chunkStructure);
             if (i == Cache.end())
             {
                 CachedRoutes.push_back(AlgorithmRoute_t());
                 AlgorithmRoute_t* route = &CachedRoutes.back();
-                Cache[chunkType] = route;
+                Cache[chunkStructure] = route;
                 AlgorithmRouteToCache_t routeToCache(&chunkPointer, route);
                 bool matches = algorithm.template Requirements<AlgorithmRouteToCache_t&>(routeToCache);
                 if (!routeToCache.MatchForChunk)

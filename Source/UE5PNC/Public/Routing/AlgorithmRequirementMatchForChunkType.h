@@ -7,25 +7,25 @@
 
 namespace PNC::Routing
 {
-    template<typename TChunkType>
+    template<typename TChunkStructure>
     struct AlgorithmRequirementMatchForChunkType : public AlgorithmRequirementFulfiller
     {
     public:
-        typedef TChunkType TChunkType_t;
+        using ChunkType_t = TChunkStructure;
 
     protected:
-        const TChunkType* ChunkType;
+        const TChunkStructure* ChunkStructure;
 
     public:
-        AlgorithmRequirementMatchForChunkType(const TChunkType* chunkType)
-            :ChunkType(chunkType)
+        AlgorithmRequirementMatchForChunkType(const TChunkStructure* chunkStructure)
+            :ChunkStructure(chunkStructure)
         {
         }
 
         template<typename T>
         bool Component(T*& component)
         {
-            auto index = ChunkType->GetComponentTypeIndexInChunk(&typeid(T));
+            auto index = ChunkStructure->GetComponentTypeIndexInChunk(&typeid(T));
             return index >= 0;
         }
 

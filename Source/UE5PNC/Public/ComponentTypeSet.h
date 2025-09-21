@@ -15,8 +15,9 @@ namespace PNC
     struct ComponentTypeSetT
     {
     public:
-        typedef TSize Size_t;
-        typedef ComponentTypeT<Size_t> ComponentType_t;
+        using Self_t = ComponentTypeSetT<TSize>;
+        using Size_t = TSize;
+        using ComponentType_t = ComponentTypeT<Size_t>;
 
     private:
         std::vector<const ComponentType_t*> ComponentTypes;

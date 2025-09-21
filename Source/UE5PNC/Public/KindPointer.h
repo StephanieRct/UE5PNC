@@ -32,17 +32,17 @@ namespace PNC
     /// <summary>
     /// A KindPointer is an abstract Pointer with a differnt implementation according to the Chunk's kind.
     /// </summary>
-    /// <typeparam name="TChunkType">Structure of the Chunk's Component data.</typeparam>
-    template<typename TChunkType>
+    /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
+    template<typename TChunkStructure>
     struct KindPointerT
     {
     public:
-        using Self_t = KindPointerT<TChunkType>;
-        using ChunkType_t = TChunkType;
-        using Size_t = typename ChunkType_t::Size_t;
-        using ChunkPointer_t = ChunkPointerT<TChunkType>;
-        using Chunk_t = ChunkPointerT<TChunkType>;
-        using ChunkArray_t = ChunkArrayPointerT<ChunkType_t, ChunkPointerT<TChunkType>>;
+        using Self_t = KindPointerT<TChunkStructure>;
+        using ChunkStructure_t = TChunkStructure;
+        using Size_t = typename ChunkStructure_t::Size_t;
+        using ChunkPointer_t = ChunkPointerT<TChunkStructure>;
+        using Chunk_t = ChunkPointerT<TChunkStructure>;
+        using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerT<TChunkStructure>>;
 
     public:
         /// <summary>

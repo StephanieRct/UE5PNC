@@ -29,7 +29,7 @@ namespace PNC
         template<typename TChunkPointer>
         bool TryRun(TChunkPointer& chunkPointer)const
         {
-            return AlgorithmRunner<typename TChunkPointer::ChunkType_t, Algorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
+            return AlgorithmRunner<typename TChunkPointer::ChunkStructure_t, Algorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
         }
 
         template<typename TChunkPointer>
@@ -46,7 +46,7 @@ namespace PNC
         template<typename TRouter, typename TChunkPointer>
         bool TryRun(const TRouter& router, TChunkPointer& chunkPointer)const
         {
-            return AlgorithmRunner<typename TChunkPointer::ChunkType_t, Algorithm_t, TChunkPointer>::TryRun(router, *Impl(), chunkPointer);
+            return AlgorithmRunner<typename TChunkPointer::ChunkStructure_t, Algorithm_t, TChunkPointer>::TryRun(router, *Impl(), chunkPointer);
         }
 
         /// <summary>

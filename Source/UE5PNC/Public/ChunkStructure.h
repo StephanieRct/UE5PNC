@@ -8,32 +8,32 @@
 namespace PNC
 {
     /// <summary>
-    /// A chunk type defines the structure of a chunk.
-    /// Pointers to ChunkType are used to uniquely identify ChunkType between chunks
+    /// A ChunkStructure defines the types of components that compose a chunk.
+    /// Pointers to ChunkStructure are used to uniquely identify the structure between chunks
     /// </summary>
     template< typename TSize>
-    struct ChunkTypeT 
+    struct ChunkStructureT 
     {
     public:
-        using Self = ChunkTypeT<TSize>;
+        using Self = ChunkStructureT<TSize>;
         using Size_t = TSize;
         using ComponentTypeSet_t = ComponentTypeSetT<TSize>;
         using ComponentType_t = typename ComponentTypeSet_t::ComponentType_t;
 
     public:
         /// <summary>
-        /// Set of component types this chunk type defines
+        /// Set of component types this ChunkStructure defines
         /// </summary>
         ComponentTypeSet_t Components;
 
         /// <summary>
-        /// Create a ChunkType from a list of ComponentType
+        /// Create a ChunkStructure from a list of ComponentType
         /// </summary>
         /// <param name="components"></param>
-        ChunkTypeT(std::initializer_list<const ComponentType_t*> components) :Components(components) {}
+        ChunkStructureT(std::initializer_list<const ComponentType_t*> components) :Components(components) {}
 
         /// <summary>
-        /// Get the index of a component type in the ComponentTypeSet of this ChunkType
+        /// Get the index of a component type in the ComponentTypeSet of this ChunkStructure
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>

@@ -9,16 +9,16 @@ namespace PNC
     /// <summary>
     /// Extent a ChunkPointer to include the required data field to point to an array of chunks.
     /// </summary>
-    /// <typeparam name="TChunkType">Structure of the chunk's component data.</typeparam>
-    /// <typeparam name="TChunkPointerElement">Type of the chunk pointer in the array.</typeparam>
-    template<typename TChunkType, typename TChunkPointerElement>
+    /// <typeparam name="TChunkStructure">Structure of the chunk's component data.</typeparam>
+    /// <typeparam name="TChunkPointerElement">Structure of the chunk pointer in the array.</typeparam>
+    template<typename TChunkStructure, typename TChunkPointerElement>
     struct ChunkArrayExtentionT
     {
     public:
-        using Self = ChunkArrayExtentionT<TChunkType, TChunkPointerElement>;
-        using ChunkType_t = TChunkType;
+        using Self = ChunkArrayExtentionT<TChunkStructure, TChunkPointerElement>;
+        using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
-        using Size_t = typename ChunkType_t::Size_t;
+        using Size_t = typename ChunkStructure_t::Size_t;
 
     public:
         /// <summary>
