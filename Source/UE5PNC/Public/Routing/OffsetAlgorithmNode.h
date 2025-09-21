@@ -11,11 +11,14 @@ namespace PNC::Routing
     struct OffsetAlgorithmNode : public AlgorithmRequirementFulfiller
     {
     public:
+        using Base_t = AlgorithmRequirementFulfiller;
+        using Self_t = OffsetAlgorithmNode<TChunkArray>;
         using ChunkArray_t = TChunkArray;
         using Size_t = typename TChunkArray::Size_t;
 
     protected:
         Size_t NodeOffset;
+
     public:
         OffsetAlgorithmNode(Size_t nodeOffset)
             : NodeOffset(nodeOffset)

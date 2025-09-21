@@ -8,16 +8,18 @@
 namespace PNC::Routing
 {
     template<typename TChunkStructure>
-    struct AlgorithmRequirementMatchForChunkType : public AlgorithmRequirementFulfiller
+    struct AlgorithmMatchStructure : public AlgorithmRequirementFulfiller
     {
     public:
-        using ChunkType_t = TChunkStructure;
+        using Base_t = AlgorithmRequirementFulfiller;
+        using Self_t = AlgorithmMatchStructure<TChunkStructure>;
+        using ChunkStructure_t = TChunkStructure;
 
     protected:
-        const TChunkStructure* ChunkStructure;
+        const ChunkStructure_t* ChunkStructure;
 
     public:
-        AlgorithmRequirementMatchForChunkType(const TChunkStructure* chunkStructure)
+        AlgorithmMatchStructure(const ChunkStructure_t* chunkStructure)
             :ChunkStructure(chunkStructure)
         {
         }

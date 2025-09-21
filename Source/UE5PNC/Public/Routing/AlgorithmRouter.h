@@ -15,6 +15,8 @@ namespace PNC::Routing
     struct AlgorithmRouterT : public AlgorithmRequirementFulfiller
     {
     public:
+        using Base_t = AlgorithmRequirementFulfiller;
+        using Self_t = AlgorithmRouterT<TAlgorithm>;
         using Algorithm_t = TAlgorithm;
 
     public:

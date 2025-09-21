@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 #include "routing\AlgorithmCacheRouter.h"
-#include "routing\AlgorithmRequirementMatchForChunkType.h"
+#include "routing\AlgorithmMatchStructure.h"
 
 namespace PNC
 {
@@ -36,7 +36,7 @@ namespace PNC
             auto iMatching = ChunkStructureMatching.find(chunkStructure);
             if (iMatching == ChunkStructureMatching.end())
             {
-                bool bMatch = Impl()->Requirements(PipelineRequirementMatchForChunkType<TChunkStructure>(chunkStructure));
+                bool bMatch = Impl()->Requirements(PipelineRequirementMatchForStructure<TChunkStructure>(chunkStructure));
                 iMatching = ChunkStructureMatching.insert(iMatching, typename CacheMap_t::value_type(chunkStructure, bMatch));
             }
             return iMatching->second;
@@ -73,16 +73,16 @@ namespace PNC
     };
 
     template<typename TChunkStructure>
-    struct PipelineRequirementMatchForChunkType
+    struct PipelineRequirementMatchForStructure
     {
     public:
-        using ChunkType_t = TChunkStructure;
+        using ChunkStructure_t = TChunkStructure;
 
     protected:
         const TChunkStructure* ChunkStructure;
 
     public:
-        PipelineRequirementMatchForChunkType(const TChunkStructure* chunkStructure)
+        PipelineRequirementMatchForStructure(const TChunkStructure* chunkStructure)
             :ChunkStructure(chunkStructure)
         {
         }
@@ -90,7 +90,7 @@ namespace PNC
         template<typename T>
         bool Algorithm(T& algorithm)
         {
-            return algorithm.Requirements(Routing::AlgorithmRequirementMatchForChunkType<TChunkStructure>(ChunkStructure));
+            return algorithm.Requirements(Routing::AlgorithmMatchStructure<TChunkStructure>(ChunkStructure));
         }
     };
 }

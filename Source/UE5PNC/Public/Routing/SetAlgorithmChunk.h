@@ -14,6 +14,8 @@ namespace PNC::Routing
     struct SetAlgorithmChunkBase : public AlgorithmRequirementFulfiller
     {
     public:
+        using Base_t = AlgorithmRequirementFulfiller;
+        using Self_t = SetAlgorithmChunkBase< TChunkPointer>;
         using ChunkPointer_t = TChunkPointer;
         using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
         using Size_t = typename ChunkPointer_t::Size_t;
@@ -72,6 +74,7 @@ namespace PNC::Routing
     {
     public:
         using Base_t = SetAlgorithmChunkBase<TChunkPointer>;
+        using Self_t = SetAlgorithmChunk<TChunkPointer>;
         using ChunkPointer_t = TChunkPointer;
         using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
         using Size_t = typename ChunkPointer_t::Size_t;
@@ -89,6 +92,7 @@ namespace PNC::Routing
     {
     public:
         using Base_t = SetAlgorithmChunkBase<KChunkTreePointerT<TChunkStructure>>;
+        using Self_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
         using ChunkStructure_t = TChunkStructure;
         using Size_t = typename ChunkStructure_t::Size_t;
         using ChunkPointer_t = KChunkTreePointerT<ChunkStructure_t>;
@@ -129,6 +133,7 @@ namespace PNC::Routing
     {
     public:
         using Base_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
+        using Self_t = SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>>;
         using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename TChunkStructure::Size_t;

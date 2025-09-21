@@ -13,6 +13,7 @@ namespace PNC::Routing
     struct RouteT
     {
     public:
+        using Self_t = RouteT<TSize>;
         using Size_t = TSize;
 
     public:
@@ -42,6 +43,7 @@ namespace PNC::Routing
     {
     public:
         using Base_t = SetAlgorithmChunk<TChunkPointer>;
+        using Self_t = RouteAlgorithmToCacheT<TChunkPointer, TSize>;
         using ChunkPointer_t = TChunkPointer;
         using Size_t = TSize;
         using AlgorithmRoute_t = RouteT<Size_t>;
@@ -84,6 +86,7 @@ namespace PNC::Routing
     {
     public:
         using Base_t = SetAlgorithmChunk<TChunkPointer>;
+        using Self_t = RouteAlgorithmWithCacheT<TChunkPointer, TSize>;
         using ChunkPointer_t = TChunkPointer;
         using Size_t = TSize;
         using AlgorithmRoute_t = typename RouteT<TSize>;
@@ -119,7 +122,7 @@ namespace PNC::Routing
     };
 
     /// <summary>
-    /// Route algorithms and cache the routes for each ChunkTypes the algorithm matches with.
+    /// Route algorithms and cache the routes for each ChunkStructures the algorithm matches with.
     /// </summary>
     /// <typeparam name="TAlgorithm"></typeparam>
     /// <typeparam name="TChunkStructure"></typeparam>
@@ -128,12 +131,14 @@ namespace PNC::Routing
     struct AlgorithmCacheRouterT : public AlgorithmRequirementFulfiller
     {
     public:
-        using Size_t = TSize;
-        using ChunkStructure_t = TChunkStructure;
+        using Self_t = AlgorithmCacheRouterT<TAlgorithm, TChunkStructure, TSize>;
+        using Base_t = AlgorithmRequirementFulfiller;
         using Algorithm_t = TAlgorithm;
-        using AlgorithmRoute_t = RouteT<TSize>;
+        using ChunkStructure_t = TChunkStructure;
+        using Size_t = TSize;
 
     protected:
+        using AlgorithmRoute_t = RouteT<TSize>;
         using Map_t = std::unordered_map<const ChunkStructure_t*, AlgorithmRoute_t*>;
         mutable Map_t Cache;
         mutable std::list<AlgorithmRoute_t> CachedRoutes;
