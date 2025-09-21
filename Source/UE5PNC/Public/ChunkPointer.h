@@ -22,7 +22,7 @@ namespace PNC
         using Size_t = typename ChunkType_t::Size_t;
 
         /// <summary>
-        /// Reinterprete_cast this object to this type to get read-write access to it's private data fields
+        /// Reinterprete_cast this object to this type to get read-write access to its private data fields
         /// Use with caution.
         /// </summary>
         using Internal_t = ChunkPointerInternalT<TChunkType>;
