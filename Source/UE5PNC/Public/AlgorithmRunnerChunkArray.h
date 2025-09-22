@@ -5,7 +5,6 @@
 #include "common.h"
 #include "Routing\SetAlgorithmChunk.h"
 #include "Routing\OffsetAlgorithmNode.h"
-#include "Routing\AlgorithmRequirementMatchForChunkType.h"
 
 namespace PNC
 {
@@ -20,7 +19,7 @@ namespace PNC
     public:
         using Algorithm_t = TAlgorithm;
         using ChunkArrayPointer_t = TChunkArrayPointer;
-        using ChunkType_t = typename TChunkArrayPointer::ChunkType_t;
+        using ChunkStructure_t = typename TChunkArrayPointer::ChunkStructure_t;
         using Size_t = typename TChunkArrayPointer::Size_t;
 
     public:

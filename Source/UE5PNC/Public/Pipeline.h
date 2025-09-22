@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 #include "routing\AlgorithmCacheRouter.h"
-#include "routing\AlgorithmRequirementMatchForChunkType.h"
+#include "routing\AlgorithmMatchStructure.h"
 
 namespace PNC
 {
@@ -12,32 +12,32 @@ namespace PNC
     /// Extend this template struct to write your own pipeline to process Chunks
     /// </summary>
     /// <typeparam name="TDerivedPipeline">Derived type. ex.: struct MyPipeline : public PipelineT<MyPipeline> {};</typeparam>
-    /// <typeparam name="TChunkType"></typeparam>
+    /// <typeparam name="TChunkStructure"></typeparam>
     /// <typeparam name="TSize"></typeparam>
-    template<typename TDerivedPipeline, typename TChunkType, typename TSize>
+    template<typename TDerivedPipeline, typename TChunkStructure, typename TSize>
     struct PipelineT
     {
     public:
-        using Self_t = PipelineT<TDerivedPipeline, TChunkType, TSize>;
+        using Self_t = PipelineT<TDerivedPipeline, TChunkStructure, TSize>;
         using Pipeline_t = TDerivedPipeline;
-        using ChunkType_t = TChunkType;
+        using ChunkStructure_t = TChunkStructure;
         using Size_t = TSize;
 
     protected:
-        typedef std::unordered_map<const ChunkType_t*, bool> CacheMap_t;
-        mutable CacheMap_t ChunkTypeMatching;
+        using CacheMap_t = std::unordered_map<const ChunkStructure_t*, bool>;
+        mutable CacheMap_t ChunkStructureMatching;
 
     public:
 
-        template<typename TChunkType>
-        bool Match(const TChunkType* chunkType)
+        template<typename TChunkStructure>
+        bool Match(const TChunkStructure* chunkStructure)
         {
-            assert(chunkType != null);
-            auto iMatching = ChunkTypeMatching.find(chunkType);
-            if (iMatching == ChunkTypeMatching.end())
+            assert(chunkStructure != null);
+            auto iMatching = ChunkStructureMatching.find(chunkStructure);
+            if (iMatching == ChunkStructureMatching.end())
             {
-                bool bMatch = Impl()->Requirements(PipelineRequirementMatchForChunkType<TChunkType>(chunkType));
-                iMatching = ChunkTypeMatching.insert(iMatching, typename CacheMap_t::value_type(chunkType, bMatch));
+                bool bMatch = Impl()->Requirements(PipelineRequirementMatchForStructure<TChunkStructure>(chunkStructure));
+                iMatching = ChunkStructureMatching.insert(iMatching, typename CacheMap_t::value_type(chunkStructure, bMatch));
             }
             return iMatching->second;
         }
@@ -47,8 +47,8 @@ namespace PNC
         {
             auto& chunk = *chunkPointer;
             assert(!chunk.IsNull());
-            const auto* chunkType = &chunk.GetChunkType();
-            if (!Match(chunkType))
+            const auto* chunkStructure = &chunk.GetChunkStructure();
+            if (!Match(chunkStructure))
                 return false;
             Impl()->Execute(chunkPointer);
             return true;
@@ -72,25 +72,25 @@ namespace PNC
         Pipeline_t* Impl() { return (reinterpret_cast<Pipeline_t*>(this)); }
     };
 
-    template<typename TChunkType>
-    struct PipelineRequirementMatchForChunkType
+    template<typename TChunkStructure>
+    struct PipelineRequirementMatchForStructure
     {
     public:
-        using TChunkType_t = TChunkType;
+        using ChunkStructure_t = TChunkStructure;
 
     protected:
-        const TChunkType* ChunkType;
+        const TChunkStructure* ChunkStructure;
 
     public:
-        PipelineRequirementMatchForChunkType(const TChunkType* chunkType)
-            :ChunkType(chunkType)
+        PipelineRequirementMatchForStructure(const TChunkStructure* chunkStructure)
+            :ChunkStructure(chunkStructure)
         {
         }
 
         template<typename T>
         bool Algorithm(T& algorithm)
         {
-            return algorithm.Requirements(Routing::AlgorithmRequirementMatchForChunkType<TChunkType>(ChunkType));
+            return algorithm.Requirements(Routing::AlgorithmMatchStructure<TChunkStructure>(ChunkStructure));
         }
     };
 }

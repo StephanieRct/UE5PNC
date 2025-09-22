@@ -12,17 +12,17 @@ namespace PNC
     /// A KChunkPointer is also a Chunk by itself and provides access to the Component data.
     /// Copying a KChunkPointer does not copy the data.
     /// </summary>
-    /// <typeparam name="TChunkType">Structure of the Chunk's Component data.</typeparam>
+    /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
     /// <summary>
-    template<typename TChunkType>
-    struct KChunkPointerT : public KindPointerT<TChunkType>
+    template<typename TChunkStructure>
+    struct KChunkPointerT : public KindPointerT<TChunkStructure>
     {
     public:
-        using Base_t = KindPointerT<TChunkType>;
-        using Self_t = KChunkPointerT<TChunkType>;
-        using ChunkType_t = TChunkType;
-        using Size_t = typename ChunkType_t::Size_t;
-        using ChunkPointer_t = ChunkPointerT<TChunkType>;
+        using Base_t = KindPointerT<TChunkStructure>;
+        using Self_t = KChunkPointerT<TChunkStructure>;
+        using ChunkStructure_t = TChunkStructure;
+        using Size_t = typename ChunkStructure_t::Size_t;
+        using ChunkPointer_t = ChunkPointerT<TChunkStructure>;
         using Chunk_t = ChunkPointer_t;
 
     protected:
@@ -30,7 +30,7 @@ namespace PNC
 
     public:
         /// <summary>
-        /// Create a Null KChunkPointer without ChunkType
+        /// Create a Null KChunkPointer without ChunkStructure
         /// </summary>
         KChunkPointerT()
         {
@@ -39,19 +39,19 @@ namespace PNC
         /// <summary>
         /// Contructs from its member data fields.
         /// </summary>
-        /// <param name="chunkType">Structure of the Chunk's Component data.</param>
+        /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
         /// <param name="nodeCount">Number of Nodes that are included by this pointer.</param>
-        /// <param name="componentData">Points to an array of Component data pointers created according to the ChunkType.</param>
-        KChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData)
+        /// <param name="componentData">Points to an array of Component data pointers created according to the ChunkStructure.</param>
+        KChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
             : Base_t()
-            , Chunk(chunkType, nodeCount, componentData)
+            , Chunk(chunkStructure, nodeCount, componentData)
         {
         }
 
     protected:
-        KChunkPointerT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData, ChunkKind kind)
+        KChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData, ChunkKind kind)
             : Base_t(kind)
-            , Chunk(chunkType, nodeCount, componentData)
+            , Chunk(chunkStructure, nodeCount, componentData)
         {
         }
 

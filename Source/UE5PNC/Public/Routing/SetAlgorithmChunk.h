@@ -14,8 +14,10 @@ namespace PNC::Routing
     struct SetAlgorithmChunkBase : public AlgorithmRequirementFulfiller
     {
     public:
+        using Base_t = AlgorithmRequirementFulfiller;
+        using Self_t = SetAlgorithmChunkBase< TChunkPointer>;
         using ChunkPointer_t = TChunkPointer;
-        using ChunkType_t = typename ChunkPointer_t::ChunkType_t;
+        using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
         using Size_t = typename ChunkPointer_t::Size_t;
 
     protected:
@@ -31,8 +33,8 @@ namespace PNC::Routing
         bool Component(T*& component)
         {
             auto& chunk = ChunkPointer->GetChunk();
-            const auto& chunkType = chunk.GetChunkType();
-            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
+            const auto& chunkStructure = chunk.GetChunkStructure();
+            auto index = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             if (index < 0)
                 return false;
             component = (T*)chunk.GetComponentData(index);
@@ -72,8 +74,9 @@ namespace PNC::Routing
     {
     public:
         using Base_t = SetAlgorithmChunkBase<TChunkPointer>;
+        using Self_t = SetAlgorithmChunk<TChunkPointer>;
         using ChunkPointer_t = TChunkPointer;
-        using ChunkType_t = typename ChunkPointer_t::ChunkType_t;
+        using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
         using Size_t = typename ChunkPointer_t::Size_t;
 
 
@@ -84,14 +87,15 @@ namespace PNC::Routing
         }
     };
 
-    template<typename TChunkType>
-    struct SetAlgorithmChunk<KChunkTreePointerT<TChunkType>> : public SetAlgorithmChunkBase<KChunkTreePointerT<TChunkType>>
+    template<typename TChunkStructure>
+    struct SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>> : public SetAlgorithmChunkBase<KChunkTreePointerT<TChunkStructure>>
     {
     public:
-        using Base_t = SetAlgorithmChunkBase<KChunkTreePointerT<TChunkType>>;
-        using ChunkType_t = TChunkType;
-        using Size_t = typename ChunkType_t::Size_t;
-        using ChunkPointer_t = KChunkTreePointerT<ChunkType_t>;
+        using Base_t = SetAlgorithmChunkBase<KChunkTreePointerT<TChunkStructure>>;
+        using Self_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
+        using ChunkStructure_t = TChunkStructure;
+        using Size_t = typename ChunkStructure_t::Size_t;
+        using ChunkPointer_t = KChunkTreePointerT<ChunkStructure_t>;
 
         SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
             :Base_t(chunkPointer)
@@ -104,8 +108,8 @@ namespace PNC::Routing
             if (this->ChunkPointer->GetParentChunk() == nullptr)
                 return false;
             auto& parentChunk = this->ChunkPointer->GetParentChunk()->GetChunk();
-            const auto& chunkType = parentChunk.GetChunkType();
-            auto index = chunkType.GetComponentTypeIndexInChunk(&typeid(T));
+            const auto& chunkStructure = parentChunk.GetChunkStructure();
+            auto index = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             if (index < 0)
                 return false;
             component = (T*)parentChunk.GetComponentData(index);
@@ -124,15 +128,16 @@ namespace PNC::Routing
         }
     };
 
-    template<typename TChunkType, typename TChunkPointerElement>
-    struct SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkType, TChunkPointerElement>> : public SetAlgorithmChunk<KChunkTreePointerT<TChunkType>>
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    struct SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>> : public SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>
     {
     public:
-        using Base_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkType>>;
-        using ChunkType_t = TChunkType;
+        using Base_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
+        using Self_t = SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>>;
+        using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
-        using Size_t = typename TChunkType::Size_t;
-        using ChunkPointer_t = KChunkArrayTreePointerT<ChunkType_t, ChunkPointerElement_t>;
+        using Size_t = typename TChunkStructure::Size_t;
+        using ChunkPointer_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>;
 
         SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
             :Base_t(chunkPointer)

@@ -11,40 +11,40 @@
 
 namespace PNC
 {
-    template<typename TChunkType>
-    const KindPointerT<TChunkType>::Chunk_t& KindPointerT<TChunkType>::GetChunk()const
+    template<typename TChunkStructure>
+    const KindPointerT<TChunkStructure>::Chunk_t& KindPointerT<TChunkStructure>::GetChunk()const
     {
         switch (this->Kind)
         {
         case ChunkKind_Chunk:
         case ChunkKind_ChunkArray:
-            return reinterpret_cast<const KChunkPointerT<TChunkType>*>(this)->GetChunk();
+            return reinterpret_cast<const KChunkPointerT<TChunkStructure>*>(this)->GetChunk();
         case ChunkKind_ChunkTree:
         case ChunkKind_ChunkArrayTree:
-            return reinterpret_cast<const KChunkTreePointerT<TChunkType>*>(this)->GetChunk();
+            return reinterpret_cast<const KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
         checkNoEntry();
         return *(Chunk_t*)nullptr;
     }
 
-    template<typename TChunkType>
-    KindPointerT<TChunkType>::Chunk_t& KindPointerT<TChunkType>::GetChunk()
+    template<typename TChunkStructure>
+    KindPointerT<TChunkStructure>::Chunk_t& KindPointerT<TChunkStructure>::GetChunk()
     {
         switch (this->Kind)
         {
         case ChunkKind_Chunk:
         case ChunkKind_ChunkArray:
-            return reinterpret_cast<KChunkPointerT<TChunkType>*>(this)->GetChunk();
+            return reinterpret_cast<KChunkPointerT<TChunkStructure>*>(this)->GetChunk();
         case ChunkKind_ChunkTree:
         case ChunkKind_ChunkArrayTree:
-            return reinterpret_cast<KChunkTreePointerT<TChunkType>*>(this)->GetChunk();
+            return reinterpret_cast<KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
         checkNoEntry();
         return *(Chunk_t*)nullptr;
     }
 
-    template<typename TChunkType>
-    const KindPointerT<TChunkType>::ChunkArray_t& KindPointerT<TChunkType>::GetChunkArray()const
+    template<typename TChunkStructure>
+    const KindPointerT<TChunkStructure>::ChunkArray_t& KindPointerT<TChunkStructure>::GetChunkArray()const
     {
         switch (this->Kind)
         {
@@ -57,14 +57,14 @@ namespace PNC
             checkNoEntry();
             break;
         case ChunkKind_ChunkArrayTree:
-            return reinterpret_cast<const KChunkTreePointerT<TChunkType>*>(this)->GetChunk();
+            return reinterpret_cast<const KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
         checkNoEntry();
         return *(ChunkArray_t*)nullptr;
     }
 
-    template<typename TChunkType>
-    KindPointerT<TChunkType>::ChunkArray_t& KindPointerT<TChunkType>::GetChunkArray()
+    template<typename TChunkStructure>
+    KindPointerT<TChunkStructure>::ChunkArray_t& KindPointerT<TChunkStructure>::GetChunkArray()
     {
         switch (this->Kind)
         {

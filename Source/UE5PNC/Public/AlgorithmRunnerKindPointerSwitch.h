@@ -13,23 +13,23 @@ namespace PNC
     /// It will retreive the pointed Chunk according to the kind of KindPointer and
     /// execute the algorithm using the appropriate AlgorithmRunner Chunk/ChunkArray
     /// </summary>
-    /// <typeparam name="TChunkType"></typeparam>
+    /// <typeparam name="TChunkStructure"></typeparam>
     /// <typeparam name="TAlgorithm"></typeparam>
-    template<typename TChunkType, typename TAlgorithm>
+    template<typename TChunkStructure, typename TAlgorithm>
     struct AlgorithmRunnerKindPointerSwitch
     {
     public:
-        using Self_t = AlgorithmRunnerKindPointerSwitch<TChunkType, TAlgorithm>;
-        using ChunkType_t = TChunkType;
+        using Self_t = AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>;
+        using ChunkStructure_t = TChunkStructure;
         using Algorithm_t = TAlgorithm;
-        using Size_t = typename ChunkType_t::Size_t;
-        using KindPointer_t = KindPointerT<ChunkType_t>;
-        using ChunkPointer_t = ChunkPointerT<ChunkType_t>;
-        using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkType_t, ChunkPointer_t>;
-        using KChunkPointer_t = KChunkPointerT<ChunkType_t>;
-        using KChunkArrayPointer_t = KChunkArrayPointerT<ChunkType_t, ChunkPointer_t>;
-        using KChunkTreePointer_t = KChunkTreePointerT<ChunkType_t>;
-        using KChunkArrayTreePointer_t = KChunkArrayTreePointerT<ChunkType_t, ChunkPointer_t>;
+        using Size_t = typename ChunkStructure_t::Size_t;
+        using KindPointer_t = KindPointerT<ChunkStructure_t>;
+        using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
+        using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkPointer_t = KChunkPointerT<ChunkStructure_t>;
+        using KChunkArrayPointer_t = KChunkArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkTreePointer_t = KChunkTreePointerT<ChunkStructure_t>;
+        using KChunkArrayTreePointer_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointer_t>;
 
     public:
         /// <summary>

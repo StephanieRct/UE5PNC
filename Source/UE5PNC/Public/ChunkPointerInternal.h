@@ -10,20 +10,20 @@ namespace PNC
     /// A ChunkPointerInternal points to a chunk's component data memory within a range of nodes.
     /// Used to get read-write access to a ChunkPointer's data fields.
     /// </summary>
-    /// <typeparam name="TChunkType">Structure of the chunk's component data.</typeparam>
-    template<typename TChunkType>
+    /// <typeparam name="TChunkStructure">Structure of the chunk's component data.</typeparam>
+    template<typename TChunkStructure>
     struct ChunkPointerInternalT
     {
     public:
-        using Self_t = ChunkPointerInternalT<TChunkType>;
-        using ChunkType_t = TChunkType;
-        using Size_t = typename ChunkType_t::Size_t;
+        using Self_t = ChunkPointerInternalT<TChunkStructure>;
+        using ChunkStructure_t = TChunkStructure;
+        using Size_t = typename ChunkStructure_t::Size_t;
 
     public:
         /// <summary>
-        /// ChunkType used to create the structure of what ComponentData points to.
+        /// ChunkStructure used to create the structure of what ComponentData points to.
         /// </summary>
-        const ChunkType_t* Type;
+        const ChunkStructure_t* Structure;
 
         /// <summary>
         /// Points to an array of component data pointers.
@@ -37,25 +37,25 @@ namespace PNC
 
     public:
         /// <summary>
-        /// Create a null ChunkRefT without chunk type.
+        /// Create a null ChunkRefT without structure nor data.
         /// IsNull() will evaluate to true.
         /// </summary>
         ChunkPointerInternalT()
-            : Type(nullptr)
+            : Structure(nullptr)
             , ComponentData(nullptr)
             , NodeCount(0)
         {
         }
 
-        ChunkPointerInternalT(const ChunkType_t* chunkType, Size_t nodeCount, void** componentData)
-            : Type(chunkType)
+        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
+            : Structure(chunkStructure)
             , ComponentData(componentData)
             , NodeCount(nodeCount)
         {
         }
 
-        ChunkPointerInternalT(const ChunkType_t* chunkType, Size_t nodeCount)
-            : Type(chunkType)
+        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, Size_t nodeCount)
+            : Structure(chunkStructure)
             , ComponentData(nullptr)
             , NodeCount(nodeCount)
         {
@@ -63,10 +63,10 @@ namespace PNC
 
     public:
         /// <summary>
-        /// Test if the chunk is null and has no type nor component data.
+        /// Test if the chunk is null and has no structure nor component data.
         /// </summary>
         /// <returns></returns>
-        bool IsNull()const { return this->Type == nullptr; }
+        bool IsNull()const { return this->Structure == nullptr; }
 
         /// <summary>
         /// Get the size of the chunk.
@@ -77,9 +77,9 @@ namespace PNC
         Size_t GetNodeCount()const { return this->NodeCount; }
 
         /// <summary>
-        /// Get the chunk type of this chunk
+        /// Get the ChunkStructure of this chunk
         /// </summary>
         /// <returns></returns>
-        const ChunkType_t& GetChunkType()const { return *this->Type; }
+        const ChunkStructure_t& GetChunkStructure()const { return *this->Structure; }
     };
 }

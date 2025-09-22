@@ -13,15 +13,15 @@ namespace PNC
     /// A KTreePointer is a KindPointer that is part of a Tree of Chunks
     /// A KTreePointer is non-copyable as it may be pointed to by other KTreePointers
     /// </summary>
-    /// <typeparam name="TChunkType">Structure of the Chunk's Component data.</typeparam>
-    template<typename TChunkType>
-    struct KTreePointerT : public KindPointerT<TChunkType>
+    /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
+    template<typename TChunkStructure>
+    struct KTreePointerT : public KindPointerT<TChunkStructure>
     {
     public:
-        using Base_t = KindPointerT<TChunkType>;
-        using Self_t = KTreePointerT<TChunkType>;
-        using ChunkType_t = TChunkType;
-        using Size_t = typename ChunkType_t::Size_t;
+        using Base_t = KindPointerT<TChunkStructure>;
+        using Self_t = KTreePointerT<TChunkStructure>;
+        using ChunkStructure_t = TChunkStructure;
+        using Size_t = typename ChunkStructure_t::Size_t;
 
     protected:
         using ChunkTreeNode_t = ChunkTreeNodeT<Self_t>;

@@ -23,7 +23,7 @@
 #include "common.h"
 #include "ComponentType.h"
 #include "ComponentTypeSet.h"
-#include "ChunkType.h"
+#include "ChunkStructure.h"
 #include "ChunkPointer.h"
 #include "ChunkAllocation.h"
 #include "ChunkArrayPointer.h"
@@ -42,27 +42,27 @@ namespace PNC
     using Size_t = int32;
     using ComponentType = ComponentTypeT<Size_t>;
     using ComponentTypeSet = ComponentTypeSetT<Size_t>;
-    using ChunkType = ChunkTypeT<Size_t>;
+    using ChunkStructure = ChunkStructureT<Size_t>;
 
-    using ChunkPointer = ChunkPointerT<ChunkType>;
-    using Chunk = ChunkAllocationT<ChunkPointerT<ChunkType>>;
+    using ChunkPointer = ChunkPointerT<ChunkStructure>;
+    using Chunk = ChunkAllocationT<ChunkPointerT<ChunkStructure>>;
 
-    using ChunkArrayPointer = ChunkArrayPointerT<ChunkType, ChunkPointer>;
+    using ChunkArrayPointer = ChunkArrayPointerT<ChunkStructure, ChunkPointer>;
     using ChunkArray = ChunkArrayAllocationT<ChunkArrayPointer>;
 
-    using KChunkTreePointer = KChunkTreePointerT<ChunkType>;
+    using KChunkTreePointer = KChunkTreePointerT<ChunkStructure>;
     using KChunkTree = ChunkAllocationT<KChunkTreePointer>;
 
-    using KChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkType, ChunkPointer>;
+    using KChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkStructure, ChunkPointer>;
     using KChunkArrayTree = ChunkArrayAllocationT< KChunkArrayTreePointer>;
 
     template<typename TAlgorithm>
     using AlgorithmRouter = Routing::AlgorithmRouterT<TAlgorithm>;
     template<typename TAlgorithm>
-    using AlgorithmCacheRouter = Routing::AlgorithmCacheRouterT<TAlgorithm, ChunkType, Size_t>;
+    using AlgorithmCacheRouter = Routing::AlgorithmCacheRouterT<TAlgorithm, ChunkStructure, Size_t>;
 
     template<typename TPipeline>
-    using Pipeline = PipelineT<TPipeline, ChunkType, Size_t>;
+    using Pipeline = PipelineT<TPipeline, ChunkStructure, Size_t>;
 
     using CoParentInChunk = CoParentInChunkT<Size_t>;
     using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
