@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 #include "KChunkTreePointer.h"
-#include "ChunkArrayExtention.h"
+#include "ChunkArrayExtension.h"
 
 namespace PNC
 {
@@ -26,9 +26,12 @@ namespace PNC
         using Size_t = typename ChunkPointerElement_t::Size_t;
         using Chunk_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>; // Structure this pointer points to
 
+        using ChunkArrayExtension_t = ChunkArrayExtensionT<ChunkStructure_t, ChunkPointerElement_t>;
+        using ChunkPointerInternal_t = ChunkArrayPointerT<TChunkStructure>::ChunkPointerInternal_t;
+        using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
+
     protected:
-        using ChunkArrayExtention_t = ChunkArrayExtentionT<ChunkStructure_t, ChunkPointerElement_t>;
-        ChunkArrayExtention_t Array;
+        ChunkArrayExtension_t Array;
 
     public:
         /// <summary>
@@ -75,7 +78,14 @@ namespace PNC
         Chunk_t& operator*() { return GetChunk(); }
         const Chunk_t* operator->()const { return &GetChunk(); }
         Chunk_t* operator->() { return &GetChunk(); }
+        
         const Chunk_t& GetChunk()const { return (const Chunk_t&)Base_t::GetChunk(); }
         Chunk_t& GetChunk() { return (Chunk_t&)Base_t::GetChunk(); }
+
+        Size_t GetChunkCount()const { return Array.ChunkCount; }
+
+    protected:
+        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+        ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
     };
 }

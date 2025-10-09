@@ -43,6 +43,17 @@ namespace PNC
         /// </summary>
         ChunkPointer_t* NextSibling = nullptr;
 
+    public:
+        ChunkTreeNodeT() = default;
+        //ChunkTreeNodeT(Self_t&& o)
+        //    : Parent(o.Parent)
+        //    , FirstChild(o.FirstChild)
+        //    , PreviousSibling(o.PreviousSibling)
+        //    , NextSibling(o.NextSibling)
+        //{
+        //    o = Self_t();
+        //}
+        
         /// <summary>
         /// If it is not part of any tree.
         /// </summary>

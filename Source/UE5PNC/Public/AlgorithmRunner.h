@@ -14,7 +14,20 @@ namespace PNC
     /// <typeparam name="TAlgorithm"></typeparam>
     /// <typeparam name="TKChunkPointer"></typeparam>
     template<typename TChunkStructure, typename TAlgorithm, typename TKChunkPointer = KindPointerT<TChunkStructure>>
-    struct AlgorithmRunner : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
+    struct AlgorithmRunner 
+        : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
+    {
+    };
+
+    template<typename TChunkStructure, typename TAlgorithm>
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkPointerT<TChunkStructure>> 
+        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>>
+    {
+    };
+
+    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> 
+        : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>
     {
     };
 }

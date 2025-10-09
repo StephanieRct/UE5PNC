@@ -7,15 +7,15 @@
 namespace PNC
 {
     /// <summary>
-    /// Extent a ChunkPointer to include the required data field to point to an array of chunks.
+    /// Extend a ChunkPointer to include the required data field to point to an array of chunks.
     /// </summary>
     /// <typeparam name="TChunkStructure">Structure of the chunk's component data.</typeparam>
     /// <typeparam name="TChunkPointerElement">Structure of the chunk pointer in the array.</typeparam>
     template<typename TChunkStructure, typename TChunkPointerElement>
-    struct ChunkArrayExtentionT
+    struct ChunkArrayExtensionT
     {
     public:
-        using Self = ChunkArrayExtentionT<TChunkStructure, TChunkPointerElement>;
+        using Self = ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>;
         using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename ChunkStructure_t::Size_t;
@@ -36,7 +36,7 @@ namespace PNC
         /// Create a null pointer.
         /// </summary>
         /// <param name="chunkCount"></param>
-        ChunkArrayExtentionT(Size_t chunkCount = 0)
+        ChunkArrayExtensionT(Size_t chunkCount = 0)
             : Chunks(nullptr)
             , ChunkCount(chunkCount)
         {
@@ -47,7 +47,7 @@ namespace PNC
         /// </summary>
         /// <param name="chunks">Array of ChunkPointerElement_t with at least chunkCount elements.</param>
         /// <param name="chunkCount">Number of chunk in chunks array</param>
-        ChunkArrayExtentionT(ChunkPointerElement_t* chunks, Size_t chunkCount)
+        ChunkArrayExtensionT(ChunkPointerElement_t* chunks, Size_t chunkCount)
             : Chunks(chunks)
             , ChunkCount(chunkCount)
         {

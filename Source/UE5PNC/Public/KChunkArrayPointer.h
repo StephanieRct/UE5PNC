@@ -26,16 +26,19 @@ namespace PNC
         using Size_t = typename ChunkStructure_t::Size_t;
         using Chunk_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>; // The type this pointer is pointing to
 
-        /// <summary>
-        /// Use the same ChunkArrayExtention_t as ChunkArrayPointerT so both keep the same memory layout.
-        /// </summary>
-        using ChunkArrayExtention_t = typename ChunkArrayPointerT<ChunkStructure_t, TChunkPointerElement>::ChunkArrayExtention_t;
+        using ChunkArrayPointer = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;
 
+        /// <summary>
+        /// Use the same ChunkArrayExtension_t as ChunkArrayPointerT so both keep the same memory layout.
+        /// </summary>
+        using ChunkArrayExtension_t = ChunkArrayPointer::ChunkArrayExtension_t;
+
+        using ChunkPointerInternal_t = ChunkArrayPointer::ChunkPointerInternal_t;
     protected:
         /// <summary>
         /// Contains pointer to the array of Chunks
         /// </summary>
-        ChunkArrayExtention_t Array;
+        ChunkArrayExtension_t Array;
 
     public:
         /// <summary>
@@ -74,5 +77,8 @@ namespace PNC
         Chunk_t* operator->() { return &GetChunk(); }
         const Chunk_t& GetChunk()const { return (const Chunk_t&)Base_t::GetChunk(); }
         Chunk_t& GetChunk() { return (Chunk_t&)Base_t::GetChunk(); }
+
+    protected:
+        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
     };
 }

@@ -47,7 +47,7 @@ namespace PNC
         {
             auto& chunk = *chunkPointer;
             assert(!chunk.IsNull());
-            const auto* chunkStructure = &chunk.GetChunkStructure();
+            const auto* chunkStructure = &chunk.GetStructure();
             if (!Match(chunkStructure))
                 return false;
             Impl()->Execute(chunkPointer);

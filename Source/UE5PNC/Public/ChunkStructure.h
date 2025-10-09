@@ -15,7 +15,7 @@ namespace PNC
     struct ChunkStructureT 
     {
     public:
-        using Self = ChunkStructureT<TSize>;
+        using Self_t = ChunkStructureT<TSize>;
         using Size_t = TSize;
         using ComponentTypeSet_t = ComponentTypeSetT<TSize>;
         using ComponentType_t = typename ComponentTypeSet_t::ComponentType_t;
@@ -26,17 +26,81 @@ namespace PNC
         /// </summary>
         ComponentTypeSet_t Components;
 
+        std::vector<Size_t> DefaultConstructibleNodeIndex;
+        std::vector<Size_t> DefaultConstructibleChunkIndex;
+        std::vector<Size_t> DestructibleNodeIndex;
+        std::vector<Size_t> DestructibleChunkIndex;
+    public:
+
+        ChunkStructureT(const ComponentType_t* component) :Components(component) 
+        {
+            Update();
+        }
         /// <summary>
         /// Create a ChunkStructure from a list of ComponentType
         /// </summary>
         /// <param name="components"></param>
-        ChunkStructureT(std::initializer_list<const ComponentType_t*> components) :Components(components) {}
+        ChunkStructureT(std::initializer_list<const ComponentType_t*> components) 
+            :Components(components) 
+        {
+            Update();
+        }
+
+        ChunkStructureT(std::vector<const ComponentType_t*>&& types)
+            :Components(std::move(types))
+        {
+            Update();
+        }
+
+        bool operator==(const Self_t& other)const { return IsSame(other); }
+        bool operator!=(const Self_t& other)const { return !IsSame(other); }
+
+    public:
+
+        Size_t GetComponentCount() const { return Components.GetSize(); }
 
         /// <summary>
         /// Get the index of a component type in the ComponentTypeSet of this ChunkStructure
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        int GetComponentTypeIndexInChunk(const type_info* type)const { return Components.GetComponentTypeIndexInChunk(type); }
+        Size_t GetComponentTypeIndexInChunk(const type_info* type)const { return Components.GetComponentTypeIndexInChunk(type); }
+
+        /// <summary>
+        /// If both structures are equal
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        bool IsSame(const Self_t& other)const
+        {
+            return Components.IsSame(other.Components);
+        }
+
+    public:
+        struct Hasher_t
+        {
+            std::size_t operator()(const Self_t* a) const
+            {
+                return a ? a->Components.GetHash() : (std::numeric_limits< std::size_t>::max() >> 1);
+            }
+        };
+        struct Equaller_t
+        {
+            bool operator()(const Self_t* a, const Self_t* b) const
+            {
+                if (!a)
+                    return !b;
+                if (!b) return false;
+                return a->IsSame(*b);
+            }
+        };
+    protected:
+        void Update() 
+        {
+            Components.SubSetIndex(&DefaultConstructibleNodeIndex, [](const ComponentType_t* c) { return c->IsUserConstructible() && c->IsNodeComponent(); });
+            Components.SubSetIndex(&DestructibleNodeIndex, [](const ComponentType_t* c) { return c->IsUserDestructible() && c->IsNodeComponent(); });
+            Components.SubSetIndex(&DefaultConstructibleChunkIndex, [](const ComponentType_t* c) { return c->IsUserConstructible() && c->IsChunkComponent(); });
+            Components.SubSetIndex(&DestructibleChunkIndex, [](const ComponentType_t* c) { return c->IsUserDestructible() && c->IsChunkComponent(); });
+        }
     };
 }

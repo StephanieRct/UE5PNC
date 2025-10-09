@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 #include "ChunkPointerInternal.h"
-#include "ChunkArrayExtention.h"
+#include "ChunkArrayExtension.h"
 
 namespace PNC
 {
@@ -25,9 +25,9 @@ namespace PNC
         using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename ChunkStructure_t::Size_t;
-        using ChunkArrayExtention_t = ChunkArrayExtentionT<ChunkStructure_t, ChunkPointerElement_t>;
+        using ChunkArrayExtension_t = ChunkArrayExtensionT<ChunkStructure_t, ChunkPointerElement_t>;
 
     public:
-        ChunkArrayExtention_t Array;
+        ChunkArrayExtension_t Array;
     };
 }

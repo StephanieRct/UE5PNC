@@ -65,7 +65,7 @@ namespace PNC::Routing
         bool Component(T*& component)
         {
             auto& chunk = this->ChunkPointer->GetChunk();
-            const auto& chunkStructure = chunk.GetChunkStructure();
+            const auto& chunkStructure = chunk.GetStructure();
             auto componentTypeIndexInChunk = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             Route->AddRoute(componentTypeIndexInChunk);
 
@@ -109,7 +109,7 @@ namespace PNC::Routing
             auto componentTypeIndexInChunk = (*Route)[CurrentComponentRoute];
             ++CurrentComponentRoute;
             // Make sure the cache is valid
-            //assert(componentTypeIndexInChunk == Chunk->GetChunkStructure().GetComponentTypeIndexInChunk(&typeid(T)));
+            //assert(componentTypeIndexInChunk == Chunk->GetStructure().GetComponentTypeIndexInChunk(&typeid(T)));
 
             if (componentTypeIndexInChunk == (Size_t)-1)
                 return false;
@@ -169,7 +169,7 @@ namespace PNC::Routing
             using AlgorithmRouteWithCache_t = RouteAlgorithmWithCacheT<TChunkPointer, Size_t>;
             //TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("Routing"));
             auto& chunk = *chunkPointer;
-            const ChunkStructure_t* chunkStructure = &chunk.GetChunkStructure();
+            const ChunkStructure_t* chunkStructure = &chunk.GetStructure();
 
             typename Map_t::iterator i = Cache.find(chunkStructure);
             if (i == Cache.end())

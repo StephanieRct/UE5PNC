@@ -3,6 +3,7 @@
 
 #pragma once
 #include "common.h"
+#include <atomic>
 
 namespace PNC
 {
@@ -47,6 +48,17 @@ namespace PNC
         {
         }
 
+        ChunkPointerInternalT(const Self_t& o) = default;
+        ChunkPointerInternalT(Self_t&& o)
+            : Structure(o.Structure)
+            , ComponentData(o.ComponentData)
+            , NodeCount(o.NodeCount)
+        {
+            o.Structure = nullptr;
+            o.ComponentData = nullptr;
+            o.NodeCount = 0;
+        }
+
         ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
             : Structure(chunkStructure)
             , ComponentData(componentData)
@@ -76,10 +88,19 @@ namespace PNC
         /// <returns>The capacity of the chunk</returns>
         Size_t GetNodeCount()const { return this->NodeCount; }
 
+        Size_t GetChunkCount()const { return 1; }
+        
         /// <summary>
         /// Get the ChunkStructure of this chunk
         /// </summary>
         /// <returns></returns>
-        const ChunkStructure_t& GetChunkStructure()const { return *this->Structure; }
+        const ChunkStructure_t& GetStructure()const { return *this->Structure; }
+
+        void* GetComponentData(const Size_t componentTypeIndexInChunk)
+        {
+            assert_pnc(!IsNull());
+            return this->ComponentData[componentTypeIndexInChunk];
+        }
+
     };
 }

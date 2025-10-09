@@ -24,11 +24,6 @@ namespace PNC
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename TChunkStructure::Size_t;
 
-        /// <summary>
-        /// Reinterprete_cast this object to this type to get read-write access to it's private data fields
-        /// Use with caution.
-        /// </summary>
-        using Internal_t = ChunkArrayPointerInternalT<ChunkStructure_t, TChunkPointerElement>;
 
         /// <summary>
         /// Chunk_t is the type a ChunkPointer points to
@@ -36,15 +31,23 @@ namespace PNC
         using Chunk_t = Self_t;
 
         /// <summary>
-        /// Use the same ChunkArrayExtention_t as ChunkArrayPointerInternalT so both keep the same memory layout.
+        /// Use the same ChunkArrayExtension_t as ChunkArrayPointerInternalT so both keep the same memory layout.
         /// </summary>
-        using ChunkArrayExtention_t = typename ChunkArrayPointerInternalT<ChunkStructure_t, TChunkPointerElement>::ChunkArrayExtention_t;
+        using ChunkArrayExtension_t = typename ChunkArrayPointerInternalT<ChunkStructure_t, TChunkPointerElement>::ChunkArrayExtension_t;
+
+        /// <summary>
+        /// Reinterprete_cast this object to this type to get read-write access to it's private data fields
+        /// Use with caution.
+        /// </summary>
+        using ChunkPointerInternal_t = ChunkArrayPointerInternalT<ChunkStructure_t, TChunkPointerElement>;
+
+        using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
 
     protected:
         /// <summary>
         /// Contains pointer to the array of Chunks
         /// </summary>
-        ChunkArrayExtention_t Array;
+        ChunkArrayExtension_t Array;
 
     public:
         /// <summary>
@@ -71,7 +74,7 @@ namespace PNC
         }
 
     protected:
-        ChunkArrayPointerT(const ChunkStructure_t* chunkStructure, Size_t totalNodeCount, Size_t chunkCount = 0)
+        ChunkArrayPointerT(const ChunkStructure_t* chunkStructure, Size_t totalNodeCount, Size_t chunkCount)
             : Base_t(chunkStructure, totalNodeCount)
             , Array(chunkCount)
         {
@@ -94,5 +97,11 @@ namespace PNC
         Chunk_t* operator->() { return this; }
         const Chunk_t& GetChunk()const { return *this; }
         Chunk_t& GetChunk() { return *this; }
+
+    protected:
+        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+        ChunkPointerElementInternal_t GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
+        const ChunkArrayExtension_t& GetArrayExtension()const { return Array; }
+        ChunkArrayExtension_t& GetArrayExtension() { return Array; }
     };
 }

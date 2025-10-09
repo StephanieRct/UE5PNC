@@ -21,7 +21,7 @@ namespace PNC
         using ChunkPointerElement_t = typename TBase::ChunkPointerElement_t;
 
     protected:
-        using Internal_t = ChunkArrayPointerInternalT<ChunkStructure_t, ChunkPointerElement_t>;
+        using ChunkPointerInternal_t = ChunkArrayPointerInternalT<ChunkStructure_t, ChunkPointerElement_t>;
 
     protected:
         /// <summary>
@@ -44,15 +44,7 @@ namespace PNC
         {
         }
 
-        /// <summary>
-        /// Allocate a Chunk Array with a maximum number of Chunks and Nodes per Chunks.
-        /// </summary>
-        /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
-        /// <param name="nodeCapacityPerChunk">Maximum number of Nodes each Chunks in the Array can grow to.</param>
-        /// <param name="chunkCapacity">Maximum number of Chunks this Array can grow to.</param>
-        /// <param name="chunkCount">Number of valid Chunks in the Array.</param>
-        /// <param name="nodeCountPerChunk">Number of valid Nodes in each Chunks in the Array.</param>
-        ChunkArrayAllocationT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount = 0, Size_t nodeCountPerChunk = 0)
+        ChunkArrayAllocationT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacityPerChunk, Size_t chunkCapacity, Size_t chunkCount, Size_t nodeCountPerChunk)
             : Base_t(chunkStructure, chunkCapacity * nodeCapacityPerChunk, chunkCount)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
             , ChunkCapacity(chunkCapacity)
@@ -123,7 +115,7 @@ namespace PNC
 
 
     protected:
-        Internal_t& GetInternalChunk() { return (Internal_t&)this->GetChunk(); }
+        ChunkPointerInternal_t& GetInternalChunk() { return (ChunkPointerInternal_t&)this->GetChunk(); }
 
         void CopyChunkArray(const Self_t& o)
         {
@@ -137,10 +129,10 @@ namespace PNC
             auto& chunk = GetInternalChunk();
             if (chunk.IsNull())
                 for (int i = 0; i < ChunkCapacity; ++i)
-                    chunk.Array.Chunks[i] = ChunkPointerElement_t::Null();
+                    new(&chunk.Array.Chunks[i])ChunkPointerElement_t();
             else
                 for (int i = 0; i < ChunkCapacity; ++i)
-                    chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Structure, nodeCountPerChunk, GetComponentDataForChunk(i));
+                    new(&chunk.Array.Chunks[i])ChunkPointerElement_t(chunk.Structure, nodeCountPerChunk, GetComponentDataForChunk(i));
         }
 
         void** GetComponentDataForChunk(Size_t chunkIndex)
@@ -191,7 +183,7 @@ namespace PNC
 
         void AllocateDataCopy(const Self_t& o)
         {
-            auto& chunk = (Internal_t&)GetInternalChunk();
+            auto& chunk = (ChunkPointerInternal_t&)GetInternalChunk();
             assert_pnc(!chunk.IsNull());
             assert_pnc(chunk.IsSameChunkStructure(*this, o));
             auto componentCount = chunk.Structure->Components.GetSize();

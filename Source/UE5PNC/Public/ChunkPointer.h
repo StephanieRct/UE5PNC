@@ -2,6 +2,8 @@
 // Copyright (c) 2025 Stephanie Rancourt
 
 #pragma once
+#include "common.h"
+#include "Node.h"
 #include "ChunkPointerInternal.h"
 
 namespace PNC
@@ -13,24 +15,27 @@ namespace PNC
     /// </summary>
     /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
     template<typename TChunkStructure>
-    struct ChunkPointerT : private ChunkPointerInternalT<TChunkStructure>
+    struct ChunkPointerT : protected ChunkPointerInternalT<TChunkStructure>
     {
     public:
         using Base_t = ChunkPointerInternalT<TChunkStructure>;
         using Self_t = ChunkPointerT<TChunkStructure>;
         using ChunkStructure_t = TChunkStructure;
+        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
         using Size_t = typename ChunkStructure_t::Size_t;
+        using ChunkPointer_t = Self_t;
+        using Node_t = NodeT<TChunkStructure>;
 
         /// <summary>
         /// Reinterprete_cast this object to this type to get read-write access to its private data fields
         /// Use with caution.
         /// </summary>
-        using Internal_t = ChunkPointerInternalT<TChunkStructure>;
+        using ChunkPointerInternal_t = ChunkPointerInternalT<TChunkStructure>;
 
         /// <summary>
         /// Chunk_t is the type a ChunkPointer points to
         /// </summary>
-        using Chunk_t = ChunkPointerT; 
+        using Chunk_t = ChunkPointerT;
 
     public:
         /// <summary>
@@ -43,26 +48,47 @@ namespace PNC
         }
 
         /// <summary>
+        /// Implicit construction from internal conterpart.
+        /// </summary>
+        /// <param name="chunkPointerInternal"></param>
+        ChunkPointerT(const ChunkPointerInternal_t& chunkPointerInternal)
+            : Base_t(chunkPointerInternal)
+        {
+        }
+
+        /// <summary>
+        /// Implicit construction from internal conterpart.
+        /// </summary>
+        /// <param name="chunkPointerInternal"></param>
+        ChunkPointerT(const ChunkPointerInternal_t&& chunkPointerInternal)
+            : Base_t(chunkPointerInternal)
+        {
+        }
+
+        ChunkPointerT(Self_t&& o) = default;
+
+        /// <summary>
         /// Contructs from its member data fields.
         /// </summary>
         /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
         /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
         /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
-        ChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
+        ChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void** const componentData)
             : Base_t(chunkStructure, nodeCount, componentData)
         {
         }
 
     protected:
-        ChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCount)
-            : Base_t(chunkStructure, nullptr, nodeCount)
+        ChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount)
+            : Base_t(chunkStructure, nodeCount)
         {
         }
 
     public:
         using Base_t::IsNull;
+        using Base_t::GetStructure;
         using Base_t::GetNodeCount;
-        using Base_t::GetChunkStructure;
+        using Base_t::GetChunkCount;
 
         /// <summary>
         /// Create a null chunk without structure nor component data.
@@ -86,7 +112,7 @@ namespace PNC
         /// </summary>
         /// <param name="componentIndexInChunk">index in the ChunkStructure::Components ComponentTypeSet</param>
         /// <returns>Pointer to the component memory array</returns>
-        void* GetComponentData(Size_t componentTypeIndexInChunk)
+        void* GetComponentData(const Size_t componentTypeIndexInChunk)
         {
             assert_pnc(!IsNull());
             return this->ComponentData[componentTypeIndexInChunk];
@@ -98,12 +124,12 @@ namespace PNC
         /// For components with ComponentOwner_Chunk, the array will be of length 1.
         /// This is the fastest way to access the chunk's component data.
         /// </summary>
-        /// <param name="componentIndexInChunk">index in the ChunkStructure::Components ComponentTypeSet</param>
+        /// <param name="componentTypeIndexInChunk">index in the ChunkStructure::Components ComponentTypeSet</param>
         /// <returns>Const pointer to the component memory array</returns>
-        const void* GetComponentData(Size_t componentIndexInChunk)const
+        const void* GetComponentData(const Size_t componentTypeIndexInChunk)const
         {
             assert_pnc(!IsNull());
-            return this->ComponentData[componentIndexInChunk];
+            return this->ComponentData[componentTypeIndexInChunk];
         }
 
         /// <summary>
@@ -115,7 +141,7 @@ namespace PNC
         /// </summary>
         /// <param name="componentType">const type_info* pointer obtained from &typeid(ComponentTypename)</param>
         /// <returns>Pointer to the component memory array</returns>
-        void* GetComponentData(const type_info* componentType)
+        void* GetComponentData(const type_info* const componentType)
         {
             assert_pnc(!IsNull());
             auto index = this->Structure->Components.GetComponentTypeIndexInChunk(componentType);
@@ -133,7 +159,7 @@ namespace PNC
         /// </summary>
         /// <param name="componentType">const type_info* pointer obtained from &typeid(ComponentTypename)</param>
         /// <returns>Const pointer to the component memory array</returns>
-        const void* GetComponentData(const type_info* componentType)const
+        const void* GetComponentData(const type_info* const componentType)const
         {
             assert_pnc(!IsNull());
             auto index = this->Structure->Components.GetComponentTypeIndexInChunk(componentType);
@@ -176,35 +202,15 @@ namespace PNC
         }
 
         /// <summary>
-        /// Copy data between two chunks of the same ChunkStructure.
-        /// Will return -1 if the any chunk is null or not the same ChunkStructure
-        /// </summary>
-        /// <param name="destination">Chunk where to write the data to.</param>
-        /// <param name="source">Chunk where to read the data from.</param>
-        /// <returns>Number of node data copied or -1 if failed.</returns>
-        static Size_t CopyData(ChunkPointerT& destination, const ChunkPointerT& source) {
-            if (destination.IsNull()
-                || source.IsNull()
-                || destination.Structure != source.Structure)
-                return (Size_t)-1;
-            auto chunkStructure = destination.Structure;
-            auto componentCount = chunkStructure->Components.ComponentTypes.size();
-            Size_t count = std::min(destination.GetNodeCount(), source.GetNodeCount());
-            for (Size_t i = 0; i < componentCount; ++i)
-            {
-                auto componentTypeInfo = chunkStructure->Components[i];
-                componentTypeInfo->Copy(destination.ComponentData[i], source.ComponentData[i], count);
-            }
-            destination.NodeCount = count;
-            return count;
-        }
-
-        /// <summary>
         /// Test if 2 chunk have the same ChunkStructure
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
         static bool IsSameChunkStructure(const ChunkPointerT& a, const ChunkPointerT& b) { return a.Structure == b.Structure; }
+
+    protected:
+        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+
     };
 }

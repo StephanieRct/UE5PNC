@@ -34,8 +34,30 @@ namespace PNC
         }
 
     public:
-        KTreePointerT(const KTreePointerT&) = delete;
-        KTreePointerT(const KTreePointerT&&) = delete;
+        KTreePointerT(const KTreePointerT& o)
+            : Base_t(o)
+            , Tree()
+        {
+        }
+        KTreePointerT(const KTreePointerT&& o)
+            : Base_t(o)
+            , Tree(o.Tree)
+        {
+            if(Tree.PreviousSibling)
+                Tree.PreviousSibling->Tree.NextSibling = this;
+            if (Tree.NextSibling)
+                Tree.NextSibling->Tree.PreviousSibling = this;
+            if (Tree.Parent && Tree.Parent->Tree.FirstChild == &o)
+                Tree.Parent->Tree.FirstChild = this;
+            if (Tree.FirstChild)
+                for (auto* c = Tree.FirstChild;;)
+                {
+                    c->Tree.Parent = this;
+                    c = c->Tree.NextSibling;
+                    if (c == Tree.FirstChild)
+                        break;
+                }
+        }
         KTreePointerT& operator=(const KTreePointerT&) = delete;
 
     public:

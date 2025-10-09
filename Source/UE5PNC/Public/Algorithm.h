@@ -22,6 +22,8 @@ namespace PNC
         /// <summary>  
         /// Will execute the algorithm on the chunk if all requirements are fulfilled and return true.
         /// Returns false if the chunk is null or if it doesn't fulfill the algorithm requirements.
+        /// 
+        /// TODO: Add a TryRun(const TChunkPointer& chunkPointer) version.
         /// </summary>
         /// <typeparam name="TChunk">Typename of the chunk to execute the algorithm on.</typeparam>
         /// <param name="chunk">The chunk to execute the algorithm on.</param>
@@ -33,7 +35,12 @@ namespace PNC
         }
 
         template<typename TChunkPointer>
-        void TryRun(TChunkPointer* chunkPointer) = delete;
+        bool TryRun(TChunkPointer* chunkPointer)
+        {
+            if (!chunkPointer)
+                return false;
+            return TryRun(*chunkPointer);
+        }
 
         /// <summary>
         /// Route using a router and execute an algorithm on a chunk if all requirements are fulfilled and return true.
@@ -52,6 +59,8 @@ namespace PNC
         /// <summary>
         /// Will execute the algorithm on a matching chunk.
         /// The chunk must not be null and must match the algorithm or it halt execution
+        /// 
+        /// TODO: Add a Run(const TChunkPointer& chunkPointer) version.
         /// </summary>
         /// <typeparam name="TChunkPointer"></typeparam>
         /// <param name="chunk"></param>
@@ -65,11 +74,21 @@ namespace PNC
         }
 
         template<typename TChunkPointer>
-        void Run(TChunkPointer* chunkPointer) = delete;
+        void Run(TChunkPointer* chunkPointer)
+        {
+            if (!chunkPointer)
+            {
+                checkf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+            }
+            return Run(*chunkPointer);
+        }
+
 
         /// <summary>
         /// Route using a router and execute an algorithm on a chunk
         /// The chunk must not be null and must match the algorithm or it halt execution
+        /// 
+        /// TODO: Add a Run(const TRouter& router, const TChunkPointer& chunkPointer) version.
         /// </summary>
         /// <typeparam name="TRouter"></typeparam>
         /// <typeparam name="TChunkPointer"></typeparam>

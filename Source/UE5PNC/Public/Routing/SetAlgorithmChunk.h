@@ -33,7 +33,7 @@ namespace PNC::Routing
         bool Component(T*& component)
         {
             auto& chunk = ChunkPointer->GetChunk();
-            const auto& chunkStructure = chunk.GetChunkStructure();
+            const auto& chunkStructure = chunk.GetStructure();
             auto index = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             if (index < 0)
                 return false;
@@ -108,7 +108,7 @@ namespace PNC::Routing
             if (this->ChunkPointer->GetParentChunk() == nullptr)
                 return false;
             auto& parentChunk = this->ChunkPointer->GetParentChunk()->GetChunk();
-            const auto& chunkStructure = parentChunk.GetChunkStructure();
+            const auto& chunkStructure = parentChunk.GetStructure();
             auto index = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             if (index < 0)
                 return false;
