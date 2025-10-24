@@ -49,6 +49,8 @@ namespace PNC
         }
 
         ChunkPointerInternalT(const Self_t& o) = default;
+        Self_t& operator=(const Self_t& o) = default;
+
         ChunkPointerInternalT(Self_t&& o)
             : Structure(o.Structure)
             , ComponentData(o.ComponentData)
@@ -57,6 +59,22 @@ namespace PNC
             o.Structure = nullptr;
             o.ComponentData = nullptr;
             o.NodeCount = 0;
+        }
+        Self_t& operator=(Self_t&& o)
+        {
+            Structure = o.Structure;
+            ComponentData = o.ComponentData;
+            NodeCount = o.NodeCount;
+            o.Structure = nullptr;
+            o.ComponentData = nullptr;
+            o.NodeCount = 0;
+        }
+
+        Self_t& Swap(Self_t& o)
+        {
+            std::swap(Structure, o.Structure);
+            std::swap(ComponentData, o.ComponentData);
+            std::swap(NodeCount, o.NodeCount);
         }
 
         ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
@@ -73,12 +91,21 @@ namespace PNC
         {
         }
 
+        ~ChunkPointerInternalT()
+        {
+            pnc_clean(Structure);
+            pnc_clean(ComponentData);
+            pnc_clean(NodeCount);
+        }
     public:
-        /// <summary>
-        /// Test if the chunk is null and has no structure nor component data.
-        /// </summary>
-        /// <returns></returns>
-        bool IsNull()const { return this->Structure == nullptr; }
+        bool IsVoid()const { return Structure == nullptr; }
+        bool IsStruct()const { return Structure != nullptr; }
+        bool IsNull()const { return ComponentData == nullptr; }
+        bool IsData()const { return ComponentData == nullptr; }
+        bool IsVoidNull()const { return Structure == nullptr && ComponentData == nullptr; }
+        bool IsVoidData()const { return Structure == nullptr && ComponentData != nullptr; }
+        bool IsStructNull()const { return Structure != nullptr && ComponentData == nullptr; }
+        bool IsStructData()const { return Structure != nullptr && ComponentData != nullptr; }
 
         /// <summary>
         /// Get the size of the chunk.
@@ -86,7 +113,7 @@ namespace PNC
         /// The size can grow up to the capacity without having to reallocate the component's memory
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
-        Size_t GetNodeCount()const { return this->NodeCount; }
+        Size_t GetNodeCount()const { return NodeCount; }
 
         Size_t GetChunkCount()const { return 1; }
         

@@ -31,8 +31,13 @@ namespace PNC
     using FnDataProcessor = void (*)(void* const base, const TSize firstIndex, const TSize count);
    
     template<typename TSize>
-    using FnDataProcessor2 = void (*)(void* const baseTo, void* const baseFrom, const TSize firstIndexTo, const TSize firstIndexFrom, const TSize count);
+    using FnDataCopy = void (*)(void* const baseTo, const TSize firstIndexTo, const void* const baseFrom, const TSize firstIndexFrom, const TSize count);
 
+    template<typename TSize>
+    using FnDataMove = void (*)(void* const baseTo, const TSize firstIndexTo, void* const baseFrom, const TSize firstIndexFrom, const TSize count);
+
+    template<typename TSize>
+    using FnDataSwap = void (*)(void* const baseTo, const TSize firstIndexTo, void* const baseFrom, const TSize firstIndexFrom, const TSize count);
 
     ////////////////////////////////////////////////////////////////////////////////
     template<typename TSize, typename T, bool THasDefaultConstructor>
@@ -91,26 +96,32 @@ namespace PNC
     struct GetCopyConstructor
     {
     public:
-        static FnDataProcessor<TSize> Get() { return nullptr; }
+        using Size_t = TSize;
+        static FnDataCopy<Size_t> GetForward() { return nullptr; }
+        static FnDataCopy<Size_t> GetBackward() { return nullptr; }
     };
     template<typename TSize, typename T>
     struct GetCopyConstructor<TSize, T, true>
     {
     public:
         using Size_t = TSize;
-        static void Copy(void* const baseTo, void* const baseFrom, const TSize firstIndexTo, const TSize firstIndexFrom, const TSize count)
+        static void CopyForward(void* const baseTo, const TSize firstIndexTo, const void* const baseFrom, const TSize firstIndexFrom, const TSize count)
         {
             T* pTo = (T*)baseTo + firstIndexTo;
-            T* pFrom = (T*)baseFrom + firstIndexFrom;
+            const T* pFrom = (const T*)baseFrom + firstIndexFrom;
             for (Size_t i = 0; i < count; ++i)
-            {
-                new(pTo + i) T(*(pFrom+i));
-            }
+                new(pTo + i) T(*(pFrom + i));
         }
-        static FnDataProcessor2<TSize> Get()
+        static void CopyBackward(void* const baseTo, const Size_t firstIndexTo, const void* const baseFrom, const Size_t firstIndexFrom, const Size_t count)
         {
-            return &Copy;
+            T* pToBegin = (T*)baseTo + firstIndexTo;
+            T* pTo = pToBegin + count;
+            const T* pFrom = (const T*)baseFrom + firstIndexFrom + count;
+            for (pTo; pFrom--, pTo-- > pToBegin;)
+                new(pTo) T(*pFrom);
         }
+        static FnDataCopy<Size_t> GetForward() { return &CopyForward; }
+        static FnDataCopy<Size_t> GetBackward() { return &CopyBackward; }
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -118,26 +129,32 @@ namespace PNC
     struct GetMoveConstructor
     {
     public:
-        static FnDataProcessor<TSize> Get() { return nullptr; }
+        using Size_t = TSize;
+        static FnDataMove<Size_t> GetForward() { return nullptr; }
+        static FnDataMove<Size_t> GetBackward() { return nullptr; }
     };
     template<typename TSize, typename T>
     struct GetMoveConstructor<TSize, T, true>
     {
     public:
         using Size_t = TSize;
-        static void Move(void* const baseTo, void* const baseFrom, const TSize firstIndexTo, const TSize firstIndexFrom, const TSize count)
+        static void MoveForward(void* const baseTo, const TSize firstIndexTo, void* const baseFrom, const TSize firstIndexFrom, const TSize count)
         {
             T* pTo = (T*)baseTo + firstIndexTo;
             T* pFrom = (T*)baseFrom + firstIndexFrom;
             for (Size_t i = 0; i < count; ++i)
-            {
                 new(pTo + i) T(std::move(*(pFrom + i)));
-            }
         }
-        static FnDataProcessor2<TSize> Get()
+        static void MoveBackward(void* const baseTo, const Size_t firstIndexTo, void* const baseFrom, const Size_t firstIndexFrom, const Size_t count)
         {
-            return &Move;
+            T* pToBegin = (T*)baseTo + firstIndexTo;
+            T* pTo = pToBegin + count;
+            T* pFrom = (T*)baseFrom + firstIndexFrom + count;
+            for (pTo; pFrom--, pTo-- > pToBegin;)
+                new(pTo) T(std::move(*(pFrom)));
         }
+        static FnDataMove<Size_t> GetForward() { return &MoveForward; }
+        static FnDataMove<Size_t> GetBackward() { return &MoveBackward; }
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -145,23 +162,31 @@ namespace PNC
     struct GetSwapper
     {
     public:
-        static FnDataProcessor<TSize> Get() { return nullptr; }
+        using Size_t = TSize;
+        static FnDataSwap<Size_t> GetForward() { return nullptr; }
+        static FnDataSwap<Size_t> GetBackward() { return nullptr; }
     };
     template<typename TSize, typename T>
     struct GetSwapper<TSize, T, true>
     {
     public:
         using Size_t = TSize;
-        static void Swap(void* const baseTo, void* const baseFrom, const TSize firstIndexTo, const TSize firstIndexFrom, const TSize count)
+        static void SwapForward(void* const baseTo, const Size_t firstIndexTo, void* const baseFrom, const Size_t firstIndexFrom, const Size_t count)
         {
             T* pTo = (T*)baseTo + firstIndexTo;
             T* pFrom = (T*)baseFrom + firstIndexFrom;
             std::swap_ranges(pTo, pTo + count, pFrom);
         }
-        static FnDataProcessor2<TSize> Get()
+        static void SwapBackward(void* const baseTo, const Size_t firstIndexTo, void* const baseFrom, const Size_t firstIndexFrom, const Size_t count)
         {
-            return &Swap;
+            T* pToBegin = (T*)baseTo + firstIndexTo;
+            T* pTo = pToBegin + count;
+            T* pFrom = (T*)baseFrom + firstIndexFrom + count;
+            for (pTo; pFrom--, pTo-- > pToBegin;)
+                std::swap(*pTo, *pFrom);
         }
+        static FnDataSwap<Size_t> GetForward() { return &SwapForward; }
+        static FnDataSwap<Size_t> GetBackward() { return &SwapBackward; }
     };
 
     /// <summary>
@@ -181,10 +206,13 @@ namespace PNC
         ComponentOwner Owner;
     private:
         FnDataProcessor<Size_t> NodeConstruct;
-        FnDataProcessor2<Size_t> NodeCopy;
-        FnDataProcessor2<Size_t> NodeMove;
-        FnDataProcessor2<Size_t> NodeSwap;
         FnDataProcessor<Size_t> NodeDestruct;
+        FnDataCopy<Size_t> NodeCopyForward;
+        FnDataMove<Size_t> NodeMoveForward;
+        FnDataSwap<Size_t> NodeSwapForward;
+        FnDataCopy<Size_t> NodeCopyBackward;
+        FnDataMove<Size_t> NodeMoveBackward;
+        FnDataSwap<Size_t> NodeSwapBackward;
     public:
         /// <summary>
         /// Create a ComponentType from the component's type_info.
@@ -212,7 +240,7 @@ namespace PNC
         /// <param name="_nullptr">Should always be equal to (const T*)nullptr. Provides a way to specify the component typename argument.</param>
         /// <param name="aOwner">Owner for this component type.</param>
         template<typename T>
-        ComponentTypeT(const T* const _nullptr, const ComponentOwner owner)
+        ComponentTypeT(const T* const _nullptr, const ComponentOwner owner = T::Owner)
             : TypeInfo(&typeid(T))
             , Size(sizeof(T))
             , Align(alignof(T))
@@ -222,9 +250,12 @@ namespace PNC
             assert_pnc(owner >= ComponentOwner__Begin && owner < ComponentOwner__End);
 
             NodeConstruct = GetDefaultConstructor<Size_t, T, std::is_default_constructible<T>::value>::Get();
-            NodeCopy = GetCopyConstructor<Size_t, T, std::is_copy_constructible<T>::value>::Get();
-            NodeMove = GetMoveConstructor<Size_t, T, std::is_move_constructible<T>::value>::Get();
-            NodeSwap = GetSwapper<Size_t, T, std::is_swappable<T>::value>::Get();
+            NodeCopyForward = GetCopyConstructor<Size_t, T, std::is_copy_constructible<T>::value>::GetForward();
+            NodeMoveForward = GetMoveConstructor<Size_t, T, std::is_move_constructible<T>::value>::GetForward();
+            NodeSwapForward = GetSwapper<Size_t, T, std::is_swappable<T>::value>::GetForward();
+            NodeCopyBackward = GetCopyConstructor<Size_t, T, std::is_copy_constructible<T>::value>::GetBackward();
+            NodeMoveBackward = GetMoveConstructor<Size_t, T, std::is_move_constructible<T>::value>::GetBackward();
+            NodeSwapBackward = GetSwapper<Size_t, T, std::is_swappable<T>::value>::GetBackward();
             NodeDestruct = GetDestructor<Size_t, T, std::is_destructible<T>::value>::Get();
         }
 
@@ -238,107 +269,10 @@ namespace PNC
         bool IsNodeComponent()const { return Owner == ComponentOwner_Node; }
         bool IsChunkComponent()const { return Owner == ComponentOwner_Chunk; }
         bool IsUserConstructible()const { return !!NodeConstruct; }
-        bool IsUserCopyable()const { return !!NodeCopy; }
-        bool IsUserMovable()const { return !!NodeMove; }
-        bool IsUserSwappable()const { return !!NodeSwap; }
+        bool IsUserCopyable()const { return !!NodeCopyForward; }
+        bool IsUserMovable()const { return !!NodeMoveForward; }
+        bool IsUserSwappable()const { return !!NodeSwapForward; }
         bool IsUserDestructible()const { return !!NodeDestruct; }
-
-        //// TODO Remove
-        //void* Allocate(const Size_t nodeCount, const Size_t chunkCount = 1)const
-        //{
-        //    auto count = GetComponentCount(nodeCount, chunkCount) ;
-        //    return pnc_alloc(Size * count, Align);
-        //}
-
-        //// TODO Remove
-        //void* AllocateConstruct(const Size_t nodeCount, const Size_t chunkCount = 1)const
-        //{
-        //    auto ptr = Allocate(nodeCount, chunkCount);
-        //    ConstructNodesUnsafe(ptr, 0, nodeCount, chunkCount);
-        //    return ptr;
-        //}
-
-        //// TODO Remove
-        //void* AllocateCopy(void* const from, const Size_t nodeCapacity, const Size_t nodeCount, const Size_t chunkCapacity = 1, const Size_t chunkCount = 1)const
-        //{
-        //    auto ptr = Allocate(nodeCapacity, chunkCapacity);
-        //    CopyNodes(ptr, from, 0, 0, nodeCount, chunkCount);
-        //    return ptr;
-        //}
-
-        //// TODO Remove
-        //void Deallocate(void* const ptr, const Size_t nodeCapacity, const Size_t chunkCapacity = 1)const
-        //{
-        //    pnc_free(ptr, GetComponentCount(nodeCapacity, chunkCapacity) * Size, Align);
-        //}
-
-
-        //void ConstructNodesUnsafe(void* const baseComponentData, const Size_t first, const Size_t nodeCount, const Size_t chunkIndex = 0)const
-        //{
-        //    if (IsUserConstructible())
-        //        UserConstructNodesUnsafe(baseComponentData, first, nodeCount, chunkIndex);
-        //}
-
-        //void DestructNodesUnsafe(void* const baseComponentData, const Size_t first, const Size_t nodeCount, const Size_t chunkIndex = 0)const
-        //{
-        //    if (IsUserDestructible())
-        //        UserDestructNodesUnsafe(baseComponentData, first, nodeCount, chunkIndex);
-        //}
-        //void MoveNodesUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstTo, const Size_t firstFrom, const Size_t nodeCount, const Size_t chunkIndexTo = 0, const Size_t chunkIndexFrom = 0)const
-        //{
-        //    if (IsUserMovable())
-        //        UserMoveNodesUnsafe(baseTo, baseFrom, firstTo, firstFrom, nodeCount, chunkIndexTo, chunkIndexFrom);
-        //    else
-        //    {
-        //        auto dataLength = GetComponentCount(nodeCount) * Size;
-        //        memcpy_s((uint8*)baseTo + GetComponentIndex(firstTo, chunkIndexTo) * Size, dataLength, (uint8*)baseFrom + GetComponentIndex(firstFrom, chunkIndexFrom) * Size, dataLength);
-        //    }
-        //}
-
-        //void SwapNodesUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstTo, const Size_t firstFrom, const Size_t nodeCount, const Size_t chunkIndexTo = 0, const Size_t chunkIndexFrom = 0)const
-        //{
-        //    if (IsUserSwappable())
-        //        UserSwapNodesUnsafe(baseTo, baseFrom, firstTo, firstFrom, nodeCount, chunkIndexTo, chunkIndexFrom);
-        //    else
-        //    {
-        //        auto dataCount = GetComponentCount(nodeCount) * Size;
-        //        auto to = (uint8*)baseTo + GetComponentIndex(firstTo, chunkIndexTo) * Size;
-        //        std::swap_ranges(to, to + dataCount, (uint8*)baseFrom + GetComponentIndex(firstFrom, chunkIndexFrom) * Size);
-        //    }
-        //}
-
-        //void UserConstructNodesUnsafe(void* const baseComponentData, const Size_t first, const Size_t nodeCount, const Size_t chunkCount = 1)const
-        //{
-        //    NodeConstruct((uint8*)baseComponentData +  (first, chunkCount) * Size, GetComponentCount(nodeCount));
-        //}
-        //void UserDestructNodesUnsafe(void* const baseComponentData, const Size_t first, const Size_t nodeCount, const Size_t chunkIndex = 0)const
-        //{
-        //    NodeDestruct((uint8*)baseComponentData + GetComponentIndex(first, chunkIndex) * Size, GetComponentCount(nodeCount));
-        //}
-
-        //void UserCopyNodesUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstTo, const Size_t firstFrom, const Size_t nodeCount, const Size_t chunkIndexTo = 0, const Size_t chunkIndexFrom = 0)const
-        //{
-        //    NodeCopy((uint8*)baseTo + GetComponentIndex(firstTo, chunkIndexTo) * Size, (uint8*)baseFrom + GetComponentIndex(firstFrom, chunkIndexFrom) * Size, GetComponentCount(nodeCount));
-        //}
-
-        //void UserMoveNodesUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstTo, const Size_t firstFrom, const Size_t nodeCount, const Size_t chunkIndexTo = 0, const Size_t chunkIndexFrom = 0)const
-        //{
-        //    NodeMove((uint8*)baseTo + GetComponentIndex(firstTo, chunkIndexTo) * Size, (uint8*)baseFrom + GetComponentIndex(firstFrom, chunkIndexFrom) * Size, GetComponentCount(nodeCount));
-        //}
-
-        //void UserSwapNodesUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstTo, const Size_t firstFrom, const Size_t nodeCount, const Size_t chunkIndexTo = 0, const Size_t chunkIndexFrom = 0)const
-        //{
-        //    NodeSwap((uint8*)baseTo + GetComponentIndex(firstTo, chunkIndexTo) * Size, (uint8*)baseFrom + GetComponentIndex(firstFrom, chunkIndexFrom) * Size, GetComponentCount(nodeCount));
-        //}
-
-
-
-
-        //void UserConstructComponentUnsafe(void* const baseComponentData, const Size_t firstIndex, const Size_t count)const { NodeConstruct((uint8*)baseComponentData + firstIndex * Size, count); }
-        //void UserDestructComponentUnsafe (void* const baseComponentData, const Size_t firstIndex, const Size_t count)const { NodeDestruct((uint8*)baseComponentData + firstIndex * Size, count); }
-        //void UserCopyComponentUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstIndexTo, const Size_t firstIndexFrom, const Size_t count)const { NodeCopy((uint8*)baseTo + firstIndexTo * Size, (uint8*)baseFrom + firstIndexFrom * Size, count); }
-        //void UserMoveComponentUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstIndexTo, const Size_t firstIndexFrom, const Size_t count)const { NodeMove((uint8*)baseTo + firstIndexTo * Size, (uint8*)baseFrom + firstIndexFrom * Size, count); }
-        //void UserSwapComponentUnsafe(void* const baseTo, void* const baseFrom, const Size_t firstIndexTo, const Size_t firstIndexFrom, const Size_t count)const { NodeSwap((uint8*)baseTo + firstIndexTo * Size, (uint8*)baseFrom + firstIndexFrom * Size, count); }
 
 
         void ConstructComponentDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
@@ -346,8 +280,16 @@ namespace PNC
             assert_pnc(!!baseComponentData);
             assert_pnc(firstComponentIndex >= 0);
             assert_pnc(count >= 0);
+
             if (IsUserConstructible())
                 NodeConstruct(baseComponentData, firstComponentIndex, count);
+        }
+
+        void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
+                                      const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
+        {
+            ConstructComponentDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
+                                         GetComponentCount(nodeCount, chunkCount));
         }
 
         void DestructComponentDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
@@ -359,15 +301,29 @@ namespace PNC
                 NodeDestruct(baseComponentData, firstComponentIndex, count);
         }
 
-        void CopyComponentDataUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
+        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
+                                     const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
+        {
+            DestructComponentDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
+                                        GetComponentCount(nodeCount, chunkCount));
+        }
+
+
+#pragma region Copy
+
+        void CopyDataForwardUnsafe(void* const baseComponentDataTo  , const Size_t firstComponentIndexTo,
+                             const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, 
+                             const Size_t count)const
         {
             assert_pnc(!!baseComponentDataTo);
             assert_pnc(!!baseComponentDataFrom);
             assert_pnc(firstComponentIndexTo >= 0);
             assert_pnc(firstComponentIndexFrom >= 0);
             assert_pnc(count >= 0);
+            assert_pnc(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+
             if (IsUserCopyable())
-                NodeCopy(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
+                NodeCopyForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
             else
             {
                 auto dataLength = count * Size;
@@ -375,90 +331,88 @@ namespace PNC
             }
         }
 
-        void MoveComponentDataUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
+        void CopyComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
+                                  const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
+                                  const Size_t nodeCount)const
         {
-            assert_pnc(!!baseComponentDataTo);
-            assert_pnc(!!baseComponentDataFrom);
-            assert_pnc(firstComponentIndexTo >= 0);
-            assert_pnc(firstComponentIndexFrom >= 0);
-            assert_pnc(count >= 0);
-            if (IsUserMovable())
-                NodeMove(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
-            else
-            {
-                auto dataLength = count * Size;
-                memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
-            }
+            CopyDataForwardUnsafe(baseComponentDataTo,   firstNodeIndexTo, 
+                                  baseComponentDataFrom, firstNodeIndexFrom, 1);
         }
 
-        void SwapComponentDataUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
+        void CopyComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
+                                  const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
+                                  const Size_t nodeCount, const Size_t chunkCount)const
         {
-            assert_pnc(!!baseComponentDataTo);
-            assert_pnc(!!baseComponentDataFrom);
-            assert_pnc(firstComponentIndexTo >= 0);
-            assert_pnc(firstComponentIndexFrom >= 0);
-            assert_pnc(count >= 0);
-            if (IsUserSwappable())
-                NodeSwap(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
-            else
-            {
-                auto dataCount = GetComponentCount(count) * Size;
-                auto to = (uint8*)baseComponentDataTo + firstComponentIndexTo * Size;
-                auto from = (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size;
-                std::swap_ranges(to, to + dataCount, from);
-            }
+            CopyDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
+                                  baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+                                                         GetComponentCount(nodeCount,          chunkCount));
         }
 
+#pragma endregion
 
 
-        void ConstructComponentUnsafe(void* const baseComponentData,
-            const Size_t firstNodeIndex, const Size_t nodeCount,
-            const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
-        {
-            ConstructComponentDataUnsafe(baseComponentData, 
-                GetComponentIndex(firstNodeIndex, firstChunkIndex), 
-                GetComponentCount(nodeCount, chunkCount));
-        }
-
-        void DestructComponentUnsafe(void* const baseComponentData,
-            const Size_t firstNodeIndex, const Size_t nodeCount,
-            const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
-        {
-            DestructComponentDataUnsafe(baseComponentData, 
-                GetComponentIndex(firstNodeIndex, firstChunkIndex), 
-                GetComponentCount(nodeCount, chunkCount));
-        }
 
 
-        void CopyComponentUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-            const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-            const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
-        {
-            CopyComponentDataUnsafe(baseComponentDataTo, baseComponentDataFrom, 
-                GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo), 
-                GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                GetComponentCount(nodeCount, chunkCount));
-        }
 
-        void MoveComponentUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-            const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-            const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
-        {
-            MoveComponentDataUnsafe(baseComponentDataTo, baseComponentDataFrom, 
-                GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
-                GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                GetComponentCount(nodeCount, chunkCount));
-        }
+        //void MoveComponentDataForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
+        //{
+        //    assert_pnc(!!baseComponentDataTo);
+        //    assert_pnc(!!baseComponentDataFrom);
+        //    assert_pnc(firstComponentIndexTo >= 0);
+        //    assert_pnc(firstComponentIndexFrom >= 0);
+        //    assert_pnc(count >= 0);
+        //    assert_pnc(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
 
-        void SwapComponentUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-            const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-            const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
-        {
-            SwapComponentDataUnsafe(baseComponentDataTo, baseComponentDataFrom, 
-                GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
-                GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                GetComponentCount(nodeCount, chunkCount));
-        }
+        //    if (IsUserMovable())
+        //        NodeMoveForward(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
+        //    else
+        //    {
+        //        auto dataLength = count * Size;
+        //        memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
+        //    }
+        //}
+
+        //void SwapComponentDataForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
+        //{
+        //    assert_pnc(!!baseComponentDataTo);
+        //    assert_pnc(!!baseComponentDataFrom);
+        //    assert_pnc(firstComponentIndexTo >= 0);
+        //    assert_pnc(firstComponentIndexFrom >= 0);
+        //    assert_pnc(count >= 0);
+        //    assert_pnc(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+
+        //    if (IsUserSwappable())
+        //        NodeSwapForward(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
+        //    else
+        //    {
+        //        auto dataCount = GetComponentCount(count) * Size;
+        //        auto to = (uint8*)baseComponentDataTo + firstComponentIndexTo * Size;
+        //        auto from = (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size;
+        //        std::swap_ranges(to, to + dataCount, from);
+        //    }
+        //}
+
+
+
+        //void MoveComponentForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
+        //{
+        //    MoveComponentDataForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
+        //        GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
+        //        GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+        //        GetComponentCount(nodeCount, chunkCount));
+        //}
+
+        //void SwapComponentForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
+        //{
+        //    SwapComponentDataForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
+        //        GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
+        //        GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+        //        GetComponentCount(nodeCount, chunkCount));
+        //}
 
 
         ///// <summary>
@@ -495,6 +449,20 @@ namespace PNC
         {
             return (uint8*)ptr - GetComponentCount(nodeCount, chunkCount) * Size;
         }
+
+        bool IsOverlappingForward(const void* const baseComponentDataTo, const Size_t firstComponentIndexTo, const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, const Size_t count)const
+        {
+            char* toBegin = (char*)baseComponentDataTo + firstComponentIndexTo * Size;
+            char* fromBegin = (char*)baseComponentDataFrom + firstComponentIndexFrom * Size;
+            char* fromEnd = fromBegin + count * Size;
+            return toBegin > fromBegin && toBegin < fromEnd;
+        }
+        bool IsOverlappingBackward(const void* const baseComponentDataTo, const Size_t firstComponentIndexTo, const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, const Size_t count)const
+        {
+            return IsOverlappingForward(baseComponentDataFrom, firstComponentIndexFrom, baseComponentDataTo, firstComponentIndexTo, count);
+        }
+
+
         /// <summary>
         /// Figure out the index into an array of this component type where a node's component instance is stored.
         /// </summary>

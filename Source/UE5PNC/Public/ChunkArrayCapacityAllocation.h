@@ -63,6 +63,32 @@ namespace PNC
             CopyChunkAndNodes(o, o.GetChunkCount());
             return *this;
         }
+        ChunkArrayCapacityAllocationT& operator=(const ChunkArrayCapacityAllocationT&& o)
+        {
+            if (this == &o)
+                return *this;
+            DestructChunkAndNode(0, GetChunkCount());
+            Deallocate();
+            Base_t::operator=(o);
+            if (o.IsNull())
+                return;
+            Allocate();
+            MoveChunkAndNodes(o, o.GetChunkCount());
+            return *this;
+        }
+        ChunkArrayCapacityAllocationT& Swap(ChunkArrayCapacityAllocationT& o)
+        {
+            if (this == &o)
+                return *this;
+            DestructChunkAndNode(0, GetChunkCount());
+            Deallocate();
+            Base_t::operator=(o);
+            if (o.IsNull())
+                return;
+            Allocate();
+            SwapChunkAndNodes(o, o.GetChunkCount());
+            return *this;
+        }
 
         ~ChunkArrayCapacityAllocationT()
         {
@@ -84,22 +110,24 @@ namespace PNC
         using Base_t::operator*;
         using Base_t::operator->;
         using Base_t::operator[];
+        using Base_t::GetInternalChunk;
 
 
     protected:
-        using Base_t::GetInternalChunk;
         using Base_t::ConstructChunkElementAndNodes;
         using Base_t::DestructChunkElementAndNodes;
-        using Base_t::CopyChunkElementAndNodes;
+        using Base_t::CopyElementAndNodesForward;
+        using Base_t::MoveElementAndNodesForward;
+        using Base_t::SwapElementAndNodes;
 
         void** GetComponentDataArrayForChunk(const Size_t chunkIndex)
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             assert_pnc(!internalChunk.IsNull());
             return &internalChunk.ComponentData[chunkIndex * internalChunk.Structure->GetComponentCount()];
         }
 
-#pragma region Construction/Destruction/Copy
+#pragma region Construction/Destruction/Copy/Move/Swap
         void ConstructChunkAndNode(const Size_t chunkFirst, const Size_t chunkCount, const Size_t nodeCountPerChunk)
         {
             for (Size_t i = 0; i < chunkCount; ++i)
@@ -114,8 +142,23 @@ namespace PNC
 
         void CopyChunkAndNodes(const Self_t& o, const Size_t chunkCount)
         {
+            // TODO:
+            // if all chunk elements are filled (nodeCount == nodeCapacity)
+            //      Copy the whole array chunk
+            // else
+            //      Copy each Chunk elements
             for (Size_t i = 0; i < chunkCount; ++i)
-                CopyChunkElementAndNodes(o, i);
+                CopyChunkElementAndNodesForward(o, i);
+        }
+        void MoveChunkAndNodes(const Self_t& o, const Size_t chunkCount)
+        {
+            for (Size_t i = 0; i < chunkCount; ++i)
+                MoveElementAndNodesForward(o, i);
+        }
+        void SwapChunkAndNodes(const Self_t& o, const Size_t chunkCount)
+        {
+            for (Size_t i = 0; i < chunkCount; ++i)
+                SwapElementAndNodes(o, i);
         }
 #pragma endregion 
 
@@ -135,7 +178,7 @@ namespace PNC
 
         void AllocateComponentDataArray()
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             assert_pnc(!internalChunk.IsNull());
             const Size_t chunkCapacity = GetChunkCapacity();
             internalChunk.ComponentData = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
@@ -143,7 +186,7 @@ namespace PNC
 
         void AllocateComponentData()
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             assert_pnc(!internalChunk.IsNull());
             const Size_t componentCount = internalChunk.Structure->Components.GetSize();
             const Size_t nodeCapacityTotal = GetNodeCapacityTotal();
@@ -157,7 +200,7 @@ namespace PNC
 
         void AllocateChunkArray()
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             const Size_t chunkCapacity = GetChunkCapacity();
             internalChunk.Array.Chunks = (ChunkPointerElement_t*)pnc_alloc(chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
@@ -165,15 +208,15 @@ namespace PNC
 
         void DeallocateChunkArray()
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             Size_t chunkCapacity = GetChunkCapacity();
-            pnc_free(internalChunk.Array.Chunks, chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
+            pnc_free_clean(internalChunk.Array.Chunks, chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
             internalChunk.Array.Chunks = nullptr;
         }
 
         void DeallocateComponentData()
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             assert_pnc(!internalChunk.IsNull());
             Size_t componentCount = internalChunk.Structure->Components.GetSize();
             Size_t nodeCapacityTotal = GetNodeCapacityTotal();
@@ -181,16 +224,16 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = *internalChunk.Structure->Components[i];
-                pnc_free(internalChunk.ComponentData[i], componentType.GetSize(nodeCapacityTotal, chunkCapacity), componentType.GetAlignment());
+                pnc_free_clean(internalChunk.ComponentData[i], componentType.GetSize(nodeCapacityTotal, chunkCapacity), componentType.GetAlignment());
             }
         }
 
         void DeallocateComponentDataArray()
         {
-            ChunkPointerInternal_t& internalChunk = GetInternalChunk();
+            ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             assert_pnc(!internalChunk.IsNull());
             Size_t chunkCapacity = GetChunkCapacity();
-            pnc_free(internalChunk.ComponentData, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            pnc_free_clean(internalChunk.ComponentData, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
 #pragma endregion 

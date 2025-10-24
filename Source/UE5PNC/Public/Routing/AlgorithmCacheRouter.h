@@ -17,7 +17,7 @@ namespace PNC::Routing
         using Size_t = TSize;
 
     public:
-        std::vector<Size_t> Components;
+        Vector<Size_t> Components;
 
         Size_t operator[](Size_t routeIndex)const
         {
@@ -139,9 +139,9 @@ namespace PNC::Routing
 
     protected:
         using AlgorithmRoute_t = RouteT<TSize>;
-        using Map_t = std::unordered_map<const ChunkStructure_t*, AlgorithmRoute_t*>;
+        using Map_t = HashMap<const ChunkStructure_t*, AlgorithmRoute_t*>;
         mutable Map_t Cache;
-        mutable std::list<AlgorithmRoute_t> CachedRoutes;
+        mutable List<AlgorithmRoute_t> CachedRoutes;
 
     public:
         AlgorithmCacheRouterT() {}

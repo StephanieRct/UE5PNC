@@ -24,8 +24,8 @@ namespace PNC
         using Chunk_t = ChunkPointerT<ChunkStructure_t>; // Structure this pointer is pointing at
         using Node_t = typename Chunk_t::Node_t;
         using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
-        using ChunkPointerInternal_t = ChunkPointerInternalT<TChunkStructure>;
 
+        using ChunkPointerInternal_t = typename ChunkPointer_t::ChunkPointerInternal_t;
     protected:
         ChunkPointerInternal_t Chunk;
 
@@ -69,11 +69,20 @@ namespace PNC
 
 
     public:
+        bool IsVoid()const { return Chunk.IsVoid(); }
+        bool IsStruct()const { return Chunk.IsStruct(); }
+        bool IsNull()const { return Chunk.IsNull(); }
+        bool IsData()const { return Chunk.IsData(); }
+        bool IsVoidNull()const { return Chunk.IsVoidNull(); }
+        bool IsVoidData()const { return Chunk.IsVoidData(); }
+        bool IsStructNull()const { return Chunk.IsStructNull(); }
+        bool IsStructData()const { return Chunk.IsStructData(); }
+
         /// <summary>
-        /// Test if the chunk is null and has no structure nor component data.
+        /// Get the ChunkStructure of this chunk
         /// </summary>
         /// <returns></returns>
-        bool IsNull()const { return this->Chunk.IsNull(); }
+        const ChunkStructure_t& GetStructure()const { return Chunk.GetStructure(); }
 
         /// <summary>
         /// Get the size of the chunk.
@@ -81,13 +90,10 @@ namespace PNC
         /// The size can grow up to the capacity without having to reallocate the component's memory
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
-        Size_t GetNodeCount()const { return this->Chunk.GetNodeCount(); }
+        Size_t GetNodeCount()const { return Chunk.GetNodeCount(); }
 
-        /// <summary>
-        /// Get the ChunkStructure of this chunk
-        /// </summary>
-        /// <returns></returns>
-        const ChunkStructure_t& GetStructure()const { return this->Chunk.GetStructure(); }
+        Size_t GetChunkCount()const { return 1; }
+
         const Chunk_t& operator*()const { return (const Chunk_t&)Chunk; }
         Chunk_t& operator*() { return (Chunk_t&)Chunk; }
         const Chunk_t* operator->()const { return &(const Chunk_t&)Chunk; }
@@ -95,17 +101,19 @@ namespace PNC
         const Chunk_t& GetChunk()const { return (const Chunk_t&)Chunk; }
         Chunk_t& GetChunk() { return (Chunk_t&)Chunk; }
 
-        void* GetComponentData(const Size_t componentTypeIndexInChunk) { return ((Chunk_t&)Chunk).GetComponentData(componentTypeIndexInChunk); }
-        void* GetComponentData(const Size_t componentTypeIndexInChunk)const { return ((Chunk_t&)Chunk).GetComponentData(componentTypeIndexInChunk); }
-        void* GetComponentData(const type_info* const componentType) { return ((Chunk_t&)Chunk).GetComponentData(componentType); }
-        void* GetComponentData(const type_info* const componentType)const { return ((Chunk_t&)Chunk).GetComponentData(componentType); }
+        void* GetComponentData(const Size_t componentTypeIndexInChunk) { return GetChunk().GetComponentData(componentTypeIndexInChunk); }
+        void* GetComponentData(const Size_t componentTypeIndexInChunk)const { return GetChunk().GetComponentData(componentTypeIndexInChunk); }
+        void* GetComponentData(const type_info* const componentType) { return GetChunk().GetComponentData(componentType); }
+        void* GetComponentData(const type_info* const componentType)const { return GetChunk().GetComponentData(componentType); }
         template<typename TComponent>
-        TComponent* GetComponentData() { return ((Chunk_t&)Chunk).GetComponentData<TComponent>(); }
+        TComponent* GetComponentData() { return GetChunk().GetComponentData<TComponent>(); }
         template<typename TComponent>
-        TComponent* GetComponentData()const { return ((Chunk_t&)Chunk).GetComponentData<TComponent>(); }
+        TComponent* GetComponentData()const { return GetChunk().GetComponentData<TComponent>(); }
 
-        static bool IsSameChunkStructure(const Self_t& a, const Self_t& b) { return a.Chunk.Structure == b.Chunk.Structure; }
-    protected:
-        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Chunk.Structure == b.Chunk.Structure; }
+
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return chunkPointer.Chunk; }
+    //protected:
+    //    ChunkPointerInternal_t& GetInternalChunk() { return Chunk; }
     };
 }

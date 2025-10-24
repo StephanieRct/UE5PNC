@@ -12,6 +12,13 @@ namespace PNC
     /// A KChunkArrayPointer is a KindPointer pointing to an array of ChunkPointers whose Component data are adjacent in memory.
     /// A KChunkArrayPointer is itself a KChunkPointer pointing to the beginning of the Component data, 
     /// effectively pointing to the first Chunk in the array.
+    /// Memory layout of this struct must be:
+    ///     Kind            : ChunkKind
+    ///     Structure       : ChunkStructure
+    ///     ComponentData   : void**
+    ///     NodeCount       : Size_t
+    ///     Array.Chunks    : ChunkPointerElement_t
+    ///     Array.ChunkCount: Size_t
     /// </summary>
     /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
     /// <typeparam name="TChunkPointerElement">Structure of the Chunk pointer in the array.</typeparam>
@@ -26,14 +33,16 @@ namespace PNC
         using Size_t = typename ChunkStructure_t::Size_t;
         using Chunk_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>; // The type this pointer is pointing to
 
-        using ChunkArrayPointer = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;
+        using ChunkArrayPointer_t = Chunk_t;
 
         /// <summary>
         /// Use the same ChunkArrayExtension_t as ChunkArrayPointerT so both keep the same memory layout.
         /// </summary>
-        using ChunkArrayExtension_t = ChunkArrayPointer::ChunkArrayExtension_t;
+        using ChunkArrayExtension_t = ChunkArrayPointer_t::ChunkArrayExtension_t;
 
-        using ChunkPointerInternal_t = ChunkArrayPointer::ChunkPointerInternal_t;
+        using ChunkPointerInternal_t = ChunkArrayPointer_t::ChunkPointerInternal_t;
+        using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
+
     protected:
         /// <summary>
         /// Contains pointer to the array of Chunks
@@ -71,6 +80,12 @@ namespace PNC
         }
 
     public:
+        Size_t GetChunkCount()const { return Array.ChunkCount; }
+
+        const ChunkPointerElement_t& operator[](Size_t index)const { return Array.Chunks[index]; }
+        ChunkPointerElement_t& operator[](Size_t index) { return Array.Chunks[index]; }
+        const Chunk_t& GetChunk(Size_t index)const { return Array.Chunks[index]; }
+        Chunk_t& GetChunk(Size_t index) { return Array.Chunks[index]; }
         const Chunk_t& operator*()const { return GetChunk(); }
         Chunk_t& operator*() { return GetChunk(); }
         const Chunk_t* operator->()const { return &GetChunk(); }
@@ -78,7 +93,10 @@ namespace PNC
         const Chunk_t& GetChunk()const { return (const Chunk_t&)Base_t::GetChunk(); }
         Chunk_t& GetChunk() { return (Chunk_t&)Base_t::GetChunk(); }
 
-    protected:
-        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return ChunkArrayPointer_t::GetInternalChunk(chunkPointer.GetChunk()); }
+        static ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return chunkPointer.GetInternalChunkElement(index); }
+    //protected:
+    //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+    //    ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
     };
 }

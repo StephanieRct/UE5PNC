@@ -26,16 +26,18 @@ namespace PNC
         /// </summary>
         ComponentTypeSet_t Components;
 
-        std::vector<Size_t> DefaultConstructibleNodeIndex;
-        std::vector<Size_t> DefaultConstructibleChunkIndex;
-        std::vector<Size_t> DestructibleNodeIndex;
-        std::vector<Size_t> DestructibleChunkIndex;
+        Vector<Size_t> DefaultConstructibleNodeIndex;
+        Vector<Size_t> DefaultConstructibleChunkIndex;
+        Vector<Size_t> DestructibleNodeIndex;
+        Vector<Size_t> DestructibleChunkIndex;
+        Vector<Size_t> NodeComponentIndex;
+        Vector<Size_t> ChunkComponentIndex;
     public:
 
-        ChunkStructureT(const ComponentType_t* component) :Components(component) 
-        {
-            Update();
-        }
+        //ChunkStructureT(const ComponentType_t* component) :Components(component) 
+        //{
+        //    Update();
+        //}
         /// <summary>
         /// Create a ChunkStructure from a list of ComponentType
         /// </summary>
@@ -46,11 +48,19 @@ namespace PNC
             Update();
         }
 
-        ChunkStructureT(std::vector<const ComponentType_t*>&& types)
+        ChunkStructureT(Vector<const ComponentType_t*>&& types)
             :Components(std::move(types))
         {
             Update();
         }
+
+        template<typename... TComponentTypes>
+        ChunkStructureT(TComponentTypes... componentTypes)
+            : Components(componentTypes...)
+        {
+            Update();
+        }
+
 
         bool operator==(const Self_t& other)const { return IsSame(other); }
         bool operator!=(const Self_t& other)const { return !IsSame(other); }
@@ -65,6 +75,8 @@ namespace PNC
         /// <param name="type"></param>
         /// <returns></returns>
         Size_t GetComponentTypeIndexInChunk(const type_info* type)const { return Components.GetComponentTypeIndexInChunk(type); }
+
+        Size_t GetComponentTypeIndexInChunk(const ComponentType_t* const type)const { return Components.GetComponentTypeIndexInChunk(type); }
 
         /// <summary>
         /// If both structures are equal
@@ -84,7 +96,7 @@ namespace PNC
                 return a ? a->Components.GetHash() : (std::numeric_limits< std::size_t>::max() >> 1);
             }
         };
-        struct Equaller_t
+        struct Equaler_t
         {
             bool operator()(const Self_t* a, const Self_t* b) const
             {
@@ -101,6 +113,8 @@ namespace PNC
             Components.SubSetIndex(&DestructibleNodeIndex, [](const ComponentType_t* c) { return c->IsUserDestructible() && c->IsNodeComponent(); });
             Components.SubSetIndex(&DefaultConstructibleChunkIndex, [](const ComponentType_t* c) { return c->IsUserConstructible() && c->IsChunkComponent(); });
             Components.SubSetIndex(&DestructibleChunkIndex, [](const ComponentType_t* c) { return c->IsUserDestructible() && c->IsChunkComponent(); });
+            Components.SubSetIndex(&NodeComponentIndex, [](const ComponentType_t* c) { return c->IsNodeComponent(); });
+            Components.SubSetIndex(&ChunkComponentIndex, [](const ComponentType_t* c) { return c->IsChunkComponent(); });
         }
     };
 }

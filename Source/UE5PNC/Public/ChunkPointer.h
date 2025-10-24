@@ -38,34 +38,11 @@ namespace PNC
         using Chunk_t = ChunkPointerT;
 
     public:
-        /// <summary>
-        /// Create a null ChunkPointer without structure.
-        /// IsNull() will evaluate to true.
-        /// </summary>
-        ChunkPointerT()
-            : Base_t()
-        {
-        }
-
-        /// <summary>
-        /// Implicit construction from internal conterpart.
-        /// </summary>
-        /// <param name="chunkPointerInternal"></param>
-        ChunkPointerT(const ChunkPointerInternal_t& chunkPointerInternal)
-            : Base_t(chunkPointerInternal)
-        {
-        }
-
-        /// <summary>
-        /// Implicit construction from internal conterpart.
-        /// </summary>
-        /// <param name="chunkPointerInternal"></param>
-        ChunkPointerT(const ChunkPointerInternal_t&& chunkPointerInternal)
-            : Base_t(chunkPointerInternal)
-        {
-        }
-
+        ChunkPointerT() = default;
+        ChunkPointerT(const Self_t& o) = default;
+        Self_t& operator=(const Self_t& o) = default;
         ChunkPointerT(Self_t&& o) = default;
+        Self_t& operator=(Self_t&& o) = default;
 
         /// <summary>
         /// Contructs from its member data fields.
@@ -85,7 +62,15 @@ namespace PNC
         }
 
     public:
+        using Base_t::IsVoid;
+        using Base_t::IsStruct;
         using Base_t::IsNull;
+        using Base_t::IsData;
+        using Base_t::IsVoidNull;
+        using Base_t::IsVoidData;
+        using Base_t::IsStructNull;
+        using Base_t::IsStructData;
+
         using Base_t::GetStructure;
         using Base_t::GetNodeCount;
         using Base_t::GetChunkCount;
@@ -207,10 +192,11 @@ namespace PNC
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        static bool IsSameChunkStructure(const ChunkPointerT& a, const ChunkPointerT& b) { return a.Structure == b.Structure; }
+        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Structure == b.Structure; }
 
-    protected:
-        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
+    //protected:
+    //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
 
     };
 }

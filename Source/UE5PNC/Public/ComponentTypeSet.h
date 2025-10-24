@@ -21,8 +21,8 @@ namespace PNC
 
     private:
         std::size_t Hash;
-        std::vector<const ComponentType_t*> ComponentTypes;
-        std::unordered_map<const type_info*, Size_t> TypeToComponentTypeIndexInChunk;
+        Vector<const ComponentType_t*> ComponentTypes;
+        HashMap<const type_info*, Size_t> TypeToComponentTypeIndexInChunk;
 
     public:
 
@@ -68,11 +68,23 @@ namespace PNC
         {
             Normalize();
         }
-        ComponentTypeSetT(std::vector<const ComponentType_t*>&& types)
-            :ComponentTypes(types)
+
+        ComponentTypeSetT(Vector<const ComponentType_t*>&& types)
+            :ComponentTypes(std::move(types))
         {
             Normalize();
         }
+
+        template<typename... TComponentTypes>
+        ComponentTypeSetT(TComponentTypes... componentTypes)
+            : ComponentTypes(sizeof...(componentTypes))
+        {
+            Size_t c = 0;
+            ((ComponentTypes[c++] = componentTypes), ...);
+            Normalize();
+        }
+
+
         bool operator==(const Self_t& other)const { return IsSame(other); }
         bool operator!=(const Self_t& other)const { return !IsSame(other); }
         bool operator<(const Self_t& other)const
@@ -106,7 +118,7 @@ namespace PNC
                 return a ? a->Hash : (std::numeric_limits< std::size_t>::max() >> 1);
             }
         };
-        struct Equaller_t
+        struct Equaler_t
         {
             bool operator()(const Self_t* a, const Self_t* b) const
             {
@@ -146,18 +158,22 @@ namespace PNC
         /// </summary>
         /// <param name="type">type_info of the component type. ex. &typeid(MyComponent)</param>
         /// <returns>return index of the component type in the set or -1 if not found.</returns>
-        Size_t GetComponentTypeIndexInChunk(const type_info* type)const 
+        Size_t GetComponentTypeIndexInChunk(const type_info* const type)const
         {
             auto i = TypeToComponentTypeIndexInChunk.find(type);
             if (i == TypeToComponentTypeIndexInChunk.end())
                 return -1;
             return i->second;
         }
+        Size_t GetComponentTypeIndexInChunk(const ComponentType_t*const type)const
+        {
+            return GetComponentTypeIndexInChunk(type->GetTypeInfo());
+        }
 
         template<typename TPredicate>
-        void SubSet(Self_t* resultMemory, TPredicate predicate)
+        void SubSet(Self_t* const resultMemory, TPredicate predicate)
         {
-            std::vector<const ComponentType_t*> subComponentTypes;
+            Vector<const ComponentType_t*> subComponentTypes;
             for (Size_t i = 0; i < ComponentTypes.size(); ++i)
             {
                 if (predicate(ComponentTypes[i]))
@@ -169,9 +185,9 @@ namespace PNC
         }
 
         template<typename TPredicate>
-        void SubSetIndex(std::vector<Size_t>* resultMemory, TPredicate predicate)
+        void SubSetIndex(Vector<Size_t>* resultMemory, TPredicate predicate)
         {
-            std::vector<Size_t> subComponentTypes;
+            Vector<Size_t> subComponentTypes;
             for (Size_t i = 0; i < ComponentTypes.size(); ++i)
             {
                 if (predicate(ComponentTypes[i]))
@@ -179,7 +195,7 @@ namespace PNC
                     subComponentTypes.push_back(i);
                 }
             }
-            new (resultMemory) std::vector<Size_t>(std::move(subComponentTypes));
+            new (resultMemory) Vector<Size_t>(std::move(subComponentTypes));
         }
 
     private:

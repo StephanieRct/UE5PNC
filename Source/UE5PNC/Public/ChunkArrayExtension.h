@@ -52,5 +52,10 @@ namespace PNC
             , ChunkCount(chunkCount)
         {
         }
+        ~ChunkArrayExtensionT()
+        {
+            pnc_clean(Chunks);
+            pnc_clean(ChunkCount);
+        }
     };
 }

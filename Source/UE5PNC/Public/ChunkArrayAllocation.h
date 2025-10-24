@@ -21,9 +21,6 @@ namespace PNC
         using ChunkPointerElement_t = typename TBase::ChunkPointerElement_t;
 
     protected:
-        using ChunkPointerInternal_t = ChunkArrayPointerInternalT<ChunkStructure_t, ChunkPointerElement_t>;
-
-    protected:
         /// <summary>
         /// Maximum number of Nodes each Chunk can grow to.
         /// </summary>
@@ -113,48 +110,48 @@ namespace PNC
         /// <returns></returns>
         Size_t GetChunkCapacity()const { return ChunkCapacity; }
 
+        using Base_t::GetInternalChunk;
 
     protected:
-        ChunkPointerInternal_t& GetInternalChunk() { return (ChunkPointerInternal_t&)this->GetChunk(); }
-
+        
         void CopyChunkArray(const Self_t& o)
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             for (int i = 0; i < ChunkCapacity; ++i)
                 chunk.Array.Chunks[i] = ChunkPointerElement_t(chunk.Structure, o[i].GetNodeCount(), GetComponentDataForChunk(i));
         }
 
         void InitChunkArray(Size_t nodeCountPerChunk = 0)
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             if (chunk.IsNull())
                 for (int i = 0; i < ChunkCapacity; ++i)
-                    new(&chunk.Array.Chunks[i])ChunkPointerElement_t();
+                    new(&chunk.Array.Chunks[i]) ChunkPointerElement_t();
             else
                 for (int i = 0; i < ChunkCapacity; ++i)
-                    new(&chunk.Array.Chunks[i])ChunkPointerElement_t(chunk.Structure, nodeCountPerChunk, GetComponentDataForChunk(i));
+                    new(&chunk.Array.Chunks[i]) ChunkPointerElement_t(chunk.Structure, nodeCountPerChunk, GetComponentDataForChunk(i));
         }
 
         void** GetComponentDataForChunk(Size_t chunkIndex)
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             return &chunk.ComponentData[chunkIndex * chunk.Structure->Components.GetSize()];
         }
 
         void AllocateChunkArray()
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             chunk.Array.Chunks = (ChunkPointerElement_t*)FMemory::Malloc(ChunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
 
         void DeallocateChunkArray()
         {
-            FMemory::Free(GetInternalChunk().Array.Chunks);
+            FMemory::Free(GetInternalChunk(*this).Array.Chunks);
         }
 
         void AllocateComponentDataArray()
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             chunk.ComponentData = (void**)FMemory::Malloc(ChunkCapacity * chunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
@@ -166,7 +163,7 @@ namespace PNC
 
         void AllocateData()
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             assert_pnc(!chunk.IsNull());
             auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = GetNodeCapacityTotal();
@@ -183,9 +180,9 @@ namespace PNC
 
         void AllocateDataCopy(const Self_t& o)
         {
-            auto& chunk = (ChunkPointerInternal_t&)GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             assert_pnc(!chunk.IsNull());
-            assert_pnc(chunk.IsSameChunkStructure(*this, o));
+            assert_pnc(chunk.IsSameStructure(*this, o));
             auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = o.GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
@@ -201,7 +198,7 @@ namespace PNC
 
         void DeallocateData()
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             if (&chunk.Structure == nullptr)
                 return;
             auto componentCount = chunk.Structure->Components.GetSize();

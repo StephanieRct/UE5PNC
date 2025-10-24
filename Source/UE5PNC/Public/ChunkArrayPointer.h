@@ -13,7 +13,9 @@ namespace PNC
     /// effectively pointing to the first Chunk in the Array.
     /// </summary>
     /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
-    /// <typeparam name="TChunkPointerElement">Structure of the Chunk pointer in the Array.</typeparam>
+    /// <typeparam name="TChunkPointerElement">Structure of the Chunk pointer in the Array. 
+    ///     Must be a ChunkPointer (does not copy nodes when copied) rather than a Chunk (copy nodes when copied)
+    /// </typeparam>
     template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
     struct ChunkArrayPointerT : public ChunkPointerT<TChunkStructure>
     {
@@ -50,13 +52,11 @@ namespace PNC
         ChunkArrayExtension_t Array;
 
     public:
-        /// <summary>
-        /// Create a Null ChunkArrayPointer without ChunkStructure.
-        /// IsNull() will evaluate to true.
-        /// </summary>
-        ChunkArrayPointerT()
-        {
-        }
+        ChunkArrayPointerT() = default;
+        ChunkArrayPointerT(const Self_t& o) = default;
+        Self_t& operator=(const Self_t& o) = default;
+        ChunkArrayPointerT(Self_t&& o) = default;
+        Self_t& operator=(Self_t&& o) = default;
 
         /// <summary>
         /// Contructs from its member data fields.
@@ -98,9 +98,11 @@ namespace PNC
         const Chunk_t& GetChunk()const { return *this; }
         Chunk_t& GetChunk() { return *this; }
 
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
+        static ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(chunkPointer.Array.Chunks[index]); }
     protected:
-        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
-        ChunkPointerElementInternal_t GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
+        //ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+        //ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
         const ChunkArrayExtension_t& GetArrayExtension()const { return Array; }
         ChunkArrayExtension_t& GetArrayExtension() { return Array; }
     };

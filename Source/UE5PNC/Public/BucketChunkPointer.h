@@ -7,11 +7,11 @@
 namespace PNC
 {
     template<typename TBase>
-    struct BucketChunkT : public TBase
+    struct BucketChunkPointerT : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = BucketChunkT<TBase>;
+        using Self_t = BucketChunkPointerT<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
         using typename Base_t::ChunkPointer_t;
@@ -31,14 +31,14 @@ namespace PNC
         /// Create a Null Chunk without ChunkStructure.
         /// IsNull() will evaluate to true.
         /// </summary>
-        BucketChunkT()
+        BucketChunkPointerT()
             : Base_t()
             , NodeCapacity(0)
         {
         }
 
-        BucketChunkT(const Self_t& o) = default;
-        BucketChunkT(Self_t&& o) = default;
+        BucketChunkPointerT(const Self_t& o) = default;
+        BucketChunkPointerT(Self_t&& o) = default;
         Self_t& operator=(const Self_t& o) = default;
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace PNC
         /// <param name="chunkStructure">Structure of the Chunk's component data.</param>
         /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
         /// <param name="nodeCount"></param>
-        BucketChunkT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
+        BucketChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
             : Base_t(chunkStructure, nodeCount)
             , NodeCapacity(nodeCapacity)
         {
@@ -59,6 +59,7 @@ namespace PNC
         using TBase::GetChunk;
         using Base_t::operator*;
         using Base_t::operator->;
+        using TBase::GetInternalChunk;
 
         /// <summary>
         /// Get the maximum number of Nodes the Chunk can grow to.
@@ -80,7 +81,7 @@ namespace PNC
         Size_t AddNode() { return AddNodes(1); }
         Size_t AddNodes(const Size_t count)
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             assert_pnc(!chunk.IsNull());
             Size_t firstIndex = chunk.NodeCount;
             if (firstIndex + count <= NodeCapacity)
@@ -96,16 +97,20 @@ namespace PNC
             }
             return -1;
         }
+        
+        //Size_t RemoveNode(const Size_t firstNodexIndex, const Size_t nodeCount)
+        //{
+        //    Node_t::MoveNodeComponentsUnsafe(GetChunk(), firstIndex, count);
+        //}
 
         //Size_t RemoveNode(const Size_t count) // Remove from the end of the chunk
         void Clear()
         {
-            auto& chunk = GetInternalChunk();
+            auto& chunk = GetInternalChunk(*this);
             if (chunk.IsNull()) return;
             Node_t::DestructNode(GetChunk(), 0, chunk.NodeCount);
             chunk.NodeCount = 0;
         }
-    protected:
-        using TBase::GetInternalChunk;
+
     };
 }

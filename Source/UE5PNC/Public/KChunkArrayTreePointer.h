@@ -26,8 +26,10 @@ namespace PNC
         using Size_t = typename ChunkPointerElement_t::Size_t;
         using Chunk_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>; // Structure this pointer points to
 
+        using ChunkArrayPointer_t = Chunk_t;
         using ChunkArrayExtension_t = ChunkArrayExtensionT<ChunkStructure_t, ChunkPointerElement_t>;
-        using ChunkPointerInternal_t = ChunkArrayPointerT<TChunkStructure>::ChunkPointerInternal_t;
+
+        using ChunkPointerInternal_t = typename ChunkArrayPointer_t::ChunkPointerInternal_t;
         using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
 
     protected:
@@ -70,22 +72,24 @@ namespace PNC
         }
 
     public:
-        const ChunkPointerElement_t& operator[](Size_t index)const { return Array.Chunks[index]; }
-        ChunkPointerElement_t& operator[](Size_t index) { return Array.Chunks[index]; }
+
+        Size_t GetChunkCount()const { return Array.ChunkCount; }
         const Chunk_t& GetChunk(Size_t index)const { return Array.Chunks[index]; }
         Chunk_t& GetChunk(Size_t index) { return Array.Chunks[index]; }
+        const ChunkPointerElement_t& operator[](Size_t index)const { return Array.Chunks[index]; }
+        ChunkPointerElement_t& operator[](Size_t index) { return Array.Chunks[index]; }
+
+        const Chunk_t& GetChunk()const { return (const Chunk_t&)Base_t::GetChunk(); }
+        Chunk_t& GetChunk() { return (Chunk_t&)Base_t::GetChunk(); }
         const Chunk_t& operator*()const { return GetChunk(); }
         Chunk_t& operator*() { return GetChunk(); }
         const Chunk_t* operator->()const { return &GetChunk(); }
         Chunk_t* operator->() { return &GetChunk(); }
-        
-        const Chunk_t& GetChunk()const { return (const Chunk_t&)Base_t::GetChunk(); }
-        Chunk_t& GetChunk() { return (Chunk_t&)Base_t::GetChunk(); }
 
-        Size_t GetChunkCount()const { return Array.ChunkCount; }
-
-    protected:
-        ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
-        ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return ChunkArrayPointer_t::GetInternalChunk(chunkPointer.GetChunk()); }
+        static ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(chunkPointer.Array.Chunks[index]); }
+    //protected:
+    //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+    //    ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
     };
 }

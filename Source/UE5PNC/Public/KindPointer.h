@@ -57,6 +57,11 @@ namespace PNC
         }
 
     public:
+        // TODO: IsNull
+        // TODO: GetStructure
+        // TODO: GetComponentData
+        // TODO: GetNodeCount
+
         bool IsTree()const
         {
             switch (Kind)
