@@ -28,8 +28,7 @@ namespace PNC
 
     protected:
         /// <summary>
-        /// Create a Null Chunk without ChunkStructure.
-        /// IsNull() will evaluate to true.
+        /// Create a VoidNull Chunk.
         /// </summary>
         BucketChunkPointerT()
             : Base_t()
@@ -37,14 +36,10 @@ namespace PNC
         {
         }
 
-        BucketChunkPointerT(const Self_t& o) = default;
-        BucketChunkPointerT(Self_t&& o) = default;
-        Self_t& operator=(const Self_t& o) = default;
-
         /// <summary>
-        /// Create a Chunk of a given ChunkStructure and allocate the Component's memory
+        /// Create a StructData Chunk
         /// The Components' memory can fit as many instances of each Components as the Chunk's capacity.
-        /// Any computation performed on this Chunk will only process node within the chunk's Node count and not it's capacity.
+        /// Any computation performed on this Chunk must only process nodes within the chunk's NodeCount and not it's capacity.
         /// </summary>
         /// <param name="chunkStructure">Structure of the Chunk's component data.</param>
         /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
@@ -54,6 +49,24 @@ namespace PNC
             , NodeCapacity(nodeCapacity)
         {
         }
+
+        BucketChunkPointerT(Self_t&& o)
+            : Base_t(std::forward<Self_t>(o))
+            , NodeCapacity(o.NodeCapacity)
+        {
+            o.NodeCapacity = 0;
+        }
+
+        Self_t& operator=(Self_t&& o)
+        {
+            Base_t::operator=(std::forward<Self_t>(o));
+            NodeCapacity = o.NodeCapacity;
+            o.NodeCapacity = 0;
+        }
+
+        BucketChunkPointerT(const Self_t& o) = default;
+        Self_t& operator=(const Self_t& o) = default;
+
 
     public:
         using TBase::GetChunk;
@@ -67,11 +80,6 @@ namespace PNC
         /// <returns>The capacity of the chunk</returns>
         Size_t GetNodeCapacity()const { return NodeCapacity; }
 
-        /// <summary>
-        /// Create a Null Chunk without ChunkStructure nor Component data.
-        /// </summary>
-        /// <returns></returns>
-        static Self_t Null() { return Self_t(); }
 
         Size_t AvailableNodes()const
         {
@@ -82,7 +90,7 @@ namespace PNC
         Size_t AddNodes(const Size_t count)
         {
             auto& chunk = GetInternalChunk(*this);
-            assert_pnc(!chunk.IsNull());
+            pnc_assert(!chunk.IsNull());
             Size_t firstIndex = chunk.NodeCount;
             if (firstIndex + count <= NodeCapacity)
             {

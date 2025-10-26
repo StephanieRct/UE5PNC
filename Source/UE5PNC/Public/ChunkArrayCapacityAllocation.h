@@ -123,7 +123,7 @@ namespace PNC
         void** GetComponentDataArrayForChunk(const Size_t chunkIndex)
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            assert_pnc(!internalChunk.IsNull());
+            pnc_assert(!internalChunk.IsNull());
             return &internalChunk.ComponentData[chunkIndex * internalChunk.Structure->GetComponentCount()];
         }
 
@@ -179,7 +179,7 @@ namespace PNC
         void AllocateComponentDataArray()
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            assert_pnc(!internalChunk.IsNull());
+            pnc_assert(!internalChunk.IsNull());
             const Size_t chunkCapacity = GetChunkCapacity();
             internalChunk.ComponentData = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
@@ -187,7 +187,7 @@ namespace PNC
         void AllocateComponentData()
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            assert_pnc(!internalChunk.IsNull());
+            pnc_assert(!internalChunk.IsNull());
             const Size_t componentCount = internalChunk.Structure->Components.GetSize();
             const Size_t nodeCapacityTotal = GetNodeCapacityTotal();
             const Size_t chunkCapacity = GetChunkCapacity();
@@ -217,7 +217,7 @@ namespace PNC
         void DeallocateComponentData()
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            assert_pnc(!internalChunk.IsNull());
+            pnc_assert(!internalChunk.IsNull());
             Size_t componentCount = internalChunk.Structure->Components.GetSize();
             Size_t nodeCapacityTotal = GetNodeCapacityTotal();
             Size_t chunkCapacity = GetChunkCapacity();
@@ -231,7 +231,7 @@ namespace PNC
         void DeallocateComponentDataArray()
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            assert_pnc(!internalChunk.IsNull());
+            pnc_assert(!internalChunk.IsNull());
             Size_t chunkCapacity = GetChunkCapacity();
             pnc_free_clean(internalChunk.ComponentData, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }

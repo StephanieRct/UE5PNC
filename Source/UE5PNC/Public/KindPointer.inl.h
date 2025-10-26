@@ -23,8 +23,7 @@ namespace PNC
         case ChunkKind_ChunkArrayTree:
             return reinterpret_cast<const KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
-        checkNoEntry();
-        return *(Chunk_t*)nullptr;
+        pnc_assert_no_entry_return(*(Chunk_t*)nullptr);
     }
 
     template<typename TChunkStructure>
@@ -39,8 +38,7 @@ namespace PNC
         case ChunkKind_ChunkArrayTree:
             return reinterpret_cast<KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
-        checkNoEntry();
-        return *(Chunk_t*)nullptr;
+        pnc_assert_no_entry_return(*(Chunk_t*)nullptr);
     }
 
     template<typename TChunkStructure>
@@ -49,18 +47,15 @@ namespace PNC
         switch (this->Kind)
         {
         case ChunkKind_Chunk:
-            checkNoEntry();
-            break;
+            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
         case ChunkKind_ChunkArray:
             return reinterpret_cast<const KChunkArrayPointerT<ChunkPointer_t>*>(this)->GetChunk();
         case ChunkKind_ChunkTree:
-            checkNoEntry();
-            break;
+            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
         case ChunkKind_ChunkArrayTree:
             return reinterpret_cast<const KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
-        checkNoEntry();
-        return *(ChunkArray_t*)nullptr;
+        pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
     }
 
     template<typename TChunkStructure>
@@ -69,17 +64,14 @@ namespace PNC
         switch (this->Kind)
         {
         case ChunkKind_Chunk:
-            checkNoEntry();
-            break;
+            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
         case ChunkKind_ChunkArray:
             return reinterpret_cast<KChunkArrayPointerT<ChunkPointer_t>*>(this)->GetChunk();
         case ChunkKind_ChunkTree:
-            checkNoEntry();
-            break;
+            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
         case ChunkKind_ChunkArrayTree:
             return reinterpret_cast<KChunkArrayTreePointerT<ChunkPointer_t>*>(this)->GetChunk();
         }
-        checkNoEntry();
-        return *(ChunkArray_t*)nullptr;
+        pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
     }
 }

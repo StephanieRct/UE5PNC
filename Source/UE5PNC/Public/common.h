@@ -16,11 +16,40 @@
 #include <algorithm> 
 #include "CoreMinimal.h"
 
-#define PNC_MEMORYTRACKER
-#define PNC_MEMORYCLEANUP
+#ifdef WITH_EDITOR
+#   define PNC_ASSERT_THROW
+#   define PNC_MEMORYTRACKER
+#endif
+
+#ifdef UE_BUILD_DEBUG
+#   define PNC_MEMORYCLEANUP
+#endif
 
 
-#define assert_pnc check
+#define pnc_ensure ensure
+#define pnc_ensuref ensureMsgf
+
+
+#define PNC_STRINGIFY(x) #x
+#define PNC_TO_STRING(x) PNC_STRINGIFY(x)
+
+
+#define PNC_ASSERT_LOC(condition) "Condition: " #condition "\n" "Location: (" __FILE__ ":" PNC_TO_STRING(__LINE__) ")"
+
+#ifdef PNC_ASSERT_THROW
+#   define pnc_assert(isTrue) if(!(isTrue)) throw FString(PNC_ASSERT_LOC(isTrue))
+//#   define pnc_assert(isTrue) if(!(isTrue)) throw FString(#isTrue ## " (" ## __FILE__ ## ":" ## __LINE__ ##")")
+#   define pnc_assertf(isTrue, text, ...) if(!(isTrue)) throw FString::Printf(TEXT("Message: " text "\n" PNC_ASSERT_LOC(isTrue)), ##__VA_ARGS__)
+#   define pnc_assert_slow pnc_assert
+#   define pnc_assertf_slow pnc_assertf
+#   define pnc_assert_no_entry_return(expression) throw FString(TEXT("No Entry"))
+#else
+#   define pnc_assert check
+#   define pnc_assertf checkf
+#   define pnc_assert_slow checkSlow
+#   define pnc_assertf_slow checkfSlow
+#   define pnc_assert_no_entry_return(expression) checkNoEntry(); return (expression);
+#endif
 #define pnc_todo UE_LOG(LogTemp, Error, TEXT("TODO"))
 
 #ifdef PNC_MEMORYCLEANUP
@@ -28,7 +57,7 @@
 
 namespace PNC
 {
-    template<typename T>
+    template<typename T, bool isEnum = std::is_enum_v<T>>
     struct Cleaner
     {
         struct MissingCleanerForType
@@ -41,34 +70,46 @@ namespace PNC
     };
 
     template<typename T>
-    struct Cleaner<T&>
+    struct Cleaner<T&, false>
     {
         static T Clean(T& ptr)
         {
-            Cleaner<T>::Clean(ptr);
+            return Cleaner<T>::Clean(ptr);
         }
     };
 
     template<typename T>
-    struct Cleaner<T*>
+    struct Cleaner<T*, false>
     {
     public:
         static T* Clean(T*& ptr)
         {
-            auto* ptr2 = ptr;
+            T* ptr2 = ptr;
             ptr = nullptr;
             return ptr2;
         }
     };
 
     template<>
-    struct Cleaner<int>
+    struct Cleaner<int, false>
     {
     public:
         static int Clean(int& a)
         {
-            auto a2 = a;
+            int a2 = a;
             a = 0;
+            return a2;
+        }
+    };
+
+    template<typename T>
+    struct Cleaner<T, true>
+    {
+    public:
+        static T Clean(T& a)
+        {
+            T a2 = a;
+            a = (T)0;
             return a2;
         }
     };
@@ -119,33 +160,47 @@ namespace PNC
 #endif
 
 #ifdef PNC_MEMORYTRACKER
-#   define pnc_alloc(size, align) ::PNC::MemoryTracker<>::Allocate(size, align)
-#   define pnc_free_clean(ptr, size, align) ::PNC::MemoryTracker<>::Deallocate(pnc_clean(ptr), size, align);
-#   define pnc_free_dirty(ptr, size, align) ::PNC::MemoryTracker<>::Deallocate(ptr, size, align);
-#   define pnc_new(type) new (::PNC::MemoryTracker<>::Allocate<type>()) type
-#   define pnc_delete_clean(ptr) ::PNC::MemoryTracker<>::Delete(pnc_clean(ptr)); 
-#   define pnc_delete_dirty(ptr) ::PNC::MemoryTracker<>::Delete(ptr); 
-
+#   define pnc_alloc(size, align) ::PNC::MemoryTracker::Allocate(size, align)
+#   define pnc_free_clean(ptr, size, align) ::PNC::MemoryTracker::Deallocate(pnc_clean(ptr), size, align)
+#   define pnc_free_dirty(ptr, size, align) ::PNC::MemoryTracker::Deallocate(ptr, size, align)
+#   define pnc_new(type) new (::PNC::MemoryTracker::Allocate<type>()) type
+#   define pnc_delete_clean(ptr) ::PNC::MemoryTracker::Delete(pnc_clean(ptr))
+#   define pnc_delete_dirty(ptr) ::PNC::MemoryTracker::Delete(ptr)
+#   define pnc_assert_owns(ptr, count) pnc_assert(::PNC::MemoryTracker::Owns(ptr, count))
+#   define pnc_owns(ptr, count) ::PNC::MemoryTracker::Owns(ptr, count)
+#   define pnc_allocation_count ((std::size_t)PNC::MemoryTracker::AllocationCount)
 
 namespace PNC
 {
-    template<int tI=0>
-    struct MemoryTracker
+    UE5PNC_API struct MemoryTracker
     {
     public:
-        static std::atomic<std::size_t> AllocationCount;
-        static void* Allocate(std::size_t const size, std::size_t const alignment)
+        UE5PNC_API static std::map<uint8*, std::size_t> Allocations;
+        UE5PNC_API static std::atomic<std::size_t> AllocationCount;
+        
+        __declspec(noinline) static void* Allocate(std::size_t const size, std::size_t const alignment)
         {
             void* ptr = FMemory::Malloc(size, alignment);
             if (ptr)
+            {
                 ++AllocationCount;
+                Allocations.insert({ (uint8*)ptr, size });
+                UE_LOG(LogTemp, Log, TEXT("Alloc %016x (new count %d)"), ptr, AllocationCount.load());
+            }
             return ptr;
         }
-        static void Deallocate(void* const ptr, std::size_t const size, std::size_t const alignment)
+        __declspec(noinline) static void Deallocate(void* const ptr, std::size_t const size, std::size_t const alignment)
         {
-            assert_pnc(AllocationCount > 0);
-            if(ptr != nullptr)
+            if (ptr != nullptr)
+            {
+                pnc_assert(AllocationCount > 0);
                 --AllocationCount;
+
+                UE_LOG(LogTemp, Log, TEXT("Free  %016x (new count %d)"), ptr, AllocationCount.load());
+                auto it = Allocations.find((uint8*)ptr);
+                pnc_assert(it != Allocations.end());
+                Allocations.erase(it);
+            }
             FMemory::Free(ptr);
         }
 
@@ -164,16 +219,28 @@ namespace PNC
 
 
         template<typename T>
-        static void Delete(T* const ptr)
+        __declspec(noinline) static void Delete(T* const ptr)
         {
             ptr->~T();
             Deallocate(ptr);
         }
 
+        static bool Owns(const void*const ptr, const std::size_t size=1)
+        {
+            auto nearest = Allocations.lower_bound((uint8*)ptr);
+            if (nearest == Allocations.end())
+                return false;
+            uint8* nearestBegin = nearest->first;
+            uint8* nearestEnd = nearest->first + nearest->second;
+            uint8* end = (uint8*)ptr + size;
+            return nearestBegin <= ptr && nearestEnd >= end;
+        }
+        template<typename T>
+        static bool Owns(const T*const ptr, const std::size_t count)
+        {
+            return Owns((void*)ptr, sizeof(T) * count);
+        }
     };
-
-    template<int tI>
-    std::atomic<std::size_t> MemoryTracker<tI>::AllocationCount = 0;
 
     template<typename T = void>
     struct PncAllocator : public std::pointer_traits<T>
@@ -224,14 +291,18 @@ namespace PNC
 
     template<typename T>
     using List = std::list<T, PncAllocator<T>>;
+
 }
 #else
 #   define pnc_alloc(size, align) FMemory::Malloc(size, align)
-#   define pnc_free_dirty(ptr, size, align) FMemory::Free(ptr);
-#   define pnc_free_clean(ptr, size, align) FMemory::Free(pnc_clean(ptr));
+#   define pnc_free_dirty(ptr, size, align) FMemory::Free(ptr)
+#   define pnc_free_clean(ptr, size, align) FMemory::Free(pnc_clean(ptr))
 #   define pnc_new(type) new type
-#   define pnc_delete_dirty(ptr) delete ptr;
-#   define pnc_delete_clean(ptr) delete pnc_clean(ptr);
+#   define pnc_delete_dirty(ptr) delete ptr
+#   define pnc_delete_clean(ptr) delete pnc_clean(ptr)
+#   define pnc_assert_owns(ptr, count) 
+#   define pnc_owns(ptr, count) true
+#   define pnc_allocation_count ((std::size_t)0)
 
 template<int tI = 0>
 struct MemoryTracker
@@ -245,3 +316,25 @@ namespace PNC
     using HashSet = std::unordered_set<T>;
 }
 #endif
+
+
+namespace PNC
+{
+    template<typename T>
+    struct Deleter
+    {
+        void operator()(T* ptr)const
+        {
+            pnc_delete_dirty(ptr);
+        }
+    };
+
+    template<typename T>
+    using Unique_Ptr = std::unique_ptr<T, Deleter<T>>;
+
+    template<typename T, class... TArgumentTypes>
+    Unique_Ptr<T> Make_Unique(TArgumentTypes&&... args)
+    {
+        return Unique_Ptr<T>(pnc_new(T)(std::forward<TArgumentTypes>(args)...));
+    }
+}

@@ -83,9 +83,9 @@ namespace PNC
         template<typename TChunk>
         static void ConstructChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(firstChunkIndex >= 0);
-            assert_pnc(chunkCount >= 0);
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstChunkIndex >= 0);
+            pnc_assert(chunkCount >= 0);
 
             const ChunkStructure_t& chunkStructure = chunk.GetStructure();
             Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleChunkIndex.size();
@@ -100,9 +100,9 @@ namespace PNC
         template<typename TChunk>
         static void ConstructNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
         {
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(firstNodeIndex >= 0);
-            assert_pnc(nodeCount >= 0);
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
 
             const ChunkStructure_t& chunkStructure = chunk.GetStructure();
             Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleNodeIndex.size();
@@ -117,9 +117,9 @@ namespace PNC
         template<typename TChunk>
         static void DestructChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(firstChunkIndex >= 0);
-            assert_pnc(chunkCount >= 0);
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstChunkIndex >= 0);
+            pnc_assert(chunkCount >= 0);
 
             const ChunkStructure_t& chunkStructure = chunk.GetStructure();
             Size_t countDestructible = chunkStructure.DestructibleChunkIndex.size();
@@ -134,9 +134,9 @@ namespace PNC
         template<typename TChunk>
         static void DestructNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
         {
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(firstNodeIndex >= 0);
-            assert_pnc(nodeCount >= 0);
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
 
             const ChunkStructure_t& chunkStructure = chunk.GetStructure();
             Size_t countDestructible = chunkStructure.DestructibleNodeIndex.size();
@@ -154,9 +154,9 @@ namespace PNC
         //    void* const baseComponentDataTo, void* const baseComponentDataFrom,
         //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
         //{
-        //    //assert_pnc(!chunk.IsNull());
-        //    //assert_pnc(firstNodeIndex >= 0);
-        //    //assert_pnc(nodeCount >= 0);
+        //    //pnc_assert(!chunk.IsNull());
+        //    //pnc_assert(firstNodeIndex >= 0);
+        //    //pnc_assert(nodeCount >= 0);
         //    //
         //    //const ChunkStructure_t& chunkStructure = chunk.GetStructure();
         //    //Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleNodeIndex.size();
@@ -184,15 +184,15 @@ namespace PNC
             const Size_t firstNodeIndex, const Size_t nodeCount,
             const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(firstNodeIndex >= 0);
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(firstChunkIndex >= 0);
-            assert_pnc(chunkCount >= 0);
-            assert_pnc(firstNodeIndex < chunk.GetNodeCount());
-            assert_pnc(firstNodeIndex + nodeCount <= chunk.GetNodeCount());
-            assert_pnc(firstChunkIndex < chunk.GetChunkCount());
-            assert_pnc(firstChunkIndex + chunkCount <= chunk.GetChunkCount());
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstChunkIndex >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(firstNodeIndex < chunk.GetNodeCount());
+            pnc_assert(firstNodeIndex + nodeCount <= chunk.GetNodeCount());
+            pnc_assert(firstChunkIndex < chunk.GetChunkCount());
+            pnc_assert(firstChunkIndex + chunkCount <= chunk.GetChunkCount());
 
             const ChunkStructure_t& chunkStructure = chunk.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
@@ -208,15 +208,15 @@ namespace PNC
             const Size_t firstNodeIndex, const Size_t nodeCount,
             const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(firstNodeIndex >= 0);
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(firstChunkIndex >= 0);
-            assert_pnc(chunkCount >= 0);
-            assert_pnc(firstNodeIndex < chunk.GetNodeCount());
-            assert_pnc(firstNodeIndex + nodeCount <= chunk.GetNodeCount());
-            assert_pnc(firstChunkIndex < chunk.GetChunkCount());
-            assert_pnc(firstChunkIndex + chunkCount <= chunk.GetChunkCount());
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstChunkIndex >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(firstNodeIndex < chunk.GetNodeCount());
+            pnc_assert(firstNodeIndex + nodeCount <= chunk.GetNodeCount());
+            pnc_assert(firstChunkIndex < chunk.GetChunkCount());
+            pnc_assert(firstChunkIndex + chunkCount <= chunk.GetChunkCount());
 
             const ChunkStructure_t& chunkStructure = chunk.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
@@ -242,23 +242,23 @@ namespace PNC
             const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
             const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunkTo.IsNull());
-            assert_pnc(!chunkFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkTo, chunkFrom));
-            assert_pnc(firstNodeIndexTo >= 0);
-            assert_pnc(firstNodeIndexFrom >= 0);
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(firstChunkIndexTo >= 0);
-            assert_pnc(firstChunkIndexFrom >= 0);
-            assert_pnc(chunkCount >= 0);
-            assert_pnc(firstNodeIndexTo < chunkTo.GetNodeCount());
-            assert_pnc(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
-            assert_pnc(firstChunkIndexTo < chunkTo.GetChunkCount());
-            assert_pnc(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
-            assert_pnc(firstNodeIndexFrom < chunkFrom.GetNodeCount());
-            assert_pnc(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
-            assert_pnc(firstChunkIndexFrom < chunkFrom.GetChunkCount());
-            assert_pnc(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+            pnc_assert(firstNodeIndexTo >= 0);
+            pnc_assert(firstNodeIndexFrom >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstChunkIndexTo >= 0);
+            pnc_assert(firstChunkIndexFrom >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(firstNodeIndexTo < chunkTo.GetNodeCount());
+            pnc_assert(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
+            pnc_assert(firstChunkIndexTo < chunkTo.GetChunkCount());
+            pnc_assert(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
+            pnc_assert(firstNodeIndexFrom < chunkFrom.GetNodeCount());
+            pnc_assert(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
+            pnc_assert(firstChunkIndexFrom < chunkFrom.GetChunkCount());
+            pnc_assert(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
 
             const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
@@ -276,23 +276,23 @@ namespace PNC
             const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
             const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunkTo.IsNull());
-            assert_pnc(!chunkFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkTo, chunkFrom));
-            assert_pnc(firstNodeIndexTo >= 0);
-            assert_pnc(firstNodeIndexFrom >= 0);
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(firstChunkIndexTo >= 0);
-            assert_pnc(firstChunkIndexFrom >= 0);
-            assert_pnc(chunkCount >= 0);
-            assert_pnc(firstNodeIndexTo < chunkTo.GetNodeCount());
-            assert_pnc(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
-            assert_pnc(firstChunkIndexTo < chunkTo.GetChunkCount());
-            assert_pnc(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
-            assert_pnc(firstNodeIndexFrom < chunkFrom.GetNodeCount());
-            assert_pnc(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
-            assert_pnc(firstChunkIndexFrom < chunkFrom.GetChunkCount());
-            assert_pnc(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+            pnc_assert(firstNodeIndexTo >= 0);
+            pnc_assert(firstNodeIndexFrom >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstChunkIndexTo >= 0);
+            pnc_assert(firstChunkIndexFrom >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(firstNodeIndexTo < chunkTo.GetNodeCount());
+            pnc_assert(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
+            pnc_assert(firstChunkIndexTo < chunkTo.GetChunkCount());
+            pnc_assert(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
+            pnc_assert(firstNodeIndexFrom < chunkFrom.GetNodeCount());
+            pnc_assert(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
+            pnc_assert(firstChunkIndexFrom < chunkFrom.GetChunkCount());
+            pnc_assert(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
 
             const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
@@ -310,23 +310,23 @@ namespace PNC
             const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
             const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
         {
-            assert_pnc(!chunkTo.IsNull());
-            assert_pnc(!chunkFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkTo, chunkFrom));
-            assert_pnc(firstNodeIndexTo >= 0);
-            assert_pnc(firstNodeIndexFrom >= 0);
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(firstChunkIndexTo >= 0);
-            assert_pnc(firstChunkIndexFrom >= 0);
-            assert_pnc(chunkCount >= 0);
-            assert_pnc(firstNodeIndexTo < chunkTo.GetNodeCount());
-            assert_pnc(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
-            assert_pnc(firstChunkIndexTo < chunkTo.GetChunkCount());
-            assert_pnc(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
-            assert_pnc(firstNodeIndexFrom < chunkFrom.GetNodeCount());
-            assert_pnc(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
-            assert_pnc(firstChunkIndexFrom < chunkFrom.GetChunkCount());
-            assert_pnc(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+            pnc_assert(firstNodeIndexTo >= 0);
+            pnc_assert(firstNodeIndexFrom >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstChunkIndexTo >= 0);
+            pnc_assert(firstChunkIndexFrom >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(firstNodeIndexTo < chunkTo.GetNodeCount());
+            pnc_assert(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
+            pnc_assert(firstChunkIndexTo < chunkTo.GetChunkCount());
+            pnc_assert(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
+            pnc_assert(firstNodeIndexFrom < chunkFrom.GetNodeCount());
+            pnc_assert(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
+            pnc_assert(firstChunkIndexFrom < chunkFrom.GetChunkCount());
+            pnc_assert(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
 
             const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
@@ -348,16 +348,16 @@ namespace PNC
         static void CopyNodeComponentsForward(TChunkTo& chunkTo, const TChunkFrom& chunkFrom,
             const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
         {
-            assert_pnc(!chunkTo.IsNull());
-            assert_pnc(!chunkFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkTo, chunkFrom));
-            assert_pnc(firstNodeIndexTo >= 0);
-            assert_pnc(firstNodeIndexFrom >= 0);
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(firstNodeIndexTo < chunkTo.GetNodeCount());
-            assert_pnc(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
-            assert_pnc(firstNodeIndexFrom < chunkFrom.GetNodeCount());
-            assert_pnc(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+            pnc_assert(firstNodeIndexTo >= 0);
+            pnc_assert(firstNodeIndexFrom >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstNodeIndexTo < chunkTo.GetNodeCount());
+            pnc_assert(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
+            pnc_assert(firstNodeIndexFrom < chunkFrom.GetNodeCount());
+            pnc_assert(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
 
             const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
             Size_t componentCount = chunkStructure.NodeComponentIndex.size();
@@ -373,16 +373,16 @@ namespace PNC
         static void CopyChunkComponentsForward(TChunkTo& chunkTo, const TChunkFrom& chunkFrom,
             const Size_t firstChunkIndexTo, const Size_t firstChunkIndexFrom, const Size_t chunkCount)
         {
-            assert_pnc(!chunkTo.IsNull());
-            assert_pnc(!chunkFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkTo, chunkFrom));
-            assert_pnc(firstChunkIndexTo >= 0);
-            assert_pnc(firstChunkIndexFrom >= 0);
-            assert_pnc(chunkCount >= 0);
-            assert_pnc(firstChunkIndexTo < chunkTo.GetChunkCount());
-            assert_pnc(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
-            assert_pnc(firstChunkIndexFrom < chunkFrom.GetChunkCount());
-            assert_pnc(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+            pnc_assert(firstChunkIndexTo >= 0);
+            pnc_assert(firstChunkIndexFrom >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(firstChunkIndexTo < chunkTo.GetChunkCount());
+            pnc_assert(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
+            pnc_assert(firstChunkIndexFrom < chunkFrom.GetChunkCount());
+            pnc_assert(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
 
 
             const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
@@ -400,45 +400,45 @@ namespace PNC
 
         //static void DestructComponentUnsafe(const ComponentType_t& componentType, void* const componentData, const Size_t firstNodeIndex, const Size_t nodeCount)
         //{
-        //    assert_pnc(componentData);
-        //    assert_pnc(firstNodeIndex >= 0);
-        //    assert_pnc(nodeCount >= 0);
+        //    pnc_assert(componentData);
+        //    pnc_assert(firstNodeIndex >= 0);
+        //    pnc_assert(nodeCount >= 0);
         //    componentType.DestructNodesUnsafe(componentData, firstNodeIndex, nodeCount);
         //}
         //static void CopyComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
         //{
-        //    assert_pnc(componentDataTo);
-        //    assert_pnc(componentDataFrom);
-        //    assert_pnc(firstNodeIndexTo >= 0);
-        //    assert_pnc(firstNodeIndexFrom >= 0);
-        //    assert_pnc(nodeCount >= 0);
+        //    pnc_assert(componentDataTo);
+        //    pnc_assert(componentDataFrom);
+        //    pnc_assert(firstNodeIndexTo >= 0);
+        //    pnc_assert(firstNodeIndexFrom >= 0);
+        //    pnc_assert(nodeCount >= 0);
         //    componentType.CopyNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
         //}
         //static void MoveComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
         //{
-        //    assert_pnc(componentDataTo);
-        //    assert_pnc(componentDataFrom);
-        //    assert_pnc(firstNodeIndexTo >= 0);
-        //    assert_pnc(firstNodeIndexFrom >= 0);
-        //    assert_pnc(nodeCount >= 0);
+        //    pnc_assert(componentDataTo);
+        //    pnc_assert(componentDataFrom);
+        //    pnc_assert(firstNodeIndexTo >= 0);
+        //    pnc_assert(firstNodeIndexFrom >= 0);
+        //    pnc_assert(nodeCount >= 0);
         //    componentType.MoveNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
         //}
         //static void SwapComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
         //{
-        //    assert_pnc(componentDataTo);
-        //    assert_pnc(componentDataFrom);
-        //    assert_pnc(firstNodeIndexTo >= 0);
-        //    assert_pnc(firstNodeIndexFrom >= 0);
-        //    assert_pnc(nodeCount >= 0);
+        //    pnc_assert(componentDataTo);
+        //    pnc_assert(componentDataFrom);
+        //    pnc_assert(firstNodeIndexTo >= 0);
+        //    pnc_assert(firstNodeIndexFrom >= 0);
+        //    pnc_assert(nodeCount >= 0);
         //    componentType.SwapNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
         //}
 
         //template<typename TChunk>
         //static void ConstructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
         //{
-        //    assert_pnc(!chunk.IsNull());
-        //    assert_pnc(firstNodeIndex >= 0);
-        //    assert_pnc(nodeCount >= 0);
+        //    pnc_assert(!chunk.IsNull());
+        //    pnc_assert(firstNodeIndex >= 0);
+        //    pnc_assert(nodeCount >= 0);
 
         //    const ChunkStructure_t& chunkStructure = chunk.GetStructure();
         //    Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleIndex.size();
@@ -453,9 +453,9 @@ namespace PNC
         //template<typename TChunk>
         //static void DestructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
         //{
-        //    assert_pnc(!chunk.IsNull());
-        //    assert_pnc(firstNodeIndex >= 0);
-        //    assert_pnc(nodeCount >= 0);
+        //    pnc_assert(!chunk.IsNull());
+        //    pnc_assert(firstNodeIndex >= 0);
+        //    pnc_assert(nodeCount >= 0);
 
         //    const ChunkStructure_t& chunkStructure = chunk.GetStructure();
         //    Size_t countDestructible = chunkStructure.DestructibleIndex.size();

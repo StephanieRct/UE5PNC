@@ -53,7 +53,7 @@ namespace PNC
         static bool TryRun(const TRouter& router, TAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
         {
             auto& chunk = *chunkPtr;
-            assert_pnc(!chunk.IsNull());
+            pnc_assert(!chunk.IsNull());
             if (!router.RouteAlgorithm(algorithm, chunkPtr))
                 return false;
             algorithm.Execute(chunk.GetNodeCount());

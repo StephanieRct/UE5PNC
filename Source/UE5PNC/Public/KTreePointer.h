@@ -142,7 +142,7 @@ namespace PNC
         /// <param name="child">KTreePointer to move.</param>
         void InsertFirstChild(Self_t* child)
         {
-            assert_pnc(child->Tree.IsExtracted());
+            pnc_assert(child->Tree.IsExtracted());
             child->Tree.Parent = this;
             if (Tree.FirstChild == nullptr)
             {
@@ -163,7 +163,7 @@ namespace PNC
         /// <param name="child">KTreePointer to move.</param>
         void InsertLastChild(Self_t* child)
         {
-            assert_pnc(child->Tree.IsExtracted());
+            pnc_assert(child->Tree.IsExtracted());
             child->Tree.Parent = this;
             if (Tree.FirstChild == nullptr)
             {
@@ -183,7 +183,7 @@ namespace PNC
         /// <param name="sibling">KTreePointer to move.</param>
         void InsertPreviousSibling(Self_t* sibling)
         {
-            assert_pnc(sibling->Tree.IsExtracted());
+            pnc_assert(sibling->Tree.IsExtracted());
             auto last = Tree.PreviousSibling;
             last->Tree.NextSibling = sibling;
             sibling->Tree.PreviousSibling = last;

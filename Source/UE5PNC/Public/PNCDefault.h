@@ -118,15 +118,16 @@ namespace PNC
         using ComponentType_t = TComponentType;
 
     public:
-        Vector<std::unique_ptr<ComponentType_t>> ComponentTypes;
+        Vector<Unique_Ptr<ComponentType_t>> ComponentTypes;
         HashMap<const type_info*, Size_t> TypeToComponentTypeIndex;
 
     public:
         template<typename T>
         const ComponentType_t* AddComponentType()
         {
-            auto componentType = std::make_unique<ComponentType_t>((T*)nullptr, T::Owner);
-            auto ptr = componentType.get();
+            
+            auto componentType = Make_Unique<ComponentType_t>((T*)nullptr, T::Owner);
+            auto* ptr = componentType.get();
             ComponentTypes.push_back(std::move(componentType));
             TypeToComponentTypeIndex.insert({ &typeid(T), ComponentTypes.size() - 1 });
             return ptr;
@@ -164,12 +165,12 @@ namespace PNC
 
     public:
         // Keep an array of all our chunk structures
-        Vector<std::unique_ptr<ChunkStructure_t>> ChunkStructures;
+        Vector<Unique_Ptr<ChunkStructure_t>> ChunkStructures;
         HashMap< const ChunkStructure_t*, std::size_t, ChunkStructureHasher_t, ChunkStructureEqualler_t> ChunkStructureToIndex;
 
         const ChunkStructure_t* GetOrAddChunkStructure(const ComponentType_t* component)
         {
-            auto chunkStructure = std::make_unique<ChunkStructure_t>(component);
+            auto chunkStructure = Make_Unique<ChunkStructure_t>(component);
             auto ptr = chunkStructure.get();
             auto i = ChunkStructureToIndex.find(ptr);
             if (i != ChunkStructureToIndex.end())
@@ -181,7 +182,7 @@ namespace PNC
         // Add a chunk structure from a list of component type
         const ChunkStructure_t* GetOrAddChunkStructure(const std::initializer_list<const ComponentType_t*>& aComponents)
         {
-            auto chunkStructure = std::make_unique<ChunkStructure_t>(aComponents);
+            auto chunkStructure = Make_Unique<ChunkStructure_t>(aComponents);
             auto ptr = chunkStructure.get();
             auto i = ChunkStructureToIndex.find(ptr);
             if (i != ChunkStructureToIndex.end())
@@ -197,14 +198,9 @@ namespace PNC
         {
             Vector<const ComponentType_t*> componentTypes(sizeof...(TComponentTypes));
             Size_t c = 0;
-            //([&]()
-            //{
-            //    componentTypes[c++] = componentTypeRegistry.GetOrAddComponentType<TComponentTypes>();
-            //} (), ...);
-
             ((componentTypes[c++] = componentTypeRegistry.GetOrAddComponentType<TComponentTypes>()), ...);
 
-            auto chunkStructure = std::make_unique<ChunkStructure_t>(std::move(componentTypes));
+            auto chunkStructure = Make_Unique<ChunkStructure_t>(std::move(componentTypes));
             auto ptr = chunkStructure.get();
             auto i = ChunkStructureToIndex.find(ptr);
             if (i != ChunkStructureToIndex.end())
@@ -410,39 +406,39 @@ namespace PNC
     //public:
     //    const Component_t& operator[](const Size_t nodeIndex)const
     //    {
-    //        assert_pnc(nodeIndex >= 0);
-    //        assert_pnc(nodeIndex < GetNodeCount());
+    //        pnc_assert(nodeIndex >= 0);
+    //        pnc_assert(nodeIndex < GetNodeCount());
     //        return Component[nodeIndex];
     //    }
 
     //    Component_t& operator[](const Size_t nodeIndex)
     //    {
-    //        assert_pnc(nodeIndex >= 0);
-    //        assert_pnc(nodeIndex < GetNodeCount());
+    //        pnc_assert(nodeIndex >= 0);
+    //        pnc_assert(nodeIndex < GetNodeCount());
     //        return Component[nodeIndex];
     //    }
 
     //    const Component_t& operator*()const
     //    {
-    //        assert_pnc(GetNodeCount() > 0);
+    //        pnc_assert(GetNodeCount() > 0);
     //        return *Component;
     //    }
 
     //    Component_t& operator*()
     //    {
-    //        assert_pnc(GetNodeCount() > 0);
+    //        pnc_assert(GetNodeCount() > 0);
     //        return *Component;
     //    }
 
     //    const Component_t* operator->()const
     //    {
-    //        assert_pnc(GetNodeCount() > 0);
+    //        pnc_assert(GetNodeCount() > 0);
     //        return Component;
     //    }
 
     //    Component_t* operator->()
     //    {
-    //        assert_pnc(GetNodeCount() > 0);
+    //        pnc_assert(GetNodeCount() > 0);
     //        return Component;
     //    }
     //};
@@ -487,11 +483,11 @@ namespace PNC
         {
             if (chunk)
             {
-                assert_pnc(component);
+                pnc_assert(component);
             }
             else 
             {
-                assert_pnc(!component);
+                pnc_assert(!component);
             }
             Update();
         }
@@ -502,25 +498,25 @@ namespace PNC
         {
             if (!Chunk) return;
             Component = Chunk->GetComponentData<Component_t>();
-            assert_pnc(Component);
+            pnc_assert(Component);
         }
         Chunk_t* GetChunk()const { return Chunk; }
         Component_t& operator[](const Size_t nodeIndex)const
         {
-            assert_pnc(nodeIndex >= 0);
-            assert_pnc(nodeIndex < Chunk->GetNodeCount());
+            pnc_assert(nodeIndex >= 0);
+            pnc_assert(nodeIndex < Chunk->GetNodeCount());
             return Component[nodeIndex];
         }
 
         Component_t& operator*()const
         {
-            assert_pnc(Chunk->GetNodeCount() > 0);
+            pnc_assert(Chunk->GetNodeCount() > 0);
             return *Component;
         }
 
         Component_t* operator->()const
         {
-            assert_pnc(Chunk->GetNodeCount() > 0);
+            pnc_assert(Chunk->GetNodeCount() > 0);
             return Component;
         }
 

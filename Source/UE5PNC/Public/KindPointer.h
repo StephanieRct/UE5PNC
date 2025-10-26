@@ -56,6 +56,10 @@ namespace PNC
         {
         }
 
+        ~KindPointerT()
+        {
+            pnc_clean(Kind);
+        }
     public:
         // TODO: IsNull
         // TODO: GetStructure

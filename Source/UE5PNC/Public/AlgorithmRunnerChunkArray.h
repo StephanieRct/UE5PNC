@@ -59,7 +59,7 @@ namespace PNC
         static bool TryRun(const TRouter& router, Algorithm_t& algorithm, ChunkArrayPointer_t& chunkPtr)
         {
             auto& chunkArray = *chunkPtr;
-            assert_pnc(!chunkArray.IsNull());
+            pnc_assert(!chunkArray.IsNull());
             if (!router.RouteAlgorithm(algorithm, chunkPtr))
                 return false;
 
@@ -69,7 +69,7 @@ namespace PNC
                 auto nodeCount = chunk.GetNodeCount();
                 algorithm.Execute(nodeCount);
                 bool nextOk = algorithm.Requirements(Routing::OffsetAlgorithmNode<ChunkArrayPointer_t>(nodeCount));
-                assert_pnc(nextOk);
+                pnc_assert(nextOk);
             }
             return true;
         }

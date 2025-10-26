@@ -69,7 +69,7 @@ namespace PNC
         {
             if (!TryRun(chunkPointer))
             {
-                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
             }
         }
 
@@ -78,7 +78,7 @@ namespace PNC
         {
             if (!chunkPointer)
             {
-                checkf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
             }
             return Run(*chunkPointer);
         }
@@ -99,7 +99,7 @@ namespace PNC
         {
             if (!TryRun(router, chunkPointer))
             {
-                checkf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
             }
         }
 

@@ -227,10 +227,10 @@ namespace PNC
             , Align(align)
             , Owner(owner) 
         {
-            assert_pnc(TypeInfo != nullptr);
-            assert_pnc(Size > 0);
-            assert_pnc(Align > 0);
-            assert_pnc(Owner >= ComponentOwner__Begin && Owner < ComponentOwner__End);
+            pnc_assert(TypeInfo != nullptr);
+            pnc_assert(Size > 0);
+            pnc_assert(Align > 0);
+            pnc_assert(Owner >= ComponentOwner__Begin && Owner < ComponentOwner__End);
         }
 
         /// <summary>
@@ -246,8 +246,8 @@ namespace PNC
             , Align(alignof(T))
             , Owner(owner)
         {
-            assert_pnc(_nullptr == nullptr);
-            assert_pnc(owner >= ComponentOwner__Begin && owner < ComponentOwner__End);
+            pnc_assert(_nullptr == nullptr);
+            pnc_assert(owner >= ComponentOwner__Begin && owner < ComponentOwner__End);
 
             NodeConstruct = GetDefaultConstructor<Size_t, T, std::is_default_constructible<T>::value>::Get();
             NodeCopyForward = GetCopyConstructor<Size_t, T, std::is_copy_constructible<T>::value>::GetForward();
@@ -277,9 +277,10 @@ namespace PNC
 
         void ConstructComponentDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
         {
-            assert_pnc(!!baseComponentData);
-            assert_pnc(firstComponentIndex >= 0);
-            assert_pnc(count >= 0);
+            pnc_assert(!!baseComponentData);
+            pnc_assert(firstComponentIndex >= 0);
+            pnc_assert(count >= 0);
+            pnc_assert_owns(baseComponentData, count * Size);
 
             if (IsUserConstructible())
                 NodeConstruct(baseComponentData, firstComponentIndex, count);
@@ -294,9 +295,10 @@ namespace PNC
 
         void DestructComponentDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
         {
-            assert_pnc(!!baseComponentData);
-            assert_pnc(firstComponentIndex >= 0);
-            assert_pnc(count >= 0);
+            pnc_assert(!!baseComponentData);
+            pnc_assert(firstComponentIndex >= 0);
+            pnc_assert(count >= 0);
+            pnc_assert_owns(baseComponentData, count * Size);
             if (IsUserDestructible())
                 NodeDestruct(baseComponentData, firstComponentIndex, count);
         }
@@ -315,12 +317,14 @@ namespace PNC
                              const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, 
                              const Size_t count)const
         {
-            assert_pnc(!!baseComponentDataTo);
-            assert_pnc(!!baseComponentDataFrom);
-            assert_pnc(firstComponentIndexTo >= 0);
-            assert_pnc(firstComponentIndexFrom >= 0);
-            assert_pnc(count >= 0);
-            assert_pnc(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+            pnc_assert(!!baseComponentDataTo);
+            pnc_assert(!!baseComponentDataFrom);
+            pnc_assert(firstComponentIndexTo >= 0);
+            pnc_assert(firstComponentIndexFrom >= 0);
+            pnc_assert(count >= 0);
+            pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+            pnc_assert_owns(baseComponentDataTo, (firstComponentIndexTo + count) * Size);
+            pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsUserCopyable())
                 NodeCopyForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
@@ -356,12 +360,12 @@ namespace PNC
 
         //void MoveComponentDataForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
         //{
-        //    assert_pnc(!!baseComponentDataTo);
-        //    assert_pnc(!!baseComponentDataFrom);
-        //    assert_pnc(firstComponentIndexTo >= 0);
-        //    assert_pnc(firstComponentIndexFrom >= 0);
-        //    assert_pnc(count >= 0);
-        //    assert_pnc(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+        //    pnc_assert(!!baseComponentDataTo);
+        //    pnc_assert(!!baseComponentDataFrom);
+        //    pnc_assert(firstComponentIndexTo >= 0);
+        //    pnc_assert(firstComponentIndexFrom >= 0);
+        //    pnc_assert(count >= 0);
+        //    pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
 
         //    if (IsUserMovable())
         //        NodeMoveForward(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
@@ -374,12 +378,12 @@ namespace PNC
 
         //void SwapComponentDataForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
         //{
-        //    assert_pnc(!!baseComponentDataTo);
-        //    assert_pnc(!!baseComponentDataFrom);
-        //    assert_pnc(firstComponentIndexTo >= 0);
-        //    assert_pnc(firstComponentIndexFrom >= 0);
-        //    assert_pnc(count >= 0);
-        //    assert_pnc(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+        //    pnc_assert(!!baseComponentDataTo);
+        //    pnc_assert(!!baseComponentDataFrom);
+        //    pnc_assert(firstComponentIndexTo >= 0);
+        //    pnc_assert(firstComponentIndexFrom >= 0);
+        //    pnc_assert(count >= 0);
+        //    pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
 
         //    if (IsUserSwappable())
         //        NodeSwapForward(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
@@ -436,7 +440,7 @@ namespace PNC
         //    case ComponentOwner_Chunk:
         //        return ptr + Size;
         //    default:
-        //        checkNoEntry();
+        //        pnc_assert_no_entry();
         //        return -1;
         //    }
         //}
@@ -477,8 +481,7 @@ namespace PNC
             case ComponentOwner_Chunk:
                 return chunkIndex;
             default:
-                checkNoEntry();
-                return -1;
+                pnc_assert_no_entry_return(-1);
             }
         }
         Size_t GetComponentCount(const Size_t nodeCount, const Size_t chunkCount = 1)const

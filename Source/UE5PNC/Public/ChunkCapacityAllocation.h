@@ -22,10 +22,10 @@ namespace PNC
 
     public:
         /// <summary>
-        /// Create a Null Chunk without ChunkStructure.
-        /// IsNull() will evaluate to true.
+        /// Create a VoidNull Chunk
         /// </summary>
         ChunkCapacityAllocationT() = default;
+
 
         /// <summary>
         /// Create a Chunk of a given ChunkStructure and allocate the Component's memory
@@ -42,6 +42,9 @@ namespace PNC
             AllocateAndConstructData();
         }
 
+        ChunkCapacityAllocationT(Self_t&& o) = default;
+        Self_t& operator=(Self_t&& o) = default;
+
         /// <summary>
         /// Copy a Chunk and its Component data.
         /// The result chunk will have the same node count and capacity as the original.
@@ -50,7 +53,7 @@ namespace PNC
         ChunkCapacityAllocationT(const Self_t& chunkFrom)
             : Base_t(chunkFrom)
         {
-            checkf(!chunkFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk. Data cannot be copied without a structure."));
+            pnc_assertf(!chunkFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk. Data cannot be copied without a structure."));
             //TODO construct from null chunk
             if (chunkFrom.IsNull())
                 return;
@@ -69,19 +72,42 @@ namespace PNC
             if (this == &chunkFrom)
                 return *this;
 
-            checkf(!chunkFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk. Data cannot be copied without a structure."));
-            checkf(!this->IsVoidData(), TEXT("Cannot copy over a VoidData Chunk. Data cannot be destroyed without a structure."));
+            pnc_assertf(!chunkFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk without the Structure."));
+            pnc_assertf(!this->IsVoidData(), TEXT("Cannot copy over a VoidData Chunk without the Structure."));
 
             if (IsData())
             {
-                if (chunkFrom.IsData() && GetNodeCapacity() >= chunkFrom.GetNodeCount())
+                const Size_t nodeCountTo = GetNodeCount();
+                const Size_t nodeCountFrom = chunkFrom.GetNodeCount();
+                if (chunkFrom.IsData() && GetNodeCapacity() >= nodeCountFrom)
                 {
                     if (IsSameStructure(*this, chunkFrom))
                     {
-                        // ReplaceCopyNodes
+                        // TODO Investigate if calling the copy assignement on the component data that overlap would slow speed down or not
+                        //if (nodeCountTo > nodeCountFrom)
+                        //{
+                        //    const Size_t nodeCountToCopyAssign = nodeCountFrom;
+                        //    const Size_t nodeCountToDestroy = nodeCountTo - nodeCountFrom;
+                        //}
+                        //else if (nodeCountTo < nodeCountFrom)
+                        //{
+                        //    const Size_t nodeCountToCopyAssign = nodeCountTo;
+                        //    const Size_t nodeCountToCopyConstruct = nodeCountTo - nodeCountFrom;
+                        //}
+                        //else
+                        //{
+                        //    // copy assign all nodes
+                        //}
+
+                        DestructData();
+                        auto& internalChunk = GetInternalChunk(*this);
+                        auto keepComponentDataArray = internalChunk.ComponentData;
+                        Base_t::operator=(chunkFrom);
+                        internalChunk.ComponentData = keepComponentDataArray;
+                        CopyConstructData(*this, chunkFrom);
                         return *this;
                     }
-                    // TODO investigate if Restructuring could be done here.
+                    // TODO investigate if Restructuring could be done here. Would reuse the existing bufffers for common components
                     //else if (CanRestructure(*this, chunkFrom))
                     //{
                     //    ...
@@ -95,12 +121,8 @@ namespace PNC
 
             if (chunkFrom.IsData())
             {
-                if (chunkFrom.IsStruct())
-                {
-                    //CopyStruct, CopyCountCap, AllocCDataArray, AllocCData, CopyCtorNodes
-                    AllocateDataArray();
-                    AllocateDataCopy(*this, chunkFrom);
-                }
+                AllocateDataArray();
+                AllocateDataCopy(*this, chunkFrom);
             }
 
             return *this;
@@ -118,7 +140,7 @@ namespace PNC
         //    return *this;
         //}
 
-        //assert_pnc(IsSameStructure(*this, chunkFrom));
+        //pnc_assert(IsSameStructure(*this, chunkFrom));
         //
         //if (GetNodeCapacity() < chunkFrom.GetNodeCount())
         //{
@@ -146,9 +168,9 @@ namespace PNC
         /// <summary>
         /// Deallocate data if not a Null Chunk
         /// </summary>
-        ~ChunkCapacityAllocationT()
+        ~ChunkCapacityAllocationT() noexcept(false)
         {
-            checkf(!this->IsVoidData(), TEXT("A VoidData Chunk is being destructed. Data cannot be destructed and freed without a structure. Use force_structure."));
+            pnc_assertf(!this->IsVoidData(), TEXT("A VoidData Chunk is being destructed. Data cannot be destructed and freed without a structure. Use force_structure."));
             if(IsData())
                 Destroy();
         }
@@ -200,6 +222,17 @@ namespace PNC
 
 
 
+        void DestructData()
+        {
+            auto& chunk = GetInternalChunk(*this);
+
+            auto componentCount = chunk.Structure->GetComponentCount();
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *chunk.Structure->Components[i];
+                Node_t::DestructComponentUnsafe(componentType, chunk.ComponentData[i], 0, chunk.NodeCount);
+            }
+        }
 
 
 
@@ -209,7 +242,7 @@ namespace PNC
         void AllocateAndConstructData()
         {
             auto& chunk = GetInternalChunk(*this);
-            assert_pnc(!chunk.IsNull());
+            pnc_assert(!chunk.IsNull());
             auto componentCount = chunk.Structure->Components.GetSize();
             Size_t nodeCapacity = GetNodeCapacity();
             if (chunk.NodeCount == 0)
@@ -229,12 +262,12 @@ namespace PNC
 
         static void AllocateDataCopy(Self_t& chunkTo, const Self_t& chunkFrom)
         {
-            assert_pnc(!chunkTo.IsNull());
-            assert_pnc(!chunkFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkTo, chunkFrom));
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
 
             const ChunkStructure_t& structure = chunkTo.GetStructure();
-            const Size_t componentCount = structure.Components.GetSize();
+            const Size_t componentCount = structure.GetComponentCount();
             const Size_t nodeCapacity = chunkFrom.GetNodeCapacity();
             const Size_t nodeCount = chunkFrom.GetNodeCount();
 
@@ -247,6 +280,19 @@ namespace PNC
             }
         }
 
+        static void CopyConstructData(Self_t& chunkTo, const Self_t& chunkFrom)
+        {
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+            const ChunkStructure_t& structure = chunkTo.GetStructure();
+            const Size_t componentCount = structure.GetComponentCount();
+            const Size_t nodeCount = chunkFrom.GetNodeCount();
+            for (Size_t i = 0; i < componentCount; ++i)
+                Node_t::CopyComponentForwardUnsafe(*structure.Components[i], 
+                                                   chunkTo.  GetComponentData(i), 0, 
+                                                   chunkFrom.GetComponentData(i), 0, nodeCount);
+        }
 
         void AllocateDataArray()
         {

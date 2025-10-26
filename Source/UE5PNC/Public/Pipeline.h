@@ -62,7 +62,7 @@ namespace PNC
         {
             if (!TryRun(chunkPointer))
             {
-                checkf(false, TEXT("Could not run pipeline '%hs' on chunk '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run pipeline '%hs' on chunk '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TChunkPointer).name());
             }
         }
         template<typename TChunkPointer>

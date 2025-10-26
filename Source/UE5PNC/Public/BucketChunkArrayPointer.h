@@ -95,15 +95,15 @@ namespace PNC
         
         void ConstructChunkElementAndNodes(const Size_t chunkIndex, const Size_t nodeCount)
         {
-            assert_pnc(chunkIndex >= 0);
-            assert_pnc(chunkIndex < ChunkCapacity);
-            assert_pnc(chunkIndex < GetChunkCount());
+            pnc_assert(chunkIndex >= 0);
+            pnc_assert(chunkIndex < ChunkCapacity);
+            pnc_assert(chunkIndex < GetChunkCount());
 
-            assert_pnc(nodeCount >= 0);
-            assert_pnc(nodeCount <= NodeCapacityPerChunk);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(nodeCount <= NodeCapacityPerChunk);
 
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(*this);
-            assert_pnc(!internalChunkArray.IsNull());
+            pnc_assert(!internalChunkArray.IsNull());
 
             new(&internalChunkArray.Array.Chunks[chunkIndex]) ChunkPointerElement_t(internalChunkArray.Structure, nodeCount, GetComponentDataArrayForChunk(chunkIndex));
             ChunkPointerElementInternal_t& internalChunkElement = GetInternalChunkElement(*this, chunkIndex);
@@ -122,12 +122,12 @@ namespace PNC
 
         void DestructChunkElementAndNodes(const Size_t chunkIndex)
         {
-            assert_pnc(chunkIndex >= 0);
-            assert_pnc(chunkIndex < ChunkCapacity);
-            assert_pnc(chunkIndex < GetChunkCount());
+            pnc_assert(chunkIndex >= 0);
+            pnc_assert(chunkIndex < ChunkCapacity);
+            pnc_assert(chunkIndex < GetChunkCount());
 
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(*this);
-            assert_pnc(!internalChunkArray.IsNull());
+            pnc_assert(!internalChunkArray.IsNull());
 
             ChunkPointerElementInternal_t& internalChunkElement = GetInternalChunkElement(*this, chunkIndex);
             if (internalChunkElement.NodeCount > 0)
@@ -140,20 +140,20 @@ namespace PNC
         // Nodes must fit in target chunk.
         static void CopyElementAndNodesForward(const Self_t& chunkArrayTo, const Size_t elementFirstIndexTo, const Self_t& chunkArrayFrom, const Size_t elementFirstIndexFrom, const Size_t elementCount)
         {
-            assert_pnc(!chunkArrayTo.IsNull());
-            assert_pnc(!chunkArrayFrom.IsNull());
-            assert_pnc(IsSameStructure(chunkArrayTo, chunkArrayFrom));
-            assert_pnc(elementCount >= 0);
-            assert_pnc(elementFirstIndexTo >= 0);
-            assert_pnc(elementFirstIndexTo < chunkArrayTo.GetChunkCapacity());
-            assert_pnc(elementFirstIndexTo < chunkArrayTo.GetChunkCount());
-            assert_pnc(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCapacity());
-            assert_pnc(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCount());
-            assert_pnc(elementFirstIndexFrom >= 0);
-            assert_pnc(elementFirstIndexFrom < chunkArrayFrom.GetChunkCapacity());
-            assert_pnc(elementFirstIndexFrom < chunkArrayFrom.GetChunkCount());
-            assert_pnc(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCapacity());
-            assert_pnc(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCount());
+            pnc_assert(!chunkArrayTo.IsNull());
+            pnc_assert(!chunkArrayFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkArrayTo, chunkArrayFrom));
+            pnc_assert(elementCount >= 0);
+            pnc_assert(elementFirstIndexTo >= 0);
+            pnc_assert(elementFirstIndexTo < chunkArrayTo.GetChunkCapacity());
+            pnc_assert(elementFirstIndexTo < chunkArrayTo.GetChunkCount());
+            pnc_assert(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCapacity());
+            pnc_assert(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCount());
+            pnc_assert(elementFirstIndexFrom >= 0);
+            pnc_assert(elementFirstIndexFrom < chunkArrayFrom.GetChunkCapacity());
+            pnc_assert(elementFirstIndexFrom < chunkArrayFrom.GetChunkCount());
+            pnc_assert(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCapacity());
+            pnc_assert(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCount());
 
             for (Size_t i = 0; i < elementCount; ++i)
             {
@@ -164,7 +164,7 @@ namespace PNC
                 ChunkPointerElementInternal_t& internalElementTo = ChunkPointerElement_t::GetInternalChunk(elementTo);
                 ChunkPointerElementInternal_t& internalElementFrom = ChunkPointerElement_t::GetInternalChunk(elementFrom);
                 const Size_t nodeCountFrom = elementFrom.GetNodeCount();
-                assert_pnc(chunkArrayTo.NodeCapacityPerChunk >= nodeCountFrom);
+                pnc_assert(chunkArrayTo.NodeCapacityPerChunk >= nodeCountFrom);
 
                 // Copy chunk pointer element using copy asignment, will point to the data in the chunkArrayFrom
                 elementTo = elementFrom;
@@ -179,24 +179,24 @@ namespace PNC
         void MoveElementAndNodesForward(const Size_t chunkIndexTo, const Size_t chunkIndexFrom, const Size_t chunkCount, const Self_t& chunkArrayFrom)
         {
             pnc_todo;
-        //    assert_pnc(chunkIndexTo >= 0);
-        //    assert_pnc(chunkIndexTo < ChunkCapacity);
-        //    assert_pnc(chunkIndexTo + chunkCount < ChunkCapacity);
-        //    assert_pnc(chunkIndexTo < GetChunkCount());
-        //    assert_pnc(chunkIndexTo + chunkCount <= GetChunkCount());
-        //    assert_pnc(chunkIndexFrom >= 0);
-        //    assert_pnc(chunkIndexFrom < chunkArrayFrom.GetChunkCount());
-        //    assert_pnc(chunkIndexFrom + chunkCount <= chunkArrayFrom.GetChunkCount());
-        //    assert_pnc(chunkCount >= 0);
-        //    assert_pnc(!chunkArrayFrom.IsNull());
-        //    assert_pnc(IsSameStructure(*this, chunkArrayFrom));
+        //    pnc_assert(chunkIndexTo >= 0);
+        //    pnc_assert(chunkIndexTo < ChunkCapacity);
+        //    pnc_assert(chunkIndexTo + chunkCount < ChunkCapacity);
+        //    pnc_assert(chunkIndexTo < GetChunkCount());
+        //    pnc_assert(chunkIndexTo + chunkCount <= GetChunkCount());
+        //    pnc_assert(chunkIndexFrom >= 0);
+        //    pnc_assert(chunkIndexFrom < chunkArrayFrom.GetChunkCount());
+        //    pnc_assert(chunkIndexFrom + chunkCount <= chunkArrayFrom.GetChunkCount());
+        //    pnc_assert(chunkCount >= 0);
+        //    pnc_assert(!chunkArrayFrom.IsNull());
+        //    pnc_assert(IsSameStructure(*this, chunkArrayFrom));
 
         //    ChunkPointerElement_t& chunkElementTo = this->GetChunkElement(chunkIndexTo);
         //    ChunkPointerElement_t& chunkElementFrom = chunkArrayFrom->GetChunkElement(chunkIndexFrom);
         //    ChunkPointerElementInternal_t& internalChunkElementTo = ChunkPointerElement_t::GetInternalChunk(chunkElementTo);
         //    ChunkPointerElementInternal_t& internalChunkElementFrom = ChunkPointerElement_t::GetInternalChunk(chunkElementFrom);
         //    const Size_t nodeCountFrom = chunkElementFrom.GetNodeCount();
-        //    assert_pnc(NodeCapacityPerChunk >= nodeCountFrom);
+        //    pnc_assert(NodeCapacityPerChunk >= nodeCountFrom);
 
         //    // Move Chunk
         //    chunkElementTo = std::move(chunkElementFrom);
@@ -211,17 +211,17 @@ namespace PNC
         {
             pnc_todo;
         //    
-        //    assert_pnc(chunkIndexTo >= 0);
-        //    assert_pnc(chunkIndexTo < ChunkCapacity);
-        //    assert_pnc(chunkIndexTo + chunkCount < ChunkCapacity);
-        //    assert_pnc(chunkIndexTo < GetChunkCount());
-        //    assert_pnc(chunkIndexTo + chunkCount <= GetChunkCount());
-        //    assert_pnc(chunkIndexFrom >= 0);
-        //    assert_pnc(chunkIndexFrom < chunkArrayFrom.GetChunkCount());
-        //    assert_pnc(chunkIndexFrom + chunkCount <= chunkArrayFrom.GetChunkCount());
-        //    assert_pnc(chunkCount >= 0);
-        //    assert_pnc(!chunkArrayFrom.IsNull());
-        //    assert_pnc(IsSameStructure(*this, chunkArrayFrom));
+        //    pnc_assert(chunkIndexTo >= 0);
+        //    pnc_assert(chunkIndexTo < ChunkCapacity);
+        //    pnc_assert(chunkIndexTo + chunkCount < ChunkCapacity);
+        //    pnc_assert(chunkIndexTo < GetChunkCount());
+        //    pnc_assert(chunkIndexTo + chunkCount <= GetChunkCount());
+        //    pnc_assert(chunkIndexFrom >= 0);
+        //    pnc_assert(chunkIndexFrom < chunkArrayFrom.GetChunkCount());
+        //    pnc_assert(chunkIndexFrom + chunkCount <= chunkArrayFrom.GetChunkCount());
+        //    pnc_assert(chunkCount >= 0);
+        //    pnc_assert(!chunkArrayFrom.IsNull());
+        //    pnc_assert(IsSameStructure(*this, chunkArrayFrom));
 
         //    ChunkPointerElement_t& chunkElementTo = this->GetChunkElement(chunkIndexTo);
         //    ChunkPointerElement_t& chunkElementFrom = chunkArrayFrom->GetChunkElement(chunkIndexFrom);
@@ -229,10 +229,10 @@ namespace PNC
         //    ChunkPointerElementInternal_t& internalChunkElementFrom = ChunkPointerElement_t::GetInternalChunk(chunkElementFrom);
         //    const Size_t nodeCountTo = chunkElementTo.GetNodeCount();
         //    const Size_t nodeCountFrom = chunkElementFrom.GetNodeCount();
-        //    assert_pnc(NodeCapacityPerChunk >= nodeCountFrom);
-        //    assert_pnc(chunkArrayFrom.NodeCapacityPerChunk >= nodeCountFrom);
+        //    pnc_assert(NodeCapacityPerChunk >= nodeCountFrom);
+        //    pnc_assert(chunkArrayFrom.NodeCapacityPerChunk >= nodeCountFrom);
 
-        //    assert_pnc(false);
+        //    pnc_assert(false);
         //    //// Swap Chunk
         //    //chunkElementTo.Swap(chunkElementFrom);
         //    //
@@ -246,9 +246,9 @@ namespace PNC
 
         //void ConstructElementNode(const Size_t chunkIndex, const Size_t nodeCount)
         //{
-        //    assert_pnc(chunkIndex < ChunkCapacity);
-        //    assert_pnc(chunkIndex < GetChunkCount());// Element be constructed before the ChunkCount includes it.
-        //    assert_pnc(chunkIndex * NodeCapacityPerChunk + nodeCount < GetNodeCapacityTotal());
+        //    pnc_assert(chunkIndex < ChunkCapacity);
+        //    pnc_assert(chunkIndex < GetChunkCount());// Element be constructed before the ChunkCount includes it.
+        //    pnc_assert(chunkIndex * NodeCapacityPerChunk + nodeCount < GetNodeCapacityTotal());
 
         //    ChunkPointerInternal_t& internal = GetInternalChunk(*this);
         //    if (nodeCount > 0)

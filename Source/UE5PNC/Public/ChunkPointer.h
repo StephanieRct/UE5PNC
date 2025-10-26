@@ -38,24 +38,17 @@ namespace PNC
         using Chunk_t = ChunkPointerT;
 
     public:
-        ChunkPointerT() = default;
-        ChunkPointerT(const Self_t& o) = default;
-        Self_t& operator=(const Self_t& o) = default;
+        using Base_t::Base_t;
+
         ChunkPointerT(Self_t&& o) = default;
         Self_t& operator=(Self_t&& o) = default;
-
-        /// <summary>
-        /// Contructs from its member data fields.
-        /// </summary>
-        /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
-        /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
-        /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
-        ChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void** const componentData)
-            : Base_t(chunkStructure, nodeCount, componentData)
-        {
-        }
+        ChunkPointerT(const Self_t& o) = default;
+        Self_t& operator=(const Self_t& o) = default;
 
     protected:
+        /// <summary>
+        /// Create a StructNull Chunk with a node count.
+        /// </summary>
         ChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount)
             : Base_t(chunkStructure, nodeCount)
         {
@@ -99,7 +92,7 @@ namespace PNC
         /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(const Size_t componentTypeIndexInChunk)
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             return this->ComponentData[componentTypeIndexInChunk];
         }
 
@@ -113,7 +106,7 @@ namespace PNC
         /// <returns>Const pointer to the component memory array</returns>
         const void* GetComponentData(const Size_t componentTypeIndexInChunk)const
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             return this->ComponentData[componentTypeIndexInChunk];
         }
 
@@ -128,7 +121,7 @@ namespace PNC
         /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(const type_info* const componentType)
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             auto index = this->Structure->Components.GetComponentTypeIndexInChunk(componentType);
             if (index < 0)
                 return nullptr;
@@ -146,7 +139,7 @@ namespace PNC
         /// <returns>Const pointer to the component memory array</returns>
         const void* GetComponentData(const type_info* const componentType)const
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             auto index = this->Structure->Components.GetComponentTypeIndexInChunk(componentType);
             if (index < 0)
                 return nullptr;
@@ -166,7 +159,7 @@ namespace PNC
         template<typename TComponent>
         TComponent* GetComponentData()
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             return (TComponent*)this->GetComponentData(&typeid(TComponent));
         }
 
@@ -182,7 +175,7 @@ namespace PNC
         template<typename TComponent>
         const TComponent* GetComponentData()const
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             return (TComponent*)this->GetComponentData(&typeid(TComponent));
         }
 
@@ -193,10 +186,13 @@ namespace PNC
         /// <param name="b"></param>
         /// <returns></returns>
         static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Structure == b.Structure; }
+        static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentData == b.ComponentData; }
 
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
     //protected:
     //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
+
+
 
     };
 }

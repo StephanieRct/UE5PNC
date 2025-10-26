@@ -38,8 +38,7 @@ namespace PNC
 
     public:
         /// <summary>
-        /// Create a null ChunkRefT without structure nor data.
-        /// IsNull() will evaluate to true.
+        /// Create a VoidNull Chunk.
         /// </summary>
         ChunkPointerInternalT()
             : Structure(nullptr)
@@ -48,8 +47,48 @@ namespace PNC
         {
         }
 
-        ChunkPointerInternalT(const Self_t& o) = default;
-        Self_t& operator=(const Self_t& o) = default;
+        /// <summary>
+        /// Create a StructNull Chunk.
+        /// </summary>
+        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure)
+            : Structure(chunkStructure)
+            , ComponentData(nullptr)
+            , NodeCount(0)
+        {
+        }
+
+        /// <summary>
+        /// Create a StructNull Chunk with a node count.
+        /// </summary>
+        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, const Size_t nodeCount)
+            : Structure(chunkStructure)
+            , ComponentData(nullptr)
+            , NodeCount(nodeCount)
+        {
+        }
+
+        /// <summary>
+        /// Create a VoidData Chunk
+        /// </summary>
+        ChunkPointerInternalT(const Size_t nodeCount, void** const componentData)
+            : Structure(nullptr)
+            , ComponentData(componentData)
+            , NodeCount(nodeCount)
+        {
+        }
+
+        /// <summary>
+        /// Create a StructData Chunk
+        /// </summary>
+        /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
+        /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
+        /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
+        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, const Size_t nodeCount, void** const componentData)
+            : Structure(chunkStructure)
+            , ComponentData(componentData)
+            , NodeCount(nodeCount)
+        {
+        }
 
         ChunkPointerInternalT(Self_t&& o)
             : Structure(o.Structure)
@@ -60,6 +99,7 @@ namespace PNC
             o.ComponentData = nullptr;
             o.NodeCount = 0;
         }
+
         Self_t& operator=(Self_t&& o)
         {
             Structure = o.Structure;
@@ -68,28 +108,11 @@ namespace PNC
             o.Structure = nullptr;
             o.ComponentData = nullptr;
             o.NodeCount = 0;
+            return *this;
         }
 
-        Self_t& Swap(Self_t& o)
-        {
-            std::swap(Structure, o.Structure);
-            std::swap(ComponentData, o.ComponentData);
-            std::swap(NodeCount, o.NodeCount);
-        }
-
-        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
-            : Structure(chunkStructure)
-            , ComponentData(componentData)
-            , NodeCount(nodeCount)
-        {
-        }
-
-        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, Size_t nodeCount)
-            : Structure(chunkStructure)
-            , ComponentData(nullptr)
-            , NodeCount(nodeCount)
-        {
-        }
+        ChunkPointerInternalT(const Self_t& o) = default;
+        Self_t& operator=(const Self_t& o) = default;
 
         ~ChunkPointerInternalT()
         {
@@ -101,7 +124,7 @@ namespace PNC
         bool IsVoid()const { return Structure == nullptr; }
         bool IsStruct()const { return Structure != nullptr; }
         bool IsNull()const { return ComponentData == nullptr; }
-        bool IsData()const { return ComponentData == nullptr; }
+        bool IsData()const { return ComponentData != nullptr; }
         bool IsVoidNull()const { return Structure == nullptr && ComponentData == nullptr; }
         bool IsVoidData()const { return Structure == nullptr && ComponentData != nullptr; }
         bool IsStructNull()const { return Structure != nullptr && ComponentData == nullptr; }
@@ -125,7 +148,7 @@ namespace PNC
 
         void* GetComponentData(const Size_t componentTypeIndexInChunk)
         {
-            assert_pnc(!IsNull());
+            pnc_assert(!IsNull());
             return this->ComponentData[componentTypeIndexInChunk];
         }
 

@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UE5PNC.h"
+#include "UE5PNC/public/common.h"
 
 #define LOCTEXT_NAMESPACE "FUE5PNCModule"
 
@@ -18,3 +19,13 @@ void FUE5PNCModule::ShutdownModule()
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FUE5PNCModule, UE5PNC)
+
+
+namespace PNC
+{
+
+
+	std::atomic<std::size_t> MemoryTracker::AllocationCount = 0;
+
+	std::map<uint8*, std::size_t> MemoryTracker::Allocations;
+}

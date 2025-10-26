@@ -45,6 +45,13 @@ namespace PNC
 
     public:
         ChunkTreeNodeT() = default;
+        ~ChunkTreeNodeT()
+        {
+            pnc_clean(Parent);
+            pnc_clean(FirstChild);
+            pnc_clean(PreviousSibling);
+            pnc_clean(NextSibling);
+        }
         //ChunkTreeNodeT(Self_t&& o)
         //    : Parent(o.Parent)
         //    , FirstChild(o.FirstChild)

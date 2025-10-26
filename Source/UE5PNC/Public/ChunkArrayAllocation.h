@@ -164,7 +164,7 @@ namespace PNC
         void AllocateData()
         {
             auto& chunk = GetInternalChunk(*this);
-            assert_pnc(!chunk.IsNull());
+            pnc_assert(!chunk.IsNull());
             auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
@@ -181,8 +181,8 @@ namespace PNC
         void AllocateDataCopy(const Self_t& o)
         {
             auto& chunk = GetInternalChunk(*this);
-            assert_pnc(!chunk.IsNull());
-            assert_pnc(chunk.IsSameStructure(*this, o));
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(chunk.IsSameStructure(*this, o));
             auto componentCount = chunk.Structure->Components.GetSize();
             auto nodeCapacityTotal = o.GetNodeCapacityTotal();
             for (size_t i = 0; i < componentCount; ++i)
