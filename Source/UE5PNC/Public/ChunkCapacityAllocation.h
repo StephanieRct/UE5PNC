@@ -42,8 +42,17 @@ namespace PNC
             AllocateAndConstructData();
         }
 
-        ChunkCapacityAllocationT(Self_t&& o) = default;
-        Self_t& operator=(Self_t&& o) = default;
+        ChunkCapacityAllocationT(Self_t&& chunkFrom) = default;
+        Self_t& operator=(Self_t&& chunkFrom)
+        {
+            if (this == &chunkFrom)
+                return *this;
+            pnc_assertf(!IsVoidData(), TEXT("Cannot move over a VoidData Chunk without the Structure."));
+            if (IsData())
+                Destroy();
+            Base_t::operator=(std::forward<Self_t>(chunkFrom));
+            return *this;
+        }
 
         /// <summary>
         /// Copy a Chunk and its Component data.
@@ -245,19 +254,12 @@ namespace PNC
             pnc_assert(!chunk.IsNull());
             auto componentCount = chunk.Structure->Components.GetSize();
             Size_t nodeCapacity = GetNodeCapacity();
-            if (chunk.NodeCount == 0)
-                for (Size_t i = 0; i < componentCount; ++i)
-                {
-                    const ComponentType_t& componentType = *chunk.Structure->Components[i];
-                    chunk.ComponentData[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
-                }
-            else
-                for (Size_t i = 0; i < componentCount; ++i)
-                {
-                    const ComponentType_t& componentType = *chunk.Structure->Components[i];
-                    chunk.ComponentData[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
-                    Node_t::ConstructComponentUnsafe(componentType, chunk.ComponentData[i], 0, chunk.NodeCount);
-                }
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *chunk.Structure->Components[i];
+                chunk.ComponentData[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
+                Node_t::ConstructComponentUnsafe(componentType, chunk.ComponentData[i], 0, chunk.NodeCount);
+            }
         }
 
         static void AllocateDataCopy(Self_t& chunkTo, const Self_t& chunkFrom)
@@ -276,7 +278,9 @@ namespace PNC
             {
                 const ComponentType_t& componentType = *structure.Components[i];
                 componentDataArrayTo[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
-                Node_t::CopyComponentForwardUnsafe(componentType, componentDataArrayTo[i], 0, chunkFrom.GetComponentData(i), 0, nodeCount);
+                Node_t::CopyComponentForwardUnsafe(componentType, componentDataArrayTo[i],       0, 
+                                                                  chunkFrom.GetComponentData(i), 0, 
+                                                                  nodeCount);
             }
         }
 

@@ -102,12 +102,15 @@ namespace PNC
 
         Self_t& operator=(Self_t&& o)
         {
-            Structure = o.Structure;
-            ComponentData = o.ComponentData;
-            NodeCount = o.NodeCount;
+            auto tmpStructure = o.Structure;
+            auto tmpComponentData = o.ComponentData;
+            auto tmpNodeCount = o.NodeCount;
             o.Structure = nullptr;
             o.ComponentData = nullptr;
             o.NodeCount = 0;
+            Structure = tmpStructure;
+            ComponentData = tmpComponentData;
+            NodeCount = tmpNodeCount;
             return *this;
         }
 

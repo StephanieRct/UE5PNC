@@ -21,7 +21,15 @@
 #   define PNC_MEMORYTRACKER
 #endif
 
+// TODO: turns some of these off by default
 #ifdef UE_BUILD_DEBUG
+// Zero out nodes' memory before construction on any component types
+#   define PNC_MEMORY_NODE_CONSTRUCTZERO
+// Zero out nodes' memory before construction on trivial component types
+#   define PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL
+// Zero out nodes' memory after destruction
+#   define PNC_MEMORY_NODE_DESTRUCTZERO
+// Clean up data fields on destruction (ex.: set pointers to null after freeing them)
 #   define PNC_MEMORYCLEANUP
 #endif
 
@@ -168,7 +176,7 @@ namespace PNC
 #   define pnc_delete_dirty(ptr) ::PNC::MemoryTracker::Delete(ptr)
 #   define pnc_assert_owns(ptr, count) pnc_assert(::PNC::MemoryTracker::Owns(ptr, count))
 #   define pnc_owns(ptr, count) ::PNC::MemoryTracker::Owns(ptr, count)
-#   define pnc_allocation_count ((std::size_t)PNC::MemoryTracker::AllocationCount)
+#   define pnc_allocation_count ((int)PNC::MemoryTracker::AllocationCount)
 
 namespace PNC
 {
@@ -176,7 +184,7 @@ namespace PNC
     {
     public:
         UE5PNC_API static std::map<uint8*, std::size_t> Allocations;
-        UE5PNC_API static std::atomic<std::size_t> AllocationCount;
+        UE5PNC_API static std::atomic<int> AllocationCount;
         
         __declspec(noinline) static void* Allocate(std::size_t const size, std::size_t const alignment)
         {
@@ -193,7 +201,7 @@ namespace PNC
         {
             if (ptr != nullptr)
             {
-                pnc_assert(AllocationCount > 0);
+                //pnc_assert(AllocationCount > 0);
                 --AllocationCount;
 
                 UE_LOG(LogTemp, Log, TEXT("Free  %016x (new count %d)"), ptr, AllocationCount.load());

@@ -17,17 +17,208 @@ namespace PNC
         using Size_t = typename ChunkStructure_t::Size_t;
 
     public:
+        
+        // can be called before index at (firstChunkIndex + chunkCount) is included by the chunk ChunkCount, 
+        // making this function unsafe.
+        template<typename TChunk>
+        static void ConstructAllChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
+        {
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstChunkIndex >= 0);
+            pnc_assert(chunkCount >= 0);
+
+            if (chunkCount == 0) return;
+
+            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
+#if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) || defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
+            Size_t componentTypeCount = chunkStructure.ChunkComponentIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.ChunkComponentIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk->GetComponentData(index);
+                componentType->ConstructDataUnsafe(componentData, firstChunkIndex, chunkCount);
+            }
+#else
+            Size_t componentTypeCount = chunkStructure.DefaultConstructibleChunkIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.DefaultConstructibleChunkIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk->GetComponentData(index);
+                componentType->ConstructDataUnsafe(componentData, firstChunkIndex, chunkCount);
+            }
+#endif
+        }
+
+        // can be called before index at (firstNodeIndex + nodeCount) is included by the chunk NodeCount, 
+        // making this function unsafe.
+        template<typename TChunk>
+        static void ConstructAllNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
+        {
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
+
+            if (nodeCount == 0) return;
+
+            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
+#if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) || defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
+            Size_t componentTypeCount = chunkStructure.NodeComponentIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.NodeComponentIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk.GetComponentData(index);
+                componentType->ConstructDataUnsafe(componentData, firstNodeIndex, nodeCount);
+            }
+#else
+            Size_t componentTypeCount = chunkStructure.DefaultConstructibleNodeIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.DefaultConstructibleNodeIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk.GetComponentData(index);
+                componentType->ConstructDataUnsafe(componentData, firstNodeIndex, nodeCount);
+            }
+#endif
+        }
+
+        template<typename TChunk>
+        static void DestructAllChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
+        {
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstChunkIndex >= 0);
+            pnc_assert(chunkCount >= 0);
+
+            if (chunkCount == 0) return;
+
+            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
+#if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) || defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
+            Size_t componentTypeCount = chunkStructure.ChunkComponentIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.ChunkComponentIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk.GetComponentData(index);
+                componentType->DestructDataUnsafe(componentData, firstChunkIndex, chunkCount);
+            }
+#else
+            Size_t componentTypeCount = chunkStructure.DestructibleChunkIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.DestructibleChunkIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk.GetComponentData(index);
+                componentType->DestructDataUnsafe(componentData, firstChunkIndex, chunkCount);
+            }
+#endif
+        }
+
+        template<typename TChunk>
+        static void DestructAllNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
+        {
+            pnc_assert(!chunk.IsNull());
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
+
+            if (nodeCount == 0) return;
+
+            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
+#if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) || defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
+            Size_t componentTypeCount = chunkStructure.NodeComponentIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.NodeComponentIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk.GetComponentData(index);
+                componentType->DestructDataUnsafe(componentData, firstNodeIndex, nodeCount);
+            }
+#else
+            Size_t componentTypeCount = chunkStructure.DestructibleNodeIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.DestructibleNodeIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentData = chunk.GetComponentData(index);
+                componentType->DestructDataUnsafe(componentData, firstNodeIndex, nodeCount);
+            }
+#endif
+        }
+
+        template<typename TChunk>
+        static void MoveAllNodeComponentsForwardUnsafe(TChunk& chunkTo,   const Size_t firstNodeIndexTo, 
+                                                       TChunk& chunkFrom, const Size_t firstNodeIndexFrom, 
+                                                       const Size_t nodeCount)
+        {
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(firstNodeIndexTo >= 0);
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(firstNodeIndexFrom >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+
+            if (nodeCount == 0) return;
+
+            const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
+            Size_t componentTypeCount = chunkStructure.NodeComponentIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.NodeComponentIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentDataTo = chunkTo.GetComponentData(index);
+                void* componentDataFrom = chunkFrom.GetComponentData(index);
+                componentType->MoveDataForwardUnsafe(componentDataTo,   firstNodeIndexTo,
+                                                     componentDataFrom, firstNodeIndexFrom, 
+                                                     nodeCount);
+            }
+        }
+        
+        template<typename TChunk>
+        static void MoveAllChunkComponentsForwardUnsafe(TChunk& chunkTo,   const Size_t firstChunkIndexTo, 
+                                                        TChunk& chunkFrom, const Size_t firstChunkIndexFrom, 
+                                                        const Size_t chunkCount)
+        {
+            pnc_assert(!chunkTo.IsNull());
+            pnc_assert(firstChunkIndexTo >= 0);
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(firstChunkIndexFrom >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
+
+            if (chunkCount == 0) return;
+
+            const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
+            Size_t componentTypeCount = chunkStructure.ChunkComponentIndex.size();
+            for (Size_t i = 0; i < componentTypeCount; ++i)
+            {
+                Size_t index = chunkStructure.ChunkComponentIndex[i];
+                const ComponentType_t* componentType = chunkStructure.Components[index];
+                void* componentDataTo = chunkTo.GetComponentData(index);
+                void* componentDataFrom = chunkFrom.GetComponentData(index);
+                componentType->MoveDataForwardUnsafe(componentDataTo,   firstChunkIndexTo,
+                                                     componentDataFrom, firstChunkIndexFrom, 
+                                                     chunkCount);
+            }
+        }
 
 
-        static void ConstructComponentUnsafe(const ComponentType_t& componentType, void* const baseComponentData,
-            const Size_t firstNodeIndex, const Size_t nodeCount,
+
+
+
+
+
+
+
+        static void ConstructComponentUnsafe(const ComponentType_t& componentType, 
+            void* const baseComponentData,const Size_t firstNodeIndex, const Size_t nodeCount,
             const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
         {
             componentType.ConstructComponentUnsafe(baseComponentData, firstNodeIndex, nodeCount, firstChunkIndex, chunkCount);
         }
 
-        static void DestructComponentUnsafe(const ComponentType_t& componentType, void* const baseComponentData,
-            const Size_t firstNodeIndex, const Size_t nodeCount,
+        static void DestructComponentUnsafe(const ComponentType_t& componentType, 
+            void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
             const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
         {
             componentType.DestructComponentUnsafe(baseComponentData, firstNodeIndex, nodeCount, firstChunkIndex, chunkCount);
@@ -80,73 +271,6 @@ namespace PNC
                 nodeCount, chunkCount);
         }
 
-        template<typename TChunk>
-        static void ConstructChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
-        {
-            pnc_assert(!chunk.IsNull());
-            pnc_assert(firstChunkIndex >= 0);
-            pnc_assert(chunkCount >= 0);
-
-            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
-            Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleChunkIndex.size();
-            for (Size_t i = 0; i < countDefaultConstructible; ++i)
-            {
-                Size_t index = chunkStructure.DefaultConstructibleChunkIndex[i];
-                void* componentData = chunk->GetComponentData(index);
-                chunkStructure.Components[index]->ConstructComponentDataUnsafe(componentData, firstChunkIndex, chunkCount);
-            }
-        }
-
-        template<typename TChunk>
-        static void ConstructNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
-        {
-            pnc_assert(!chunk.IsNull());
-            pnc_assert(firstNodeIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-
-            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
-            Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleNodeIndex.size();
-            for (Size_t i = 0; i < countDefaultConstructible; ++i)
-            {
-                Size_t index = chunkStructure.DefaultConstructibleNodeIndex[i];
-                void* componentData = chunk->GetComponentData(index);
-                chunkStructure.Components[index]->ConstructComponentDataUnsafe(componentData, firstNodeIndex, nodeCount);
-            }
-        }
-
-        template<typename TChunk>
-        static void DestructChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
-        {
-            pnc_assert(!chunk.IsNull());
-            pnc_assert(firstChunkIndex >= 0);
-            pnc_assert(chunkCount >= 0);
-
-            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
-            Size_t countDestructible = chunkStructure.DestructibleChunkIndex.size();
-            for (Size_t i = 0; i < countDestructible; ++i)
-            {
-                Size_t index = chunkStructure.DestructibleChunkIndex[i];
-                void* componentData = chunk->GetComponentData(index);
-                chunkStructure.Components[index]->DestructComponentUnsafe(componentData, firstChunkIndex, chunkCount);
-            }
-        }
-
-        template<typename TChunk>
-        static void DestructNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
-        {
-            pnc_assert(!chunk.IsNull());
-            pnc_assert(firstNodeIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-
-            const ChunkStructure_t& chunkStructure = chunk.GetStructure();
-            Size_t countDestructible = chunkStructure.DestructibleNodeIndex.size();
-            for (Size_t i = 0; i < countDestructible; ++i)
-            {
-                Size_t index = chunkStructure.DestructibleNodeIndex[i];
-                void* componentData = chunk->GetComponentData(index);
-                chunkStructure.Components[index]->DestructComponentUnsafe(componentData, firstNodeIndex, nodeCount);
-            }
-        }
 
 
         //template<typename TChunk>

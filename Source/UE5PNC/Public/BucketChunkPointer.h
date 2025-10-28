@@ -59,9 +59,11 @@ namespace PNC
 
         Self_t& operator=(Self_t&& o)
         {
-            Base_t::operator=(std::forward<Self_t>(o));
-            NodeCapacity = o.NodeCapacity;
+            Base_t::operator=(std::move(o));
+            auto tmpNodeCapacity = o.NodeCapacity;
             o.NodeCapacity = 0;
+            NodeCapacity = tmpNodeCapacity;
+            return *this;
         }
 
         BucketChunkPointerT(const Self_t& o) = default;
@@ -70,6 +72,7 @@ namespace PNC
 
     public:
         using TBase::GetChunk;
+        using TBase::GetNodeCount;
         using Base_t::operator*;
         using Base_t::operator->;
         using TBase::GetInternalChunk;
@@ -83,33 +86,51 @@ namespace PNC
 
         Size_t AvailableNodes()const
         {
-            auto& chunk = GetChunk();
-            return NodeCapacity - chunk.GetNodeCount();
+            return NodeCapacity - GetNodeCount();
         }
         Size_t AddNode() { return AddNodes(1); }
         Size_t AddNodes(const Size_t count)
         {
-            auto& chunk = GetInternalChunk(*this);
-            pnc_assert(!chunk.IsNull());
-            Size_t firstIndex = chunk.NodeCount;
+            auto& internalChunk = GetInternalChunk(*this);
+            pnc_assert(!internalChunk.IsNull());
+            Size_t firstIndex = internalChunk.NodeCount;
             if (firstIndex + count <= NodeCapacity)
             {
-                if (firstIndex == 0)
-                {
-                    // construct chunk components
-                    Node_t::ConstructChunkComponentsUnsafe(GetChunk());
-                }
-                Node_t::ConstructNodeComponentsUnsafe(GetChunk(), firstIndex, count);
-                chunk.NodeCount += count;
+                //if (firstIndex == 0)
+                //{
+                //    // construct chunk components
+                //    Node_t::ConstructAllChunkComponentsUnsafe(internalChunk);
+                //}
+                Node_t::ConstructAllNodeComponentsUnsafe(internalChunk, firstIndex, count);
+                internalChunk.NodeCount += count;
                 return firstIndex;
             }
             return -1;
         }
         
-        //Size_t RemoveNode(const Size_t firstNodexIndex, const Size_t nodeCount)
-        //{
-        //    Node_t::MoveNodeComponentsUnsafe(GetChunk(), firstIndex, count);
-        //}
+        void RemoveNode(const Size_t firstNodexIndex, const Size_t nodeCount = 1)
+        {
+            pnc_assert(firstNodexIndex >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstNodexIndex < GetNodeCount());
+            pnc_assert(firstNodexIndex + nodeCount <= GetNodeCount());
+
+            auto& internalChunk = GetInternalChunk(*this);
+
+            Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodexIndex, nodeCount);
+
+            const Size_t firstFollowingNodeIndex = firstNodexIndex + nodeCount;
+            if(firstFollowingNodeIndex < internalChunk.NodeCount)
+            {
+                const Size_t followingNodeCount = internalChunk.NodeCount - firstFollowingNodeIndex;
+                Node_t::MoveAllNodeComponentsForwardUnsafe(internalChunk, firstNodexIndex,
+                                                           internalChunk, firstFollowingNodeIndex,
+                                                           followingNodeCount);
+                internalChunk.NodeCount = firstNodexIndex + followingNodeCount;
+            }
+            else
+                internalChunk.NodeCount = firstNodexIndex;
+        }
 
         //Size_t RemoveNode(const Size_t count) // Remove from the end of the chunk
         void Clear()

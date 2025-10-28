@@ -275,46 +275,39 @@ namespace PNC
         bool IsUserDestructible()const { return !!NodeDestruct; }
 
 
-        void ConstructComponentDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
+        void ConstructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
         {
             pnc_assert(!!baseComponentData);
             pnc_assert(firstComponentIndex >= 0);
             pnc_assert(count >= 0);
-            pnc_assert_owns(baseComponentData, count * Size);
+            pnc_assert_owns(baseComponentData, (firstComponentIndex + count) * Size);
 
+#ifdef PNC_MEMORY_NODE_CONSTRUCTZERO
+            std::fill((uint8*)baseComponentData + firstComponentIndex * Size, (uint8*)baseComponentData + (firstComponentIndex + count) * Size, 0);
+#endif
             if (IsUserConstructible())
                 NodeConstruct(baseComponentData, firstComponentIndex, count);
+#if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) && !defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
+            else
+                std::fill(baseComponentData + firstComponentIndex * Size, baseComponentData + (firstComponentIndex + count) * Size, 0);
+#endif
         }
 
-        void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
-                                      const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
-        {
-            ConstructComponentDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
-                                         GetComponentCount(nodeCount, chunkCount));
-        }
-
-        void DestructComponentDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
+        void DestructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
         {
             pnc_assert(!!baseComponentData);
             pnc_assert(firstComponentIndex >= 0);
             pnc_assert(count >= 0);
-            pnc_assert_owns(baseComponentData, count * Size);
+            pnc_assert_owns(baseComponentData, (firstComponentIndex + count) * Size);
             if (IsUserDestructible())
                 NodeDestruct(baseComponentData, firstComponentIndex, count);
+#ifdef PNC_MEMORY_NODE_DESTRUCTZERO
+            std::fill((uint8*)baseComponentData + firstComponentIndex * Size, (uint8*)baseComponentData + (firstComponentIndex + count) * Size, 0);
+#endif
         }
 
-        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
-                                     const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
-        {
-            DestructComponentDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
-                                        GetComponentCount(nodeCount, chunkCount));
-        }
-
-
-#pragma region Copy
-
-        void CopyDataForwardUnsafe(void* const baseComponentDataTo  , const Size_t firstComponentIndexTo,
-                             const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, 
+        void CopyDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
+                             const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
                              const Size_t count)const
         {
             pnc_assert(!!baseComponentDataTo);
@@ -323,7 +316,7 @@ namespace PNC
             pnc_assert(firstComponentIndexFrom >= 0);
             pnc_assert(count >= 0);
             pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseComponentDataTo, (firstComponentIndexTo + count) * Size);
+            pnc_assert_owns(baseComponentDataTo,   (firstComponentIndexTo   + count) * Size);
             pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsUserCopyable())
@@ -334,6 +327,61 @@ namespace PNC
                 memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
             }
         }
+        
+        void MoveDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
+                                   void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
+                                   const Size_t count)const
+        {
+            pnc_assert(!!baseComponentDataTo);
+            pnc_assert(!!baseComponentDataFrom);
+            pnc_assert(firstComponentIndexTo >= 0);
+            pnc_assert(firstComponentIndexFrom >= 0);
+            pnc_assert(count >= 0);
+            pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
+            pnc_assert_owns(baseComponentDataTo,   (firstComponentIndexTo   + count) * Size);
+            pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
+
+            if (IsUserMovable())
+                NodeMoveForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
+            else
+            {
+                auto dataLength = count * Size;
+                memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
+
+#ifdef PNC_MEMORY_NODE_DESTRUCTZERO
+                std::fill((uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, (uint8*)baseComponentDataFrom + (firstComponentIndexFrom + count) * Size, 0);
+#endif
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
+                                                                     const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
+        {
+            ConstructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
+                                                   GetComponentCount(nodeCount,      chunkCount));
+        }
+
+
+        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
+                                                                    const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
+        {
+            DestructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
+                                                  GetComponentCount(nodeCount,      chunkCount));
+        }
+
+
 
         void CopyComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
                                   const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
@@ -351,8 +399,6 @@ namespace PNC
                                   baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
                                                          GetComponentCount(nodeCount,          chunkCount));
         }
-
-#pragma endregion
 
 
 

@@ -25,7 +25,7 @@ namespace PNC
 {
 
 
-	std::atomic<std::size_t> MemoryTracker::AllocationCount = 0;
+	std::atomic<int> MemoryTracker::AllocationCount = 0;
 
 	std::map<uint8*, std::size_t> MemoryTracker::Allocations;
 }
