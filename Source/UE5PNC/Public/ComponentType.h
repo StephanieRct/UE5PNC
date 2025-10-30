@@ -306,9 +306,9 @@ namespace PNC
 #endif
         }
 
-        void CopyDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
-                             const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
-                             const Size_t count)const
+        void CopyConstructDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
+                                      const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
+                                      const Size_t count)const
         {
             pnc_assert(!!baseComponentDataTo);
             pnc_assert(!!baseComponentDataFrom);
@@ -383,21 +383,21 @@ namespace PNC
 
 
 
-        void CopyComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
-                                  const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
-                                  const Size_t nodeCount)const
-        {
-            CopyDataForwardUnsafe(baseComponentDataTo,   firstNodeIndexTo, 
-                                  baseComponentDataFrom, firstNodeIndexFrom, 1);
-        }
+        //void CopyConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
+        //                                   const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
+        //                                   const Size_t nodeCount)const
+        //{
+        //    CopyConstructDataForwardUnsafe(baseComponentDataTo,   firstNodeIndexTo,
+        //                                   baseComponentDataFrom, firstNodeIndexFrom, 1);
+        //}
 
-        void CopyComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                  const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                  const Size_t nodeCount, const Size_t chunkCount)const
+        void CopyConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
+                                           const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
+                                           const Size_t nodeCount, const Size_t chunkCount)const
         {
-            CopyDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
-                                  baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                                                         GetComponentCount(nodeCount,          chunkCount));
+            CopyConstructDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
+                                           baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+                                                                  GetComponentCount(nodeCount,          chunkCount));
         }
 
 

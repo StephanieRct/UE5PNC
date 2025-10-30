@@ -116,7 +116,7 @@ namespace PNC
             }
             
             if(nodeCount > 0)
-                Node_t::ConstructNode(internalChunkElement, 0, nodeCount);
+                Node_t::ConstructAllComponentsUnsafe(internalChunkElement, 0, nodeCount);
 
         }
 
@@ -131,7 +131,7 @@ namespace PNC
 
             ChunkPointerElementInternal_t& internalChunkElement = GetInternalChunkElement(*this, chunkIndex);
             if (internalChunkElement.NodeCount > 0)
-                Node_t::DestructNode(internalChunkElement, 0, internalChunkElement.NodeCount);
+                Node_t::DestructAllComponentsUnsafe(internalChunkElement, 0, internalChunkElement.NodeCount);
             
             internalChunkElement.NodeCount = 0;
             internalChunkElement.~ChunkPointerElementInternal_t();
@@ -173,7 +173,7 @@ namespace PNC
 
                 // Copy Nodes
                 if (nodeCountFrom > 0)
-                    Node_t::CopyNodeForward(internalElementTo, internalElementFrom, 0, 0, nodeCountFrom);
+                    Node_t::CopyConstructAllComponentsForward(internalElementTo, internalElementFrom, 0, 0, nodeCountFrom);
             }
         }
         void MoveElementAndNodesForward(const Size_t chunkIndexTo, const Size_t chunkIndexFrom, const Size_t chunkCount, const Self_t& chunkArrayFrom)

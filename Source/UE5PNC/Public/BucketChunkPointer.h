@@ -96,11 +96,6 @@ namespace PNC
             Size_t firstIndex = internalChunk.NodeCount;
             if (firstIndex + count <= NodeCapacity)
             {
-                //if (firstIndex == 0)
-                //{
-                //    // construct chunk components
-                //    Node_t::ConstructAllChunkComponentsUnsafe(internalChunk);
-                //}
                 Node_t::ConstructAllNodeComponentsUnsafe(internalChunk, firstIndex, count);
                 internalChunk.NodeCount += count;
                 return firstIndex;
@@ -108,7 +103,7 @@ namespace PNC
             return -1;
         }
         
-        void RemoveNode(const Size_t firstNodexIndex, const Size_t nodeCount = 1)
+        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const Size_t nodeCount = 1)
         {
             pnc_assert(firstNodexIndex >= 0);
             pnc_assert(nodeCount >= 0);
@@ -119,6 +114,7 @@ namespace PNC
 
             Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodexIndex, nodeCount);
 
+            const Size_t firstMovingNodeIndex = internalChunk.NodeCount - nodeCount;
             const Size_t firstFollowingNodeIndex = firstNodexIndex + nodeCount;
             if(firstFollowingNodeIndex < internalChunk.NodeCount)
             {
@@ -131,13 +127,34 @@ namespace PNC
             else
                 internalChunk.NodeCount = firstNodexIndex;
         }
+        
+        void RemoveNode(const Size_t firstNodeIndex, const Size_t nodeCount = 1)
+        {
+            pnc_assert(firstNodeIndex >= 0);
+            pnc_assert(nodeCount >= 0);
+            pnc_assert(firstNodeIndex < GetNodeCount());
+            pnc_assert(firstNodeIndex + nodeCount <= GetNodeCount());
 
+            auto& internalChunk = GetInternalChunk(*this);
+
+            Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodeIndex, nodeCount);
+            const Size_t lastNodexIndex = firstNodeIndex + nodeCount;
+            const Size_t movingFirstNodeIndex = std::max(lastNodexIndex, internalChunk.NodeCount - nodeCount);
+            const Size_t movingNodeCount = internalChunk.NodeCount - movingFirstNodeIndex;
+            if(movingNodeCount > 0)
+            {
+                Node_t::MoveAllNodeComponentsForwardUnsafe(internalChunk, firstNodeIndex,
+                                                           internalChunk, movingFirstNodeIndex,
+                                                           movingNodeCount);
+            }
+            internalChunk.NodeCount -= nodeCount;
+        }
         //Size_t RemoveNode(const Size_t count) // Remove from the end of the chunk
         void Clear()
         {
             auto& chunk = GetInternalChunk(*this);
             if (chunk.IsNull()) return;
-            Node_t::DestructNode(GetChunk(), 0, chunk.NodeCount);
+            Node_t::DestructAllNodeComponentsUnsafe(GetChunk(), 0, chunk.NodeCount);
             chunk.NodeCount = 0;
         }
 

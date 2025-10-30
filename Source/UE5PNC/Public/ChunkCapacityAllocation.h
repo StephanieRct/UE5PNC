@@ -107,13 +107,12 @@ namespace PNC
                         //{
                         //    // copy assign all nodes
                         //}
-
-                        DestructData();
                         auto& internalChunk = GetInternalChunk(*this);
+                        Node_t::DestructAllComponentsUnsafe(internalChunk, 0, internalChunk.NodeCount);
                         auto keepComponentDataArray = internalChunk.ComponentData;
                         Base_t::operator=(chunkFrom);
                         internalChunk.ComponentData = keepComponentDataArray;
-                        CopyConstructData(*this, chunkFrom);
+                        Node_t::CopyConstructAllComponentsForwardUnsafe(*this, 0, 0, chunkFrom, 0, 0, chunkFrom.GetNodeCount(), 1);
                         return *this;
                     }
                     // TODO investigate if Restructuring could be done here. Would reuse the existing bufffers for common components
@@ -219,7 +218,7 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = *chunk.Structure->Components[i];
-                Node_t::DestructComponentUnsafe(componentType, chunk.ComponentData[i], 0, chunk.NodeCount);
+                componentType.DestructComponentUnsafe(chunk.ComponentData[i], 0, chunk.NodeCount);
                 pnc_free_clean(chunk.ComponentData[i], componentType.GetSize(NodeCapacity), componentType.GetAlignment());
             }
         }
@@ -230,35 +229,21 @@ namespace PNC
         }
 
 
-
-        void DestructData()
-        {
-            auto& chunk = GetInternalChunk(*this);
-
-            auto componentCount = chunk.Structure->GetComponentCount();
-            for (Size_t i = 0; i < componentCount; ++i)
-            {
-                const ComponentType_t& componentType = *chunk.Structure->Components[i];
-                Node_t::DestructComponentUnsafe(componentType, chunk.ComponentData[i], 0, chunk.NodeCount);
-            }
-        }
-
-
-
-
-
-
         void AllocateAndConstructData()
         {
-            auto& chunk = GetInternalChunk(*this);
-            pnc_assert(!chunk.IsNull());
-            auto componentCount = chunk.Structure->Components.GetSize();
+            auto& internalChunk = GetInternalChunk(*this);
+            pnc_assert(!internalChunk.IsNull());
+            if (internalChunk.NodeCount == 0)
+            {
+                //Construct only ChunkComponents
+            }
+            auto componentCount = internalChunk.Structure->Components.GetSize();
             Size_t nodeCapacity = GetNodeCapacity();
             for (Size_t i = 0; i < componentCount; ++i)
             {
-                const ComponentType_t& componentType = *chunk.Structure->Components[i];
-                chunk.ComponentData[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
-                Node_t::ConstructComponentUnsafe(componentType, chunk.ComponentData[i], 0, chunk.NodeCount);
+                const ComponentType_t& componentType = *internalChunk.Structure->Components[i];
+                internalChunk.ComponentData[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
+                componentType.ConstructComponentUnsafe(internalChunk.ComponentData[i], 0, internalChunk.NodeCount);
             }
         }
 
@@ -278,25 +263,12 @@ namespace PNC
             {
                 const ComponentType_t& componentType = *structure.Components[i];
                 componentDataArrayTo[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
-                Node_t::CopyComponentForwardUnsafe(componentType, componentDataArrayTo[i],       0, 
-                                                                  chunkFrom.GetComponentData(i), 0, 
-                                                                  nodeCount);
+                componentType.CopyConstructComponentForwardUnsafe(
+                    componentDataArrayTo[i],       0, 0,
+                    chunkFrom.GetComponentData(i), 0, 0, nodeCount, 1);
             }
         }
 
-        static void CopyConstructData(Self_t& chunkTo, const Self_t& chunkFrom)
-        {
-            pnc_assert(!chunkTo.IsNull());
-            pnc_assert(!chunkFrom.IsNull());
-            pnc_assert(IsSameStructure(chunkTo, chunkFrom));
-            const ChunkStructure_t& structure = chunkTo.GetStructure();
-            const Size_t componentCount = structure.GetComponentCount();
-            const Size_t nodeCount = chunkFrom.GetNodeCount();
-            for (Size_t i = 0; i < componentCount; ++i)
-                Node_t::CopyComponentForwardUnsafe(*structure.Components[i], 
-                                                   chunkTo.  GetComponentData(i), 0, 
-                                                   chunkFrom.GetComponentData(i), 0, nodeCount);
-        }
 
         void AllocateDataArray()
         {
