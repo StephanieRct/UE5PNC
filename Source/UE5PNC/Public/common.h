@@ -176,38 +176,52 @@ namespace PNC
 #   define pnc_delete_dirty(ptr) ::PNC::MemoryTracker::Delete(ptr)
 #   define pnc_assert_owns(ptr, count) pnc_assert(::PNC::MemoryTracker::Owns(ptr, count))
 #   define pnc_owns(ptr, count) ::PNC::MemoryTracker::Owns(ptr, count)
-#   define pnc_allocation_count ((int)PNC::MemoryTracker::AllocationCount)
+#   define pnc_allocation_count ((int)PNC::MemoryTracker::Instance.AllocationCount)
 
 namespace PNC
 {
     UE5PNC_API struct MemoryTracker
     {
     public:
-        UE5PNC_API static std::map<uint8*, std::size_t> Allocations;
-        UE5PNC_API static std::atomic<int> AllocationCount;
+        UE5PNC_API static MemoryTracker Instance;
+        struct Alloc
+        {
+            uint8* Base;
+            std::size_t Size;
+            bool Includes(uint8*const ptr, const std::size_t size)const
+            {
+                return Base <= ptr && (Base + Size) >= (ptr + size);
+            }
+        };
+        std::map<uint8*, Alloc> Allocations;
+        int AllocationCount;
         
         __declspec(noinline) static void* Allocate(std::size_t const size, std::size_t const alignment)
         {
+            MemoryTracker& instance = Instance;
             void* ptr = FMemory::Malloc(size, alignment);
             if (ptr)
             {
-                ++AllocationCount;
-                Allocations.insert({ (uint8*)ptr, size });
-                UE_LOG(LogTemp, Log, TEXT("Alloc %016x (new count %d)"), ptr, AllocationCount.load());
+                ++instance.AllocationCount;
+                instance.Allocations.insert({ (uint8*)ptr + size - 1, {(uint8*)ptr, size} });
+                UE_LOG(LogTemp, Log, TEXT("Alloc %016x (new count %d)"), ptr, instance.AllocationCount);
             }
             return ptr;
         }
         __declspec(noinline) static void Deallocate(void* const ptr, std::size_t const size, std::size_t const alignment)
         {
+            MemoryTracker& instance = Instance;
             if (ptr != nullptr)
             {
                 //pnc_assert(AllocationCount > 0);
-                --AllocationCount;
+                --Instance.AllocationCount;
 
-                UE_LOG(LogTemp, Log, TEXT("Free  %016x (new count %d)"), ptr, AllocationCount.load());
-                auto it = Allocations.find((uint8*)ptr);
-                pnc_assert(it != Allocations.end());
-                Allocations.erase(it);
+                UE_LOG(LogTemp, Log, TEXT("Free  %016x (new count %d)"), ptr, instance.AllocationCount);
+
+                auto it = instance.Allocations.lower_bound((uint8*)ptr);
+                pnc_assert(it != instance.Allocations.end());
+                pnc_assert(it->second.Includes((uint8*)ptr, size));
+                Instance.Allocations.erase(it);
             }
             FMemory::Free(ptr);
         }
@@ -235,16 +249,14 @@ namespace PNC
 
         static bool Owns(const void*const ptr, const std::size_t size=1)
         {
-            auto nearest = Allocations.lower_bound((uint8*)ptr);
-            if (nearest == Allocations.end())
+            MemoryTracker& instance = Instance;
+            auto nearest = instance.Allocations.lower_bound((uint8*)ptr);
+            if (nearest == instance.Allocations.end())
                 return false;
-            uint8* nearestBegin = nearest->first;
-            uint8* nearestEnd = nearest->first + nearest->second;
-            uint8* end = (uint8*)ptr + size;
-            return nearestBegin <= ptr && nearestEnd >= end;
+            return nearest->second.Includes((uint8*)ptr, size);
         }
         template<typename T>
-        static bool Owns(const T*const ptr, const std::size_t count)
+        static bool OwnsT(const T*const ptr, const std::size_t count)
         {
             return Owns((void*)ptr, sizeof(T) * count);
         }

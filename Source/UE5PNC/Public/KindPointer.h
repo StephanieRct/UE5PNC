@@ -56,10 +56,12 @@ namespace PNC
         {
         }
 
+#ifdef PNC_MEMORYCLEANUP
         ~KindPointerT()
         {
             pnc_clean(Kind);
         }
+#endif
     public:
         // TODO: IsNull
         // TODO: GetStructure

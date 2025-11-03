@@ -74,7 +74,7 @@ namespace PNC
         /// The total maximum number of Nodes the Array can grow to.
         /// </summary>
         /// <returns></returns>
-        Size_t GetNodeCapacityTotal()const { return NodeCapacityPerChunk * ChunkCapacity; }
+        Size_t GetNodeCapacity()const { return NodeCapacityPerChunk * ChunkCapacity; }
 
         /// <summary>
         /// The maximum number of Nodes each Chunks in the Array can grow to.
@@ -92,7 +92,7 @@ namespace PNC
         using Base_t::GetInternalChunkElement;
 
     protected:
-        
+
         void ConstructChunkElementAndNodes(const Size_t chunkIndex, const Size_t nodeCount)
         {
             pnc_assert(chunkIndex >= 0);
@@ -117,6 +117,8 @@ namespace PNC
             
             if(nodeCount > 0)
                 Node_t::ConstructAllComponentsUnsafe(internalChunkElement, 0, nodeCount);
+            else
+                Node_t::ConstructAllChunkComponentsUnsafe(internalChunkElement, 0);
 
         }
 
@@ -132,8 +134,9 @@ namespace PNC
             ChunkPointerElementInternal_t& internalChunkElement = GetInternalChunkElement(*this, chunkIndex);
             if (internalChunkElement.NodeCount > 0)
                 Node_t::DestructAllComponentsUnsafe(internalChunkElement, 0, internalChunkElement.NodeCount);
+            else
+                Node_t::DestructAllChunkComponentsUnsafe(internalChunkElement, 0);
             
-            internalChunkElement.NodeCount = 0;
             internalChunkElement.~ChunkPointerElementInternal_t();
         }
 

@@ -117,12 +117,14 @@ namespace PNC
         ChunkPointerInternalT(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
 
+#ifdef PNC_MEMORYCLEANUP
         ~ChunkPointerInternalT()
         {
             pnc_clean(Structure);
             pnc_clean(ComponentData);
             pnc_clean(NodeCount);
         }
+#endif
     public:
         bool IsVoid()const { return Structure == nullptr; }
         bool IsStruct()const { return Structure != nullptr; }

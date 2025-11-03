@@ -36,7 +36,7 @@ namespace PNC
             {
                 Size_t index = chunkStructure.ChunkComponentIndex[i];
                 const ComponentType_t* componentType = chunkStructure.Components[index];
-                void* componentData = chunk->GetComponentData(index);
+                void* componentData = chunk.GetComponentData(index);
                 componentType->ConstructDataUnsafe(componentData, firstChunkIndex, chunkCount);
             }
 #else
@@ -45,7 +45,7 @@ namespace PNC
             {
                 Size_t index = chunkStructure.DefaultConstructibleChunkIndex[i];
                 const ComponentType_t* componentType = chunkStructure.Components[index];
-                void* componentData = chunk->GetComponentData(index);
+                void* componentData = chunk.GetComponentData(index);
                 componentType->ConstructDataUnsafe(componentData, firstChunkIndex, chunkCount);
             }
 #endif

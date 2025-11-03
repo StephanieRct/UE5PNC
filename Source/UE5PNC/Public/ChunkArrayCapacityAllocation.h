@@ -38,7 +38,7 @@ namespace PNC
             : Base_t(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk)
         {
             Allocate();
-            ConstructChunkAndNode(0, chunkCount, nodeCountPerChunk);
+            ConstructChunkAndNode(chunkCount, chunkCapacity, nodeCountPerChunk);
         }
 
         ChunkArrayCapacityAllocationT(const ChunkArrayCapacityAllocationT& o)
@@ -103,7 +103,7 @@ namespace PNC
         using Base_t::GetChunk;
         using Base_t::GetStructure;
         using Base_t::GetComponentData;
-        using Base_t::GetNodeCapacityTotal;
+        using Base_t::GetNodeCapacity;
         using Base_t::GetNodeCapacityPerChunk;
         using Base_t::GetChunkCapacity;
         using Base_t::GetChunkCount;
@@ -127,15 +127,20 @@ namespace PNC
             return &internalChunk.ComponentData[chunkIndex * internalChunk.Structure->GetComponentCount()];
         }
 
-#pragma region Construction/Destruction/Copy/Move/Swap
-        void ConstructChunkAndNode(const Size_t chunkFirst, const Size_t chunkCount, const Size_t nodeCountPerChunk)
+#pragma region Construction/Destruction/Copy/Move
+        void ConstructChunkAndNode(const Size_t chunkCount, const Size_t chunkCapacity, const Size_t nodeCountPerChunk)
         {
+            // TODO if chunkCount == chunkCapacity && nodeCountPerChunk == NodeCapacityPerChunk, construct the full array at once.
+
             for (Size_t i = 0; i < chunkCount; ++i)
-                ConstructChunkElementAndNodes(chunkFirst + i, nodeCountPerChunk);
+                ConstructChunkElementAndNodes(i, nodeCountPerChunk);
+
         }
 
         void DestructChunkAndNode(const Size_t chunkFirst, const Size_t chunkCount)
         {
+            // TODO if chunkCount == chunkCapacity && nodeCountPerChunk == NodeCapacityPerChunk, destruct the full array at once.
+
             for (Size_t i = 0; i < chunkCount; ++i)
                 DestructChunkElementAndNodes(chunkFirst + i);
         }
@@ -154,11 +159,6 @@ namespace PNC
         {
             for (Size_t i = 0; i < chunkCount; ++i)
                 MoveElementAndNodesForward(o, i);
-        }
-        void SwapChunkAndNodes(const Self_t& o, const Size_t chunkCount)
-        {
-            for (Size_t i = 0; i < chunkCount; ++i)
-                SwapElementAndNodes(o, i);
         }
 #pragma endregion 
 
@@ -179,7 +179,7 @@ namespace PNC
         void AllocateComponentDataArray()
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            pnc_assert(!internalChunk.IsNull());
+            pnc_assert(internalChunk.IsStruct());
             const Size_t chunkCapacity = GetChunkCapacity();
             internalChunk.ComponentData = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
@@ -189,7 +189,7 @@ namespace PNC
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             pnc_assert(!internalChunk.IsNull());
             const Size_t componentCount = internalChunk.Structure->Components.GetSize();
-            const Size_t nodeCapacityTotal = GetNodeCapacityTotal();
+            const Size_t nodeCapacityTotal = GetNodeCapacity();
             const Size_t chunkCapacity = GetChunkCapacity();
             for (size_t i = 0; i < componentCount; ++i)
             {
@@ -219,7 +219,7 @@ namespace PNC
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             pnc_assert(!internalChunk.IsNull());
             Size_t componentCount = internalChunk.Structure->Components.GetSize();
-            Size_t nodeCapacityTotal = GetNodeCapacityTotal();
+            Size_t nodeCapacityTotal = GetNodeCapacity();
             Size_t chunkCapacity = GetChunkCapacity();
             for (Size_t i = 0; i < componentCount; ++i)
             {

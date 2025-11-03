@@ -52,10 +52,12 @@ namespace PNC
             , ChunkCount(chunkCount)
         {
         }
+#ifdef PNC_MEMORYCLEANUP
         ~ChunkArrayExtensionT()
         {
             pnc_clean(Chunks);
             pnc_clean(ChunkCount);
         }
+#endif
     };
 }

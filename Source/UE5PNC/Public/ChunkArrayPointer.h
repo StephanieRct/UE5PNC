@@ -87,10 +87,14 @@ namespace PNC
         /// <returns></returns>
         Size_t GetChunkCount()const { return Array.ChunkCount; }
 
+        // TODO Array indexing must return copies
         const ChunkPointerElement_t& operator[](Size_t index)const { return Array.Chunks[index]; }
+        // TODO Array indexing must return copies
         ChunkPointerElement_t& operator[](Size_t index) { return Array.Chunks[index]; }
-        const Chunk_t& GetChunk(Size_t index)const { return Array.Chunks[index]; }
-        Chunk_t& GetChunk(Size_t index) { return Array.Chunks[index]; }
+        // TODO Array indexing must return copies
+        const ChunkPointerElement_t& GetChunk(Size_t index)const { return Array.Chunks[index]; }
+        // TODO Array indexing must return copies
+        ChunkPointerElement_t& GetChunk(Size_t index) { return Array.Chunks[index]; }
         const Chunk_t& operator*()const { return *this; }
         Chunk_t& operator*() { return *this; }
         const Chunk_t* operator->()const { return this; }

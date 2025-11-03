@@ -45,6 +45,7 @@ namespace PNC
 
     public:
         ChunkTreeNodeT() = default;
+#ifdef PNC_MEMORYCLEANUP
         ~ChunkTreeNodeT()
         {
             pnc_clean(Parent);
@@ -52,6 +53,7 @@ namespace PNC
             pnc_clean(PreviousSibling);
             pnc_clean(NextSibling);
         }
+#endif
         //ChunkTreeNodeT(Self_t&& o)
         //    : Parent(o.Parent)
         //    , FirstChild(o.FirstChild)

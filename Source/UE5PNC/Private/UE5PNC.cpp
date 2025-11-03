@@ -24,8 +24,9 @@ IMPLEMENT_MODULE(FUE5PNCModule, UE5PNC)
 namespace PNC
 {
 
+	MemoryTracker MemoryTracker::Instance;
 
-	std::atomic<int> MemoryTracker::AllocationCount = 0;
+	//std::atomic<int> MemoryTracker::AllocationCount = 0;
 
-	std::map<uint8*, std::size_t> MemoryTracker::Allocations;
+	//std::map<uint8*, std::size_t> MemoryTracker::Allocations;
 }
