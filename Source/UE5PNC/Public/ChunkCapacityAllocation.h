@@ -35,8 +35,15 @@ namespace PNC
         /// <param name="chunkStructure">Structure of the Chunk's component data.</param>
         /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
         /// <param name="nodeCount"></param>
-        ChunkCapacityAllocationT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
+        ChunkCapacityAllocationT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount)
             : Base_t(chunkStructure, nodeCapacity, nodeCount)
+        {
+            AllocateDataArray();
+            AllocateAndConstructData();
+        }
+
+        ChunkCapacityAllocationT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity)
+            : Base_t(chunkStructure, nodeCapacity)
         {
             AllocateDataArray();
             AllocateAndConstructData();
@@ -201,7 +208,6 @@ namespace PNC
         using TBase::IsStructNull;
         using TBase::IsStructData;
     protected:
-        using TBase::NodeCapacity;
 
 
         void Destroy()
@@ -215,11 +221,12 @@ namespace PNC
             auto& chunk = GetInternalChunk(*this);
 
             auto componentCount = chunk.Structure->GetComponentCount();
+            Size_t capacity = GetNodeCapacity();
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = *chunk.Structure->Components[i];
                 componentType.DestructComponentUnsafe(chunk.ComponentData[i], 0, chunk.NodeCount);
-                pnc_free_clean(chunk.ComponentData[i], componentType.GetSize(NodeCapacity), componentType.GetAlignment());
+                pnc_free_clean(chunk.ComponentData[i], componentType.GetSize(capacity), componentType.GetAlignment());
             }
         }
         void FreeDataArray()

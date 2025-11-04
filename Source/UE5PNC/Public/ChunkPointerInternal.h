@@ -142,8 +142,9 @@ namespace PNC
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
         Size_t GetNodeCount()const { return NodeCount; }
-
+        Size_t GetNodeCapacity()const { return NodeCount; }
         Size_t GetChunkCount()const { return 1; }
+        Size_t GetChunkCapacity()const { return 1; }
         
         /// <summary>
         /// Get the ChunkStructure of this chunk

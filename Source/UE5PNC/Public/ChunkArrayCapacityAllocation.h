@@ -41,6 +41,12 @@ namespace PNC
             ConstructChunkAndNode(chunkCount, chunkCapacity, nodeCountPerChunk);
         }
 
+        ChunkArrayCapacityAllocationT(const ChunkStructure_t* const chunkStructure, const Size_t chunkCount, const Size_t nodeCountPerChunk)
+            : Base_t(chunkStructure, chunkCount, nodeCountPerChunk)
+        {
+            Allocate();
+            ConstructChunkAndNode(chunkCount, chunkCount, nodeCountPerChunk);
+        }
         ChunkArrayCapacityAllocationT(const ChunkArrayCapacityAllocationT& o)
             : Base_t(o)
         {
@@ -104,7 +110,7 @@ namespace PNC
         using Base_t::GetStructure;
         using Base_t::GetComponentData;
         using Base_t::GetNodeCapacity;
-        using Base_t::GetNodeCapacityPerChunk;
+        //using Base_t::GetNodeCapacityPerChunk;
         using Base_t::GetChunkCapacity;
         using Base_t::GetChunkCount;
         using Base_t::operator*;
@@ -118,7 +124,6 @@ namespace PNC
         using Base_t::DestructChunkElementAndNodes;
         using Base_t::CopyElementAndNodesForward;
         using Base_t::MoveElementAndNodesForward;
-        using Base_t::SwapElementAndNodes;
 
         void** GetComponentDataArrayForChunk(const Size_t chunkIndex)
         {
@@ -133,7 +138,7 @@ namespace PNC
             // TODO if chunkCount == chunkCapacity && nodeCountPerChunk == NodeCapacityPerChunk, construct the full array at once.
 
             for (Size_t i = 0; i < chunkCount; ++i)
-                ConstructChunkElementAndNodes(i, nodeCountPerChunk);
+                ConstructChunkElementAndNodes(*this, i, i * nodeCountPerChunk, nodeCountPerChunk, GetComponentDataArrayForChunk(i));
 
         }
 
@@ -142,7 +147,7 @@ namespace PNC
             // TODO if chunkCount == chunkCapacity && nodeCountPerChunk == NodeCapacityPerChunk, destruct the full array at once.
 
             for (Size_t i = 0; i < chunkCount; ++i)
-                DestructChunkElementAndNodes(chunkFirst + i);
+                DestructChunkElementAndNodes(*this, chunkFirst + i);
         }
 
         void CopyChunkAndNodes(const Self_t& o, const Size_t chunkCount)

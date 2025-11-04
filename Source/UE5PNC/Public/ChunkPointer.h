@@ -66,7 +66,9 @@ namespace PNC
 
         using Base_t::GetStructure;
         using Base_t::GetNodeCount;
+        using Base_t::GetNodeCapacity;
         using Base_t::GetChunkCount;
+        using Base_t::GetChunkCapacity;
 
         /// <summary>
         /// Create a null chunk without structure nor component data.
@@ -189,6 +191,7 @@ namespace PNC
         static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentData == b.ComponentData; }
 
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
+        static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& chunkPointer) { return reinterpret_cast<const ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
     //protected:
     //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
 

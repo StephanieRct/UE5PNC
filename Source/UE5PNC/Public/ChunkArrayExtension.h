@@ -59,5 +59,8 @@ namespace PNC
             pnc_clean(ChunkCount);
         }
 #endif
+
+    public:
+
     };
 }

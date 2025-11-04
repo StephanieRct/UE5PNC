@@ -91,5 +91,17 @@ namespace PNC
     //protected:
     //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
     //    ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
+
+    protected:
+
+        static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const Size_t nodeCount, void** const componentDataArray)
+        {
+            ChunkArrayPointer_t::ConstructChunkElementAndNodes(chunkArray.GetChunk(), chunkIndex, nodeFirstIndex, nodeCount, componentDataArray);
+        }
+
+        static void DestructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex)
+        {
+            ChunkArrayPointer_t::DestructChunkElementAndNodes(chunkArray.GetChunk(), chunkIndex);
+        }
     };
 }

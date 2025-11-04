@@ -49,24 +49,14 @@ namespace PNC
     //using BucketChunkArray = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<ChunkArrayPointerT<ChunkStructure, TChunkPointerElement>>>;
 
     template<typename TChunkStructure>
-    using ChunkT = ChunkCapacityAllocationT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
-
-    template<typename TChunkStructure, typename TChunkPointerElement>
-    using ChunkArrayT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
-
+    using ChunkT = ChunkCapacityAllocationT<ChunkPointerT<TChunkStructure>>;
+    template<typename TChunkStructure, typename TAlgorithm>
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkT<TChunkStructure>> : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
 
     template<typename TChunkStructure>
-    using KChunkT = ChunkCapacityAllocationT<BucketChunkPointerT<KChunkPointerT<TChunkStructure>>>;
-
-    template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<KChunkArrayPointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
-
-
-    template<typename TChunkStructure>
-    using KChunkTreeT = ChunkCapacityAllocationT<BucketChunkPointerT<KChunkTreePointerT<TChunkStructure>>>;
-
-    template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayTreeT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
+    using BucketT = ChunkCapacityAllocationT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
+    template<typename TChunkStructure, typename TAlgorithm>
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketT<TChunkStructure>> : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
 
 
     using Size_t = int32;
@@ -75,6 +65,33 @@ namespace PNC
     using ChunkStructure = ChunkStructureT<Size_t>;
 
     using ChunkPointer = ChunkPointerT<ChunkStructure>;
+    using Chunk = ChunkT<ChunkStructure>;
+    using Bucket = BucketT<ChunkStructure>;
+
+
+
+
+
+
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using ChunkArrayT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
+
+    template<typename TChunkStructure>
+    using KChunkT = ChunkCapacityAllocationT<BucketChunkPointerT<KChunkPointerT<TChunkStructure>>>;
+
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using KChunkArrayT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<KChunkArrayPointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
+
+    template<typename TChunkStructure>
+    using KChunkTreeT = ChunkCapacityAllocationT<BucketChunkPointerT<KChunkTreePointerT<TChunkStructure>>>;
+
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using KChunkArrayTreeT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
+
+
+
+
+
     using ChunkArrayPointer = ChunkArrayPointerT<ChunkStructure, ChunkPointer>;
 
     using KChunkPointer = KChunkPointerT<ChunkStructure>;
@@ -84,7 +101,6 @@ namespace PNC
     using KChunkArrayTreePointer = KChunkArrayTreePointerT<ChunkStructure, ChunkPointer>;
 
 
-    using Chunk = ChunkT<ChunkStructure>;
     using ChunkArray = ChunkArrayT<ChunkStructure, ChunkPointer>;
 
     using KChunk = KChunkT<ChunkStructure>;

@@ -25,6 +25,7 @@ namespace PNC
     {
     };
 
+
     template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
     struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> 
         : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>
