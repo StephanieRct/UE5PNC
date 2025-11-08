@@ -48,15 +48,105 @@ namespace PNC
     //template<typename TChunkStructure, typename TChunkPointerElement>
     //using BucketChunkArray = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<ChunkArrayPointerT<ChunkStructure, TChunkPointerElement>>>;
 
+    //ChunkPointerT
+    //ChunkT
+    // -----------------
+    // |#|#|#|#|#|#|#|#|
+    // -----------------
     template<typename TChunkStructure>
     using ChunkT = ChunkCapacityAllocationT<ChunkPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkT<TChunkStructure>> : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkT<TChunkStructure>> 
+        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
 
+
+    //BucketPointerT
+    //BucketT
+    // -----------------
+    // |#|#|#|#|#| | | |
+    // -----------------
     template<typename TChunkStructure>
-    using BucketT = ChunkCapacityAllocationT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
+    using BucketPointerT = BucketChunkPointerT<ChunkPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketT<TChunkStructure>> : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketPointerT<TChunkStructure>> :
+        public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
+    template<typename TChunkStructure>
+    using BucketT = ChunkCapacityAllocationT<BucketPointerT<TChunkStructure>>;
+    template<typename TChunkStructure, typename TAlgorithm>
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketT<TChunkStructure>> 
+        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
+
+    //ChunkArrayPointerT
+    //UniformChunkArrayPointerT
+    //UniformChunkArray
+    // -------------------------------------------------------
+    // |-----------------|-----------------|-----------------|
+    // ||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#||
+    // |-----------------|-----------------|-----------------|
+    // -------------------------------------------------------
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using UniformChunkArrayPointerT = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using UniformChunkArrayT = ChunkArrayCapacityAllocationT<UniformChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>;
+    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
+    struct AlgorithmRunner< TChunkStructure, TAlgorithm, UniformChunkArrayT<TChunkStructure, TChunkPointerElement>>
+        : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> {
+    };
+
+
+    //UniformBucketArray
+    // -------------------------------------------------------
+    // |-----------------|-----------------|-----------------|
+    // ||#|#|#| | | | | |||#|#|#|#|#|#| | |||#| | | | | | | ||
+    // |-----------------|-----------------|-----------------|
+    // -------------------------------------------------------
+    //
+    //UniformChunkBarrel
+    // -------------------------------------------------------
+    // |-----------------|-----------------|                 |
+    // ||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#||                 |
+    // |-----------------|-----------------|                 |
+    // -------------------------------------------------------
+    //
+    //UniformBucketBarrel
+    // -------------------------------------------------------
+    // |-----------------|-----------------|                 |
+    // ||#|#|#|#|#| | | |||#|#| | | | | | ||                 |
+    // |-----------------|-----------------|                 |
+    // -------------------------------------------------------
+    
+
+
+    //ChunkArray
+    // -------------------------------------------------------
+    // |------|-----------------|--------|-------------------|
+    // ||#|#|#||#|#|#|#|#|#|#|#|||#|#|#|#||#|#|#|#|#|#|#|#|#||
+    // |------|-----------------|--------|-------------------|
+    // -------------------------------------------------------
+    
+    //ChunkBarrel
+    // -------------------------------------------------------
+    // |------|-----------------|                            |
+    // ||#|#|#||#|#|#|#|#|#|#|#||                            |
+    // |------|-----------------|                            |
+    // -------------------------------------------------------
+    
+
+    //BucketBarrel
+    // -------------------------------------------------------
+    // |------|-----------------|--------|                   |
+    // ||#|#| ||#|#|#| | | | | |||#|#|#|#|                   |
+    // |------|-----------------|--------|                   |
+    // -------------------------------------------------------
+
+
+    //template<typename TChunkStructure, typename TChunkPointerElement>
+    //using ArrayChunkPointerT = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
+    //
+    //template<typename TChunkStructure, typename TChunkPointerElement>
+    //using ArrayChunkT = ChunkArrayCapacityAllocationT<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>;
+    //template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
+    //struct AlgorithmRunner< TChunkStructure, TAlgorithm, ArrayChunkT<TChunkStructure, TChunkPointerElement>> : public AlgorithmRunnerChunkArray<TAlgorithm, ArrayChunkPointerT<TChunkStructure, TChunkPointerElement>>{};
 
 
     using Size_t = int32;
@@ -67,6 +157,10 @@ namespace PNC
     using ChunkPointer = ChunkPointerT<ChunkStructure>;
     using Chunk = ChunkT<ChunkStructure>;
     using Bucket = BucketT<ChunkStructure>;
+    using UniformChunkArray = UniformChunkArrayT<ChunkStructure, ChunkPointer>;
+
+
+
 
 
 

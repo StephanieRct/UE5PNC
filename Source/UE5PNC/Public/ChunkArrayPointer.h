@@ -102,6 +102,7 @@ namespace PNC
         /// </summary>
         /// <returns></returns>
         Size_t GetChunkCount()const { return Array.ChunkCount; }
+        Size_t GetChunkCapacity()const { return GetChunkCount(); }
 
         // TODO Array indexing must return copies
         const ChunkPointerElement_t operator[](Size_t index)const { return Array.Chunks[index]; }
@@ -136,7 +137,7 @@ namespace PNC
             pnc_assert(nodeFirstIndex >= 0);
             pnc_assert(nodeCount >= 0);
             pnc_assert(nodeFirstIndex < chunkArray.GetNodeCount());
-            pnc_assert(nodeFirstIndex + nodeCount < chunkArray.GetNodeCount());
+            pnc_assert(nodeFirstIndex + nodeCount <= chunkArray.GetNodeCount());
 
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(chunkArray);
             pnc_assert(!internalChunkArray.IsNull());
