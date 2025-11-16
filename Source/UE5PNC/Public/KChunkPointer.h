@@ -16,10 +16,10 @@ namespace PNC
     /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
     /// <summary>
     template<typename TChunkStructure>
-    struct KChunkPointerT : public ChunkPointerExtension<ChunkPointerT<TChunkStructure>, KindPointerT<TChunkStructure>>
+    struct KChunkPointerT : public DChunkPointer<ChunkPointerT<TChunkStructure>, KindPointerT<TChunkStructure>>
     {
     public:
-        using Base_t = ChunkPointerExtension<ChunkPointerT<TChunkStructure>, KindPointerT<TChunkStructure>>;
+        using Base_t = DChunkPointer<ChunkPointerT<TChunkStructure>, KindPointerT<TChunkStructure>>;
         using Self_t = KChunkPointerT<TChunkStructure>;
         using ChunkStructure_t = TChunkStructure;
         using Size_t = typename ChunkStructure_t::Size_t;

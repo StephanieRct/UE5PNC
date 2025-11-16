@@ -365,3 +365,28 @@ namespace PNC
         return Unique_Ptr<T>(pnc_new(T)(std::forward<TArgumentTypes>(args)...));
     }
 }
+
+
+#define PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER()\
+    const Chunk_t& operator*()const { return *this; }\
+    Chunk_t& operator*() { return *this; }\
+    const Chunk_t* operator->()const { return this; }\
+    Chunk_t* operator->() { return this; }\
+    const Chunk_t& GetChunk()const { return *this; }\
+    Chunk_t& GetChunk() { return *this; }\
+    static_assert(true)
+
+#define PNC_USING_CHUNKPOINTER_INTERFACE()\
+    using Base_t::IsVoid;\
+    using Base_t::IsStruct;\
+    using Base_t::IsNull;\
+    using Base_t::IsData;\
+    using Base_t::IsVoidNull;\
+    using Base_t::IsVoidData;\
+    using Base_t::IsStructNull;\
+    using Base_t::IsStructData;\
+    using Base_t::GetStructure;\
+    using Base_t::GetNodeCount;\
+    using Base_t::GetInternalChunk;\
+    using Base_t::IsSameStructure;\
+    static_assert(true)

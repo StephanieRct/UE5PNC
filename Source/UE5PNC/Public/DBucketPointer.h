@@ -7,14 +7,15 @@
 namespace PNC
 {
     template<typename TBase>
-    struct BucketChunkPointerT : public TBase
+    struct DBucketPointerT : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = BucketChunkPointerT<TBase>;
+        using Self_t = DBucketPointerT<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
         using typename Base_t::ChunkPointer_t;
+        using typename Base_t::Chunk_t;
         using typename Base_t::Node_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
         using ChunkPointerInternal_t = ChunkPointerT<ChunkStructure_t>::ChunkPointerInternal_t;
@@ -29,7 +30,7 @@ namespace PNC
         /// <summary>
         /// Create a VoidNull Chunk.
         /// </summary>
-        BucketChunkPointerT()
+        DBucketPointerT()
             : Base_t()
             , NodeCapacity(0)
         {
@@ -43,13 +44,13 @@ namespace PNC
         /// <param name="chunkStructure">Structure of the Chunk's component data.</param>
         /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
         /// <param name="nodeCount"></param>
-        BucketChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
+        DBucketPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
             : Base_t(chunkStructure, nodeCount)
             , NodeCapacity(nodeCapacity)
         {
         }
 
-        BucketChunkPointerT(Self_t&& o)
+        DBucketPointerT(Self_t&& o)
             : Base_t(std::forward<Self_t>(o))
             , NodeCapacity(o.NodeCapacity)
         {
@@ -65,16 +66,13 @@ namespace PNC
             return *this;
         }
 
-        BucketChunkPointerT(const Self_t& o) = default;
+        DBucketPointerT(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
 
 
     public:
-        using TBase::GetChunk;
-        using TBase::GetNodeCount;
-        using Base_t::operator*;
-        using Base_t::operator->;
-        using TBase::GetInternalChunk;
+        PNC_USING_CHUNKPOINTER_INTERFACE();
+        PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
 
         /// <summary>
         /// Get the maximum number of Nodes the Chunk can grow to.

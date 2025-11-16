@@ -7,24 +7,24 @@
 namespace PNC
 {
     template<typename TBase>
-    struct ChunkCapacityReallocatorT : public TBase
+    struct DGrowingChunkT : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = ChunkCapacityReallocatorT<TBase>;
-        using typename TBase::ChunkStructure_t;
-        using typename TBase::Size_t;
+        using Self_t = DGrowingChunkT<TBase>;
+        using typename Base_t::ChunkStructure_t;
+        using typename Base_t::Chunk_t;
+        using typename Base_t::Size_t;
         using typename Base_t::Node_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
         using ChunkPointerInternal_t = ChunkPointerT<ChunkStructure_t>::ChunkPointerInternal_t;
 
-        using Base_t::GetNodeCount;
-        using Base_t::GetNodeCapacity;
-        using Base_t::AddNodes;
-        using Base_t::IsSameStructure;
-        using Base_t::GetInternalChunk;
     public:
         using Base_t::Base_t;
+        using Base_t::GetNodeCapacity;
+        using Base_t::AddNodes;
+        PNC_USING_CHUNKPOINTER_INTERFACE();
+        PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
 
         Size_t AddNode() 
         { 

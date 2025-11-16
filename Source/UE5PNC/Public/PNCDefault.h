@@ -25,8 +25,10 @@
 #include "ComponentTypeSet.h"
 #include "ChunkStructure.h"
 #include "ChunkPointer.h"
-#include "ChunkCapacityAllocation.h"
-#include "ChunkCapacityReallocator.h"
+#include "DChunkPointer.h"
+#include "DBucketPointer.h"
+#include "DOwningChunk.h"
+#include "DGrowingChunk.h"
 
 #include "ChunkArrayPointer.h"
 #include "ChunkArrayCapacityAllocation.h"
@@ -37,7 +39,6 @@
 #include "Components.h"
 #include "routing\AlgorithmRouter.h"
 #include "routing\AlgorithmCacheRouter.h"
-#include "BucketChunkPointer.h"
 #include "BucketChunkArrayPointer.h"
 
 #include "KindPointer.inl.h"
@@ -56,7 +57,7 @@ namespace PNC
     // |#|#|#|#|#|#|#|#|
     // -----------------
     template<typename TChunkStructure>
-    using ChunkT = ChunkCapacityAllocationT<ChunkPointerT<TChunkStructure>>;
+    using ChunkT = DOwningChunkT<ChunkPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TAlgorithm>
     struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkT<TChunkStructure>> 
         : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
@@ -68,12 +69,12 @@ namespace PNC
     // |#|#|#|#|#| | | |
     // -----------------
     template<typename TChunkStructure>
-    using BucketPointerT = BucketChunkPointerT<ChunkPointerT<TChunkStructure>>;
+    using BucketPointerT = DBucketPointerT<ChunkPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TAlgorithm>
     struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketPointerT<TChunkStructure>> :
         public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
     template<typename TChunkStructure>
-    using BucketT = ChunkCapacityAllocationT<BucketPointerT<TChunkStructure>>;
+    using BucketT = DOwningChunkT<BucketPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TAlgorithm>
     struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketT<TChunkStructure>> 
         : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
@@ -85,12 +86,12 @@ namespace PNC
     // |#|#|#|#|#| | | | ...
     // -----------------
     template<typename TChunkStructure>
-    using BunchPointerT = ChunkCapacityReallocatorT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
+    using BunchPointerT = DGrowingChunkT<DBucketPointerT<ChunkPointerT<TChunkStructure>>>;
     template<typename TChunkStructure, typename TAlgorithm>
     struct AlgorithmRunner< TChunkStructure, TAlgorithm, BunchPointerT<TChunkStructure>> :
         public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
     template<typename TChunkStructure>
-    using BunchT = ChunkCapacityAllocationT<BunchPointerT<TChunkStructure>>;
+    using BunchT = DOwningChunkT<BunchPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TAlgorithm>
     struct AlgorithmRunner< TChunkStructure, TAlgorithm, BunchT<TChunkStructure>>
         : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
@@ -193,13 +194,13 @@ namespace PNC
 
 
     template<typename TChunkStructure>
-    using KChunkT = ChunkCapacityAllocationT<BucketChunkPointerT<KChunkPointerT<TChunkStructure>>>;
+    using KChunkT = DOwningChunkT<DBucketPointerT<KChunkPointerT<TChunkStructure>>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KChunkArrayT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<KChunkArrayPointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
 
     template<typename TChunkStructure>
-    using KChunkTreeT = ChunkCapacityAllocationT<BucketChunkPointerT<KChunkTreePointerT<TChunkStructure>>>;
+    using KChunkTreeT = DOwningChunkT<DBucketPointerT<KChunkTreePointerT<TChunkStructure>>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KChunkArrayTreeT = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
