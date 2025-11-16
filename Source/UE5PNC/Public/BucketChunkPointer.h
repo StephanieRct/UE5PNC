@@ -16,8 +16,7 @@ namespace PNC
         using typename Base_t::Size_t;
         using typename Base_t::ChunkPointer_t;
         using typename Base_t::Node_t;
-
-    protected:
+        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
         using ChunkPointerInternal_t = ChunkPointerT<ChunkStructure_t>::ChunkPointerInternal_t;
 
     protected:
@@ -157,6 +156,10 @@ namespace PNC
             Node_t::DestructAllNodeComponentsUnsafe(GetChunk(), 0, chunk.NodeCount);
             chunk.NodeCount = 0;
         }
+    protected:
 
+        void SetNodeCapacity(const Size_t value) { NodeCapacity = value; }
+
+        
     };
 }

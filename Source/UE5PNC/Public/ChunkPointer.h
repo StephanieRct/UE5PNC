@@ -54,6 +54,12 @@ namespace PNC
         {
         }
 
+        // used by ChunkCapacityAllocationT<ChunkPointerT>, ignores the capacity parameter
+        ChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacity, const Size_t nodeCount)
+            : Base_t(chunkStructure, nodeCount)
+        {
+        }
+
     public:
         using Base_t::IsVoid;
         using Base_t::IsStruct;
@@ -195,7 +201,328 @@ namespace PNC
     //protected:
     //    ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
 
+    protected:
+            
+        /// <summary>
+        /// Notes:
+        ///     Derived structs may call this function
+        ///     Does not destruct/free data on this chunk before allocating the new data
+        ///     Does not set NodeCapacity nor NodeCount on chunkToOverwrite
+        ///     chunkToOverwrite cannot be the same as chunkFrom
+        /// </summary>
+        template<typename TChunk>
+        static void AllocateDataCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom, const Size_t newNodeCapacity)
+        {
+            pnc_assert(!chunkToOverwrite.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkToOverwrite, chunkFrom));
+            pnc_assert(&chunkToOverwrite != &chunkFrom);
+
+            const ChunkStructure_t& structure = chunkToOverwrite.GetStructure();
+            const Size_t componentCount = structure.GetComponentCount();
+            const Size_t nodeCount = chunkFrom.GetNodeCount();
+
+            void**const componentDataArrayTo = TChunk::GetInternalChunk(chunkToOverwrite).ComponentData;
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *structure.Components[i];
+                componentDataArrayTo[i] = (void*)pnc_alloc(componentType.GetSize(newNodeCapacity), componentType.GetAlignment());
+                componentType.CopyConstructComponentForwardUnsafe(
+                    componentDataArrayTo[i],       0, 0,
+                    chunkFrom.GetComponentData(i), 0, 0, nodeCount, 1);
+            }
+        }
+        template<typename TChunk>
+        static void AllocateDataCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom)
+        {
+            AllocateDataCopy(chunkToOverwrite, chunkFrom, chunkFrom.GetNodeCapacity());
+        }
+
+        /// <summary>
+        /// Notes:
+        ///     Derived structs may call this function
+        ///     Will destruct and free data from chunkTo.
+        ///     Does not set NodeCapacity nor NodeCount on chunkTo.
+        ///     chunkTo cannot be the same as chunkFrom
+        ///     newNodeCapacity must be greater or equal to chunkFrom.GetNodeCapacity()
+        /// </summary>
+        template<typename TChunk>
+        static void ReallocateDataCopy(TChunk& chunkToReallocate, const TChunk& chunkFrom, const Size_t newNodeCapacity)
+        {
+            pnc_assert(!chunkToReallocate.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkToReallocate, chunkFrom));
+            pnc_assert(&chunkToReallocate != &chunkFrom);
+            pnc_assert(newNodeCapacity >= chunkFrom.GetNodeCapacity());
+
+            const ChunkStructure_t& structure = chunkToReallocate.GetStructure();
+            const Size_t componentCount = structure.GetComponentCount();
+            const Size_t nodeCountFrom = chunkFrom.GetNodeCount();
+            const Size_t nodeCountTo = chunkToReallocate.GetNodeCount();
+            const Size_t nodeCapacityTo = chunkToReallocate.GetNodeCapacity();
+            typename TChunk::ChunkPointerInternal_t& internalChunkTo = TChunk::GetInternalChunk(chunkToReallocate);
+            void**const componentDataArrayTo = internalChunkTo.ComponentData;
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *structure.Components[i];
+                const void* const dataFrom = chunkFrom.GetComponentData(i);
+                switch (componentType.GetOwner())
+                {
+                case ComponentOwner_Chunk:
+                    componentType.CopyAssignDataForwardUnsafe(
+                        componentDataArrayTo[i], 0,
+                        dataFrom, 0, 1);
+                    break;
+                case ComponentOwner_Node:
+                    void* const dataNew = (void*)pnc_alloc(componentType.GetSize(newNodeCapacity), componentType.GetAlignment());
+                    componentType.CopyConstructDataForwardUnsafe(
+                        dataNew, 0,
+                        dataFrom, 0, nodeCountFrom);
+
+                    componentType.DestructDataUnsafe(componentDataArrayTo[i], 0, nodeCountTo);
+                    pnc_free_dirty(componentDataArrayTo[i], componentType.GetSize(nodeCapacityTo), componentType.GetAlignment());
+
+                    componentDataArrayTo[i] = dataNew;
+                    break;
+                    pnc_assert_switch_default_no_entry();
+                }
+            }
+        }
+        template<typename TChunk>
+        static void ReallocateDataCopy(TChunk& chunkToReallocate, const TChunk& chunkFrom)
+        {
+            return ReallocateDataCopy(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity());
+        }
+        
+        /// <summary>
+        /// Notes:
+        ///     Derived structs may call this function
+        ///     Will destruct and free (or reuse) data from chunkToReallocate.
+        ///     Does not set NodeCapacity nor NodeCount on chunkToReallocate.
+        ///     chunkToReallocate and chunkFrom can be the same
+        ///     newNodeCapacity must be greater or equal to chunkFrom.GetNodeCapacity()
+        /// </summary>
+        template<typename TChunk>
+        static void ReallocateDataMove(TChunk& chunkToReallocate, TChunk& chunkFrom, const Size_t newNodeCapacity)
+        {
+            pnc_assert(!chunkToReallocate.IsNull());
+            pnc_assert(!chunkFrom.IsNull());
+            pnc_assert(IsSameStructure(chunkToReallocate, chunkFrom));
+            pnc_assert(newNodeCapacity >= chunkFrom.GetNodeCapacity());
+
+            const ChunkStructure_t& structure = chunkToReallocate.GetStructure();
+            const Size_t componentCount = structure.GetComponentCount();
+            const Size_t nodeCountFrom = chunkFrom.GetNodeCount();
+            const Size_t nodeCountTo = chunkToReallocate.GetNodeCount();
+            const Size_t nodeCapacityTo = chunkToReallocate.GetNodeCapacity();
+
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunkToReallocate);
+            void**const componentDataArrayTo = internalChunk.ComponentData;
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *structure.Components[i];
+                void* const dataFrom = chunkFrom.GetComponentData(i);
+                switch(componentType.GetOwner())
+                {
+                case ComponentOwner_Chunk:
+                    if (componentDataArrayTo[i] != dataFrom)
+                    {
+                        //componentType.DestructDataUnsafe(componentDataArrayTo[i], 0, 1);
+                        componentType.MoveAssignDataForwardUnsafe(
+                            componentDataArrayTo[i], 0,
+                            dataFrom, 0, 1);
+                    }
+                    break;
+                case ComponentOwner_Node:
+                    void* const dataNew = (void*)pnc_alloc(componentType.GetSize(newNodeCapacity), componentType.GetAlignment());
+                    componentType.MoveConstructDataForwardUnsafe(
+                        dataNew , 0,
+                        dataFrom, 0, nodeCountFrom);
+
+                    componentType.DestructDataUnsafe(componentDataArrayTo[i], 0, nodeCountTo);
+                    pnc_free_dirty(componentDataArrayTo[i], componentType.GetSize(nodeCapacityTo), componentType.GetAlignment());
+
+                    componentDataArrayTo[i] = dataNew;
+                    break;
+                pnc_assert_switch_default_no_entry();
+                }
+            }
+        }
+        template<typename TChunk>
+        static void ReallocateDataMove(TChunk& chunkToReallocate, TChunk& chunkFrom)
+        {
+            return ReallocateDataMove(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity());
+        }
 
 
+
+        /// <summary>
+        /// Notes:
+        ///     Derived structs may call this function
+        ///     Does not set the NodeCapacity nor NodeCount on chunkOverwrite. It only allocate, construct and set componentData
+        /// </summary>
+        template<typename TChunk>
+        static void AllocateAndConstructData(TChunk& chunkToOverwrite, const Size_t nodeCapacity, const Size_t nodeCount)
+        {
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunkToOverwrite);
+            pnc_assert(!internalChunk.IsNull());
+            if (nodeCount == 0)
+            {
+                // TODO: Construct only ChunkComponents
+                //return;
+            }
+            auto componentCount = internalChunk.Structure->Components.GetSize();
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *internalChunk.Structure->Components[i];
+                internalChunk.ComponentData[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity), componentType.GetAlignment());
+                componentType.ConstructComponentUnsafe(internalChunk.ComponentData[i], 0, nodeCount);
+            }
+        }
+
+        template<typename TChunk>
+        static void AllocateDataArray(TChunk& chunk)
+        {
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
+            internalChunk.ComponentData = (void**)pnc_alloc(internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+        }
+
+        template<typename TChunk>
+        static void DestructAndFreeData(TChunk& chunk)
+        {
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
+
+            auto componentCount = internalChunk.Structure->GetComponentCount();
+            Size_t capacity = chunk.GetNodeCapacity();
+            for (Size_t i = 0; i < componentCount; ++i)
+            {
+                const ComponentType_t& componentType = *internalChunk.Structure->Components[i];
+                componentType.DestructComponentUnsafe(internalChunk.ComponentData[i], 0, internalChunk.NodeCount);
+                pnc_free_clean(internalChunk.ComponentData[i], componentType.GetSize(capacity), componentType.GetAlignment());
+            }
+        }
+
+        template<typename TChunk>
+        static void Destroy(TChunk& chunk)
+        {
+            DestructAndFreeData(chunk);
+            FreeDataArray(chunk);
+        }
+
+        template<typename TChunk>
+        static void FreeDataArray(TChunk& chunk)
+        {
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
+            pnc_free_clean(internalChunk.ComponentData, internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+        }
+
+        template<typename TChunk, typename TBase>
+        friend struct ChunkPointerExtension;
     };
+    
+    template<typename TChunk, typename TBase>
+    struct ChunkPointerExtension : public TBase
+    {
+    public:
+        using Base_t = TBase;
+        using Self_t = ChunkPointerExtension<TChunk,TBase>;
+        using Chunk_t = TChunk;
+        using ChunkStructure_t = typename Chunk_t::ChunkStructure_t;
+        using Size_t = typename Chunk_t::Size_t;
+        using ChunkPointer_t = typename Chunk_t::ChunkPointer_t;
+        using ChunkPointerInternal_t = typename Chunk_t::ChunkPointerInternal_t;
+
+    protected:
+        Chunk_t Chunk;
+    public:
+        ChunkPointerExtension()
+        {}
+
+        ChunkPointerExtension(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
+            : Base_t()
+            , Chunk(chunkStructure, nodeCount, componentData)
+        {}
+        template<class... TBaseCTorArgumentTypes>
+        ChunkPointerExtension(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData, TBaseCTorArgumentTypes&&... args)
+            : Base_t(args...)
+            , Chunk(chunkStructure, nodeCount, componentData)
+        {}
+
+        ChunkPointerExtension(const ChunkStructure_t* chunkStructure, Size_t nodeCount)
+            : Base_t()
+            , Chunk(chunkStructure, nodeCount)
+        {}
+        template<class... TBaseCTorArgumentTypes>
+        ChunkPointerExtension(const ChunkStructure_t* chunkStructure, Size_t nodeCount, TBaseCTorArgumentTypes&&... args)
+            : Base_t(args...)
+            , Chunk(chunkStructure, nodeCount)
+        {}
+
+        template<class... TBaseCTorArgumentTypes>
+        ChunkPointerExtension(TBaseCTorArgumentTypes&&... args)
+            : Base_t(args...)
+        {}
+
+    public:
+        bool IsVoid()const { return Chunk.IsVoid(); }
+        bool IsStruct()const { return Chunk.IsStruct(); }
+        bool IsNull()const { return Chunk.IsNull(); }
+        bool IsData()const { return Chunk.IsData(); }
+        bool IsVoidNull()const { return Chunk.IsVoidNull(); }
+        bool IsVoidData()const { return Chunk.IsVoidData(); }
+        bool IsStructNull()const { return Chunk.IsStructNull(); }
+        bool IsStructData()const { return Chunk.IsStructData(); }
+        const ChunkStructure_t& GetStructure()const { return *Chunk.GetStructure(); }
+        Size_t GetNodeCount()const { return Chunk.GetNodeCount(); }
+        Size_t GetChunkCount()const { return Chunk.GetChunkCount(); }
+        void* GetComponentData(const Size_t componentTypeIndexInChunk) { return Chunk.GetComponentData(componentTypeIndexInChunk); }
+        void* GetComponentData(const Size_t componentTypeIndexInChunk)const { return Chunk.GetComponentData(componentTypeIndexInChunk); }
+        void* GetComponentData(const type_info* const componentType) { return Chunk.GetComponentData(componentType); }
+        void* GetComponentData(const type_info* const componentType)const { return Chunk.GetComponentData(componentType); }
+        template<typename TComponent>
+        TComponent* GetComponentData() { return Chunk.GetComponentData<TComponent>(); }
+        template<typename TComponent>
+        TComponent* GetComponentData()const { return Chunk.GetComponentData<TComponent>(); }
+        const Chunk_t& operator*()const { return (const Chunk_t&)Chunk; }
+        Chunk_t& operator*() { return (Chunk_t&)Chunk; }
+        const Chunk_t* operator->()const { return &(const Chunk_t&)Chunk; }
+        Chunk_t* operator->() { return &(Chunk_t&)Chunk; }
+        const Chunk_t& GetChunk()const { return (const Chunk_t&)Chunk; }
+        Chunk_t& GetChunk() { return (Chunk_t&)Chunk; }
+        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Chunk.Structure == b.Chunk.Structure; }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.Chunk); }
+    protected:
+        template<typename TChunk>
+        static void AllocateDataCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom, const Size_t newNodeCapacity) 
+            { return ChunkPointer_t::AllocateDataCopy(chunkToOverwrite, chunkFrom, newNodeCapacity); }
+        template<typename TChunk>
+        static void AllocateDataCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom)
+            { AllocateDataCopy(chunkToOverwrite, chunkFrom, chunkFrom.GetNodeCapacity()); }
+        template<typename TChunk>
+        static void ReallocateDataCopy(TChunk& chunkTo, const TChunk& chunkFrom, const Size_t newNodeCapacity)
+            { return ChunkPointer_t::ReallocateDataCopy(chunkTo, chunkFrom, newNodeCapacity); }
+        template<typename TChunk>
+        static void ReallocateDataCopy(TChunk& chunkTo, const TChunk& chunkFrom)
+            { return ReallocateDataCopy(chunkTo, chunkFrom, chunkFrom.GetNodeCapacity()); }
+        template<typename TChunk>
+        static void ReallocateDataMove(TChunk& chunkToReallocate, TChunk& chunkFrom, const Size_t newNodeCapacity)
+            { return ChunkPointer_t::ReallocateDataMove(chunkToReallocate, chunkFrom, newNodeCapacity); }
+        template<typename TChunk>
+        static void ReallocateDataMove(TChunk& chunkToReallocate, TChunk& chunkFrom)
+            { return ReallocateDataMove(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity()); }
+        template<typename TChunk>
+        static void AllocateAndConstructData(TChunk& chunkToOverwrite, const Size_t nodeCapacity, const Size_t nodeCount)
+            { return ChunkPointer_t::AllocateAndConstructData(chunkToOverwrite, nodeCapacity, nodeCount); }
+        template<typename TChunk>
+        static void AllocateDataArray(TChunk& chunk){ return ChunkPointer_t::AllocateDataArray(chunk); }
+        template<typename TChunk>
+        static void DestructAndFreeData(TChunk& chunk){ return ChunkPointer_t::DestructAndFreeData(chunk); }
+        template<typename TChunk>
+        static void Destroy(TChunk& chunk){ return ChunkPointer_t::Destroy(chunk); }
+        template<typename TChunk>
+        static void FreeDataArray(TChunk& chunk){ return ChunkPointer_t::FreeDataArray(chunk); }
+    };
+
 }
+
+

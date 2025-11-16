@@ -208,9 +208,9 @@ namespace PNC
                 const ComponentType_t* componentType = chunkStructure.Components[index];
                 void* componentDataTo = chunkTo.GetComponentData(index);
                 void* componentDataFrom = chunkFrom.GetComponentData(index);
-                componentType->MoveDataForwardUnsafe(componentDataTo,   firstNodeIndexTo,
-                                                     componentDataFrom, firstNodeIndexFrom, 
-                                                     nodeCount);
+                componentType->MoveConstructDataForwardUnsafe(componentDataTo,   firstNodeIndexTo,
+                                                              componentDataFrom, firstNodeIndexFrom, 
+                                                              nodeCount);
             }
         }
         

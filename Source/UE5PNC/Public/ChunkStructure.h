@@ -109,10 +109,10 @@ namespace PNC
     protected:
         void Update() 
         {
-            Components.SubSetIndex(&DefaultConstructibleNodeIndex, [](const ComponentType_t* c) { return c->IsUserConstructible() && c->IsNodeComponent(); });
-            Components.SubSetIndex(&DestructibleNodeIndex, [](const ComponentType_t* c) { return c->IsUserDestructible() && c->IsNodeComponent(); });
-            Components.SubSetIndex(&DefaultConstructibleChunkIndex, [](const ComponentType_t* c) { return c->IsUserConstructible() && c->IsChunkComponent(); });
-            Components.SubSetIndex(&DestructibleChunkIndex, [](const ComponentType_t* c) { return c->IsUserDestructible() && c->IsChunkComponent(); });
+            Components.SubSetIndex(&DefaultConstructibleNodeIndex, [](const ComponentType_t* c) { return c->IsNonTrivialConstruct() && c->IsNodeComponent(); });
+            Components.SubSetIndex(&DestructibleNodeIndex, [](const ComponentType_t* c) { return c->IsNonTrivialDestruct() && c->IsNodeComponent(); });
+            Components.SubSetIndex(&DefaultConstructibleChunkIndex, [](const ComponentType_t* c) { return c->IsNonTrivialConstruct() && c->IsChunkComponent(); });
+            Components.SubSetIndex(&DestructibleChunkIndex, [](const ComponentType_t* c) { return c->IsNonTrivialDestruct() && c->IsChunkComponent(); });
             Components.SubSetIndex(&NodeComponentIndex, [](const ComponentType_t* c) { return c->IsNodeComponent(); });
             Components.SubSetIndex(&ChunkComponentIndex, [](const ComponentType_t* c) { return c->IsChunkComponent(); });
         }

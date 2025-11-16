@@ -58,6 +58,13 @@
 #   define pnc_assertf_slow checkfSlow
 #   define pnc_assert_no_entry_return(expression) checkNoEntry(); return (expression);
 #endif
+
+#ifdef UE_BUILD_DEBUG //default: pnc_assert_no_entry_return(); break
+#   define pnc_assert_switch_default_no_entry() 
+#else
+#   define pnc_assert_switch_default_no_entry() 
+#endif
+
 #define pnc_todo UE_LOG(LogTemp, Error, TEXT("TODO"))
 
 #ifdef PNC_MEMORYCLEANUP

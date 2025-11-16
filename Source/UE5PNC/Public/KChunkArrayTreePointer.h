@@ -65,8 +65,8 @@ namespace PNC
         {
         }
 
-        KChunkArrayTreePointerT(const ChunkStructure_t* chunkStructure, Size_t totalNodeCount, Size_t chunkCount = 0, ChunkKind kind = ChunkKind_ChunkArrayTree)
-            : Base_t(chunkStructure, totalNodeCount, kind)
+        KChunkArrayTreePointerT(const ChunkStructure_t* chunkStructure, const Size_t chunkCount, const Size_t nodeCountPerChunk, ChunkKind kind = ChunkKind_ChunkArrayTree)
+            : Base_t(chunkStructure, chunkCount * nodeCountPerChunk, kind)
             , Array(chunkCount)
         {
         }

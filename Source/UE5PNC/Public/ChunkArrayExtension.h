@@ -19,6 +19,8 @@ namespace PNC
         using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename ChunkStructure_t::Size_t;
+        using ChunkPointerInternal_t = ChunkPointerInternalT<TChunkStructure>;
+        using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
 
     public:
         /// <summary>
@@ -61,6 +63,28 @@ namespace PNC
 #endif
 
     public:
+        Size_t GetChunkCount()const { return ChunkCount; }
+        const ChunkPointerElement_t GetChunk(const ChunkPointerInternal_t& chunkArray, Size_t index)const { return Chunks[index]; }
+        ChunkPointerElement_t GetChunk(ChunkPointerInternal_t& chunkArray, Size_t index) { return Chunks[index]; }
 
+        const ChunkPointerElementInternal_t& GetInternalChunk(const ChunkPointerInternal_t& chunkArray, Size_t index)const { return ChunkPointerElement_t::GetInternalChunk(Chunks[index]); }
+        ChunkPointerElementInternal_t& GetInternalChunk(ChunkPointerInternal_t& chunkArray, Size_t index){ return ChunkPointerElement_t::GetInternalChunk(Chunks[index]); }
     };
+
+
+    // TODO consider an alternative ChunkArrayExtensionT with these data fields:
+    //  Size_t Multiplicity;
+    //  Size_t FirstNodePerChunk; //Element(x).FirstNode == FirstNodePerChunk * x + FirstNodes[x%Multiplicity]
+    //  Size_t NodeCountPerChunk; //Element(x).NodeCount == NodeCountPerChunk * x + NodeCounts[x%Multiplicity]
+    //  Size_t* FirstNodes;
+    //  Size_t* NodeCounts;
+    //  NodeRange<Size_t>* Ranges;
+    // 
+    //  template<typename TSize>
+    //  struct NodeRange
+    //  {
+    //      using Size_t = TSize;
+    //      Size_t First;
+    //      Size_t Count;
+    //  };
 }

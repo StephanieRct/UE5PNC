@@ -101,15 +101,15 @@ namespace PNC
         /// Number of elements in the array
         /// </summary>
         /// <returns></returns>
-        Size_t GetChunkCount()const { return Array.ChunkCount; }
+        Size_t GetChunkCount()const { return Array.GetChunkCount(); }
         Size_t GetChunkCapacity()const { return GetChunkCount(); }
 
         // TODO Array indexing must return copies
-        const ChunkPointerElement_t operator[](Size_t index)const { return Array.Chunks[index]; }
+        const ChunkPointerElement_t operator[](Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
         //// TODO Array indexing must return copies
         //ChunkPointerElement_t& operator[](Size_t index) { return Array.Chunks[index]; }
         // TODO Array indexing must return copies
-        const ChunkPointerElement_t GetChunk(Size_t index)const { return Array.Chunks[index]; }
+        const ChunkPointerElement_t GetChunk(Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
         //// TODO Array indexing must return copies
         //ChunkPointerElement_t GetChunk(Size_t index) { return Array.Chunks[index]; }
         const Chunk_t& operator*()const { return *this; }
@@ -121,8 +121,8 @@ namespace PNC
 
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& chunkPointer) { return reinterpret_cast<const ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
-        static ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(chunkPointer.Array.Chunks[index]); }
-        static const ChunkPointerElementInternal_t& GetInternalChunkElement(const Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<const ChunkPointerElementInternal_t&>(chunkPointer.Array.Chunks[index]); }
+        static ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(chunkPointer.Array.GetInternalChunk(GetInternalChunk(chunkPointer), index)); }
+        static const ChunkPointerElementInternal_t& GetInternalChunkElement(const Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<const ChunkPointerElementInternal_t&>(chunkPointer.Array.GetInternalChunk(GetInternalChunk(chunkPointer), index)); }
     protected:
         //ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
         //ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
@@ -133,7 +133,7 @@ namespace PNC
         static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const Size_t nodeCount, void**const componentDataArray)
         {
             pnc_assert(chunkIndex >= 0);
-            pnc_assert(chunkIndex < chunkArray.Array.ChunkCount);
+            pnc_assert(chunkIndex < chunkArray.Array.GetChunkCount());
             pnc_assert(nodeFirstIndex >= 0);
             pnc_assert(nodeCount >= 0);
             pnc_assert(nodeFirstIndex < chunkArray.GetNodeCount());
@@ -162,7 +162,7 @@ namespace PNC
         static void DestructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex)
         {
             pnc_assert(chunkIndex >= 0);
-            pnc_assert(chunkIndex < chunkArray.Array.ChunkCount);
+            pnc_assert(chunkIndex < chunkArray.Array.GetChunkCount());
 
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(chunkArray);
             pnc_assert(!internalChunkArray.IsNull());
