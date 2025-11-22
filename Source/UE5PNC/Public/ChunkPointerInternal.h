@@ -3,7 +3,7 @@
 
 #pragma once
 #include "common.h"
-#include <atomic>
+#include "Node.h"
 
 namespace PNC
 {
@@ -19,6 +19,8 @@ namespace PNC
         using Self_t = ChunkPointerInternalT<TChunkStructure>;
         using ChunkStructure_t = TChunkStructure;
         using Size_t = typename ChunkStructure_t::Size_t;
+        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
+        using Node_t = NodeT<TChunkStructure>;
 
     public:
         /// <summary>
@@ -135,6 +137,14 @@ namespace PNC
         bool IsStructNull()const { return Structure != nullptr && ComponentData == nullptr; }
         bool IsStructData()const { return Structure != nullptr && ComponentData != nullptr; }
 
+        /// <summary>
+        /// Test if 2 chunk have the same ChunkStructure
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Structure == b.Structure; }
+        static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentData == b.ComponentData; }
         /// <summary>
         /// Get the size of the chunk.
         /// The size is the number of valid nodes in the chunk that can be processed by algorithms.

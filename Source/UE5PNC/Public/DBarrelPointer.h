@@ -3,16 +3,15 @@
 
 #pragma once
 #include "common.h"
-#include "ChunkArrayPointer.h"
 
 namespace PNC
 {
     template<typename TBase>
-    struct BucketChunkArrayPointerT : public TBase
+    struct DBarrelPointerT : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = BucketChunkArrayPointerT<TBase>;
+        using Self_t = DBarrelPointerT<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
         using typename Base_t::ChunkPointerElement_t;
@@ -37,16 +36,16 @@ namespace PNC
         /// <summary>
         /// Create a Null Chunk
         /// </summary>
-        BucketChunkArrayPointerT()
+        DBarrelPointerT()
             : NodeCapacityPerChunk(0)
             , ChunkCapacity(0)
         {
         }
 
-        BucketChunkArrayPointerT(Self_t&& o) = default;
+        DBarrelPointerT(Self_t&& o) = default;
 
     protected:
-        BucketChunkArrayPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount, const Size_t nodeCountPerChunk)
+        DBarrelPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount, const Size_t nodeCountPerChunk)
             : Base_t(chunkStructure, chunkCount, nodeCapacityPerChunk)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
             , ChunkCapacity(chunkCapacity)

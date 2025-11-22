@@ -7,11 +7,11 @@
 namespace PNC
 {
     template<typename TBase>
-    struct DGrowingChunkT : public TBase
+    struct DGrowT : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DGrowingChunkT<TBase>;
+        using Self_t = DGrowT<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Chunk_t;
         using typename Base_t::Size_t;
@@ -22,6 +22,7 @@ namespace PNC
     public:
         using Base_t::Base_t;
         using Base_t::GetNodeCapacity;
+        using Base_t::GetChunkCapacity;
         using Base_t::AddNodes;
         PNC_USING_CHUNKPOINTER_INTERFACE();
         PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
@@ -37,16 +38,16 @@ namespace PNC
             const Size_t nodeCapacity = GetNodeCapacity();
             if (nodeCount + count > nodeCapacity)
             {
-                const Size_t newCapacity = std::max(nodeCapacity * 2, nodeCount + count);
-                ReallocateDataMove(*this, *this, newCapacity);
-                this->SetNodeCapacity(newCapacity);
+                const Size_t newNodeCapacity = std::max(nodeCapacity * 2, nodeCount + count);
+                ReallocateMove(*this, *this, newNodeCapacity, GetChunkCapacity());
+                this->SetNodeCapacity(newNodeCapacity);
             }
             return Base_t::AddNodes(count);
         }
 
     protected:
         using TBase::SetNodeCapacity;
-        using TBase::ReallocateDataMove;
+        using TBase::ReallocateMove;
         
     };
 }

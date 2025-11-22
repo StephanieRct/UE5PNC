@@ -9,6 +9,7 @@
 
 namespace PNC
 {
+    // TODO Should be changed to a decorator DTreePointer<...>
     /// <summary>
     /// A KTreePointer is a KindPointer that is part of a Tree of Chunks
     /// A KTreePointer is non-copyable as it may be pointed to by other KTreePointers
@@ -28,6 +29,10 @@ namespace PNC
         ChunkTreeNode_t Tree;
 
     protected:
+        KTreePointerT()
+            :Base_t()
+        {
+        }
         KTreePointerT(ChunkKind kind)
             :Base_t(kind)
         {

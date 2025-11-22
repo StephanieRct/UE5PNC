@@ -353,7 +353,7 @@ namespace PNC
         bool IsNonTrivialSwap()const { return !!NonTrivialSwapForward; }
 
 
-        void ConstructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
+        void ConstructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count) const
         {
             pnc_assert(!!baseComponentData);
             pnc_assert(firstComponentIndex >= 0);
@@ -371,14 +371,14 @@ namespace PNC
 #endif
         }
         
-        void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
-                                                                     const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
+        void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
+                                                                     const Size_t nodeCount, const Size_t chunkCount) const
         {
             ConstructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
                                                    GetComponentCount(nodeCount,      chunkCount));
         }
 
-        void DestructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count)const
+        void DestructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count) const
         {
             pnc_assert(!!baseComponentData);
             pnc_assert(firstComponentIndex >= 0);
@@ -391,8 +391,8 @@ namespace PNC
 #endif
         }
         
-        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t nodeCount,
-                                                                    const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)const
+        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
+                                                                    const Size_t nodeCount,      const Size_t chunkCount) const
         {
             DestructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
                                                   GetComponentCount(nodeCount,      chunkCount));
@@ -400,7 +400,7 @@ namespace PNC
 
         void MoveConstructDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
                                             void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
-                                            const Size_t count)const
+                                            const Size_t count) const
         {
             pnc_assert(!!baseComponentDataTo);
             pnc_assert(!!baseComponentDataFrom);

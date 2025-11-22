@@ -3,61 +3,37 @@
 
 #pragma once
 #include "common.h"
-#include "ChunkArrayPointerInternal.h"
+#include "DArrayPointerInternal.h"
 
 namespace PNC
 {
-    /// <summary>
-    /// A ChunkArrayPointer points to an Array of ChunkPointers whose Component data is adjacent in memory.
-    /// A ChunkArrayPointer is itself a ChunkPointer pointing to the beginning of the Component data, 
-    /// effectively pointing to the first Chunk in the Array.
-    /// </summary>
-    /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
-    /// <typeparam name="TChunkPointerElement">Structure of the Chunk pointer in the Array. 
-    ///     Must be a ChunkPointer (does not copy nodes when copied) rather than a Chunk (copy nodes when copied)
-    /// </typeparam>
-    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
-    struct ChunkArrayPointerT : public ChunkPointerT<TChunkStructure>
+    template<typename TArrayExtension, typename TBase>
+    struct DArrayPointerT : public TBase
     {
     public:
-        using Base_t = ChunkPointerT<TChunkStructure>;
-        using Self_t = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
-        using Base_t::Size_t;
-        using Base_t::ComponentType_t;
-        using Base_t::ChunkStructure_t;
-        using Base_t::Node_t;
-        using ChunkPointerElement_t = TChunkPointerElement;
-
-
-        /// <summary>
-        /// Chunk_t is the type a ChunkPointer points to
-        /// </summary>
+        using Base_t = TBase;
+        using Self_t = DArrayPointerT<TArrayExtension, TBase>;
+        using ArrayExtension_t = TArrayExtension;
+        using ChunkPointerElement_t = ArrayExtension_t::ChunkPointerElement_t;
+        using typename Base_t::Size_t;
+        using typename Base_t::ComponentType_t;
+        using typename Base_t::ChunkStructure_t;
+        using typename Base_t::Node_t;
         using Chunk_t = Self_t;
-
-        /// <summary>
-        /// Use the same ChunkArrayExtension_t as ChunkArrayPointerInternalT so both keep the same memory layout.
-        /// </summary>
-        using ChunkArrayExtension_t = typename ChunkArrayPointerInternalT<ChunkStructure_t, TChunkPointerElement>::ChunkArrayExtension_t;
-
-        /// <summary>
-        /// Reinterprete_cast this object to this type to get read-write access to it's private data fields
-        /// Use with caution.
-        /// </summary>
-        using ChunkPointerInternal_t = ChunkArrayPointerInternalT<ChunkStructure_t, TChunkPointerElement>;
-
+        using ChunkPointerInternal_t = DArrayPointerInternalT<ArrayExtension_t, typename Base_t::ChunkPointerInternal_t>;
         using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
 
     protected:
         /// <summary>
         /// Contains pointer to the array of Chunks
         /// </summary>
-        ChunkArrayExtension_t Array;
+        ArrayExtension_t Array;
 
     public:
-        ChunkArrayPointerT() = default;
-        ChunkArrayPointerT(const Self_t& o) = default;
+        DArrayPointerT() = default;
+        DArrayPointerT(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
-        ChunkArrayPointerT(Self_t&& o) = default;
+        DArrayPointerT(Self_t&& o) = default;
         Self_t& operator=(Self_t&& o) = default;
 
         /// <summary>
@@ -68,7 +44,7 @@ namespace PNC
         /// <param name="chunks">Points to an array of ChunkPointerElement_t the size of chunkCount or more.</param>
         /// <param name="chunkCount">Number of Chunks in the Array.</param>
         /// <param name="totalNodeCount">The total number of Nodes used by all Chunks in the Array.</param>
-        ChunkArrayPointerT(const ChunkStructure_t* chunkStructure, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t totalNodeCount)
+        DArrayPointerT(const ChunkStructure_t* chunkStructure, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t totalNodeCount)
             : Base_t(chunkStructure, totalNodeCount, componentData)
             , Array(chunks, chunkCount)
         {
@@ -76,27 +52,14 @@ namespace PNC
         }
 
     protected:
-        ChunkArrayPointerT(const ChunkStructure_t*const chunkStructure, const Size_t chunkCount, const Size_t nodeCountPerChunk)
-            : Base_t(chunkStructure, chunkCount * nodeCountPerChunk)
+        DArrayPointerT(const ChunkStructure_t* const chunkStructure, const Size_t chunkCount, const Size_t nodeCountPerChunk)
+            : Base_t(chunkStructure, chunkCount* nodeCountPerChunk)
             , Array(chunkCount)
         {
         }
 
     public:
-        using Base_t::IsVoid;
-        using Base_t::IsStruct;
-        using Base_t::IsNull;
-        using Base_t::IsData;
-        using Base_t::IsVoidNull;
-        using Base_t::IsVoidData;
-        using Base_t::IsStructNull;
-        using Base_t::IsStructData;
-
-        using Base_t::GetStructure;
-        using Base_t::GetNodeCount;
-        using Base_t::GetNodeCapacity;
-        using Base_t::GetChunkCount;
-        using Base_t::GetChunkCapacity;
+        PNC_USING_CHUNKPOINTER_INTERFACE();
         /// <summary>
         /// Number of elements in the array
         /// </summary>
@@ -104,14 +67,10 @@ namespace PNC
         Size_t GetChunkCount()const { return Array.GetChunkCount(); }
         Size_t GetChunkCapacity()const { return GetChunkCount(); }
 
-        // TODO Array indexing must return copies
-        const ChunkPointerElement_t operator[](Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
-        //// TODO Array indexing must return copies
-        //ChunkPointerElement_t& operator[](Size_t index) { return Array.Chunks[index]; }
-        // TODO Array indexing must return copies
-        const ChunkPointerElement_t GetChunk(Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
-        //// TODO Array indexing must return copies
-        //ChunkPointerElement_t GetChunk(Size_t index) { return Array.Chunks[index]; }
+        const ChunkPointerElement_t& operator[](const Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
+        ChunkPointerElement_t& operator[](const Size_t index) { return Array.GetChunk(GetInternalChunk(*this), index); }
+        const ChunkPointerElement_t& GetChunk(const Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
+        ChunkPointerElement_t& GetChunk(const Size_t index) { return Array.GetChunk(GetInternalChunk(*this), index); }
         const Chunk_t& operator*()const { return *this; }
         Chunk_t& operator*() { return *this; }
         const Chunk_t* operator->()const { return this; }
@@ -119,15 +78,122 @@ namespace PNC
         const Chunk_t& GetChunk()const { return *this; }
         Chunk_t& GetChunk() { return *this; }
 
-        static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& chunkPointer) { return reinterpret_cast<const ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
-        static ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(chunkPointer.Array.GetInternalChunk(GetInternalChunk(chunkPointer), index)); }
+        static       ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.GetChunk()); }
         static const ChunkPointerElementInternal_t& GetInternalChunkElement(const Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<const ChunkPointerElementInternal_t&>(chunkPointer.Array.GetInternalChunk(GetInternalChunk(chunkPointer), index)); }
+        static       ChunkPointerElementInternal_t& GetInternalChunkElement(Self_t& chunkPointer, const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(chunkPointer.Array.GetInternalChunk(GetInternalChunk(chunkPointer), index)); }
+
     protected:
-        //ChunkPointerInternal_t& GetInternalChunk() { return reinterpret_cast<ChunkPointerInternal_t&>(GetChunk()); }
-        //ChunkPointerElementInternal_t& GetInternalChunkElement(const Size_t index) { return reinterpret_cast<ChunkPointerElementInternal_t&>(Array.Chunks[index]); }
-        const ChunkArrayExtension_t& GetArrayExtension()const { return Array; }
-        ChunkArrayExtension_t& GetArrayExtension() { return Array; }
+        const ArrayExtension_t& GetArrayExtension()const { return Array; }
+        ArrayExtension_t& GetArrayExtension() { return Array; }
+
+        /// <summary>
+        /// Notes:
+        ///     Allocates a set of ComponentDataArray (for each component type) for each chunk element in the array.
+        ///     The base chunk array shares the same set of ComponentDataArray as the first chunk element in the array.
+        /// </summary>
+        template<typename TChunk>
+        static void AllocateComponentDataArray(TChunk& chunk)
+        {
+            pnc_assert(chunk.IsStruct());
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
+            const Size_t chunkCapacity = chunk.GetChunkCapacity();
+            internalChunk.ComponentData = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+        }
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        /// </summary>
+        template<typename TChunk>
+        static void FreeComponentDataArray(TChunk& chunk)
+        {
+            pnc_assert(chunk.IsStruct());
+            typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
+            Size_t chunkCapacity = chunk.GetChunkCapacity();
+            pnc_free_clean(internalChunk.ComponentData, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+        }
+
+        // TODO replace ChunkArrayCapacityAllocationT with DOwnT<DArrayPointerT<...>>
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        /// </summary>
+        template<typename TChunk>
+        static void AllocateConstruct(TChunk& chunk, const Size_t nodeCapacity, const Size_t chunkCapacity)
+        {
+            Base_t::AllocateConstruct(chunk, nodeCapacity, chunkCapacity);
+            chunk.Array.Allocate (chunk, nodeCapacity, chunkCapacity);
+            chunk.Array.Construct(chunk, nodeCapacity, chunkCapacity);
+
+        }
+        template<typename TChunk>
+        static void AllocateConstruct(TChunk& chunk)
+            { AllocateConstruct(chunk, chunk.GetNodeCapacity(), chunk.GetChunkCapacity()); }
+
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        ///     chunk and chunkFrom CANNOT be the same
+        /// </summary>
+        template<typename TChunk>
+        static void AllocateCopy(TChunk& chunk, const TChunk& chunkFrom, const Size_t newNodeCapacity, const Size_t newChunkCapacity)
+        {
+            pnc_assert(!IsSameData(chunk, chunkFrom));
+            Base_t::AllocateCopy(chunk, chunkFrom,                  newNodeCapacity, newChunkCapacity);
+            chunk.Array.Allocate      (chunk,                             newNodeCapacity, newChunkCapacity);
+            chunk.Array.ConstructCopy (chunk, chunkFrom, chunkFrom.Array, newNodeCapacity, newChunkCapacity);
+        }
+        template<typename TChunk>
+        static void AllocateCopy(TChunk& chunk, const TChunk& chunkFrom)
+            { AllocateCopy(chunk, chunkFrom, chunkFrom.GetNodeCapacity(), chunkFrom.GetChunkCapacity()); }
+
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        ///     chunkToReallocate and chunkFrom CANNOT be the same
+        /// </summary>
+        template<typename TChunk>
+        static void ReallocateCopy(TChunk& chunkToReallocate, const TChunk& chunkFrom, const Size_t newNodeCapacity, const Size_t newChunkCapacity)
+        {
+            pnc_assert(!IsSameData(chunkToReallocate, chunkFrom));
+            Base_t::ReallocateCopy(chunkToReallocate, chunkFrom, newNodeCapacity, newChunkCapacity);
+            chunkToReallocate.Array.ReallocateCopy(chunkToReallocate, chunkFrom, chunkFrom.Array, newNodeCapacity, newChunkCapacity);
+        }
+        template<typename TChunk>
+        static void ReallocateCopy(TChunk& chunkToReallocate, const TChunk& chunkFrom)
+            { return ReallocateCopy(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity(), chunkFrom.GetChunkCapacity()); }
+
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        ///     chunkToReallocate and chunkFrom CAN be the same
+        /// </summary>
+        template<typename TChunk>
+        static void ReallocateMove(TChunk& chunkToReallocate, TChunk& chunkFrom, const Size_t newNodeCapacity, const Size_t newChunkCapacity)
+        {
+            Base_t::ReallocateMove(chunkToReallocate, chunkFrom, newNodeCapacity, newChunkCapacity);
+            chunkToReallocate.Array.ReallocateMove(chunkToReallocate, chunkFrom, chunkFrom.Array, newNodeCapacity, newChunkCapacity);
+        }
+        template<typename TChunk>
+        static void ReallocateMove(TChunk& chunkToReallocate, TChunk& chunkFrom)
+            { return ReallocateMove(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity(), chunkFrom.GetChunkCapacity()); }
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        /// </summary>
+        template<typename TChunk>
+        static void FreeDestruct(TChunk& chunk)
+        {
+            chunk.Array.Destruct(chunk);
+            Base_t::FreeDestruct(chunk);
+        }
+
 
     public:
         static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const Size_t nodeCount, void**const componentDataArray)
@@ -167,9 +233,9 @@ namespace PNC
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(chunkArray);
             pnc_assert(!internalChunkArray.IsNull());
 
-            ChunkPointerElementInternal_t& internalChunkElement = GetInternalChunkElement(chunkArray, chunkIndex);
+            auto internalChunkElement = GetInternalChunkElement(chunkArray, chunkIndex);
             if (internalChunkElement.NodeCount > 0)
-                Node_t::DestructAllComponentsUnsafe(internalChunkElement, 0, internalChunkElement.NodeCount);
+                Node_t::DestructAllComponentsUnsafe(internalChunkElement, 0, 0, internalChunkElement.NodeCount, 1);
             else
                 Node_t::DestructAllChunkComponentsUnsafe(internalChunkElement, 0);
             
@@ -243,4 +309,19 @@ namespace PNC
         }
 
     };
+}
+
+#include "common.h"
+#include "ChunkArrayExtension.h"
+#include "DBarrelPointer.h"
+#include "ChunkArrayCapacityAllocation.h"
+namespace PNC
+{
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using ChunkArrayPointerT = DArrayPointerT<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
+                                              ChunkPointerT<TChunkStructure>>;
+
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using ChunkArrayT = DOwnT<DBarrelPointerT<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
+
 }

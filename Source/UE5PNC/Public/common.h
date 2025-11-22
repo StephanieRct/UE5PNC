@@ -376,7 +376,7 @@ namespace PNC
     Chunk_t& GetChunk() { return *this; }\
     static_assert(true)
 
-#define PNC_USING_CHUNKPOINTER_INTERFACE()\
+#define PNC_USING_CHUNKPOINTERINTERNAL_INTERFACE()\
     using Base_t::IsVoid;\
     using Base_t::IsStruct;\
     using Base_t::IsNull;\
@@ -387,6 +387,11 @@ namespace PNC
     using Base_t::IsStructData;\
     using Base_t::GetStructure;\
     using Base_t::GetNodeCount;\
-    using Base_t::GetInternalChunk;\
     using Base_t::IsSameStructure;\
+    using Base_t::IsSameData;\
+    static_assert(true)
+
+#define PNC_USING_CHUNKPOINTER_INTERFACE()\
+    PNC_USING_CHUNKPOINTERINTERNAL_INTERFACE();\
+    using Base_t::GetInternalChunk;\
     static_assert(true)

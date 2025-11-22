@@ -12,37 +12,68 @@ namespace PNC
     public:
         using Base_t = TBase;
         using Self_t = DChunkPointer<TChunkPointer, TBase>;
+
+        using typename Base_t::Size_t;
+        using ComponentType_t = typename TChunkPointer::ComponentType_t;
+        using ChunkStructure_t = typename TChunkPointer::ChunkStructure_t;
+        using Node_t = typename TChunkPointer::Node_t;
+        using ChunkPointerInternal_t = typename TChunkPointer::ChunkPointerInternal_t;
         using ChunkPointer_t = TChunkPointer;
-        using Chunk_t = ChunkPointer_t;
-        using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
-        using Size_t = typename ChunkPointer_t::Size_t;
-        using ChunkPointerInternal_t = typename ChunkPointer_t::ChunkPointerInternal_t;
+        using Chunk_t = typename TChunkPointer::Chunk_t;
 
     protected:
         ChunkPointer_t Chunk;
+
     public:
         DChunkPointer()
         {}
 
-        DChunkPointer(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
+        DChunkPointer(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void** componentData)
             : Base_t()
             , Chunk(chunkStructure, nodeCount, componentData)
         {}
         template<class... TBaseCTorArgumentTypes>
-        DChunkPointer(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData, TBaseCTorArgumentTypes&&... args)
+        DChunkPointer(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void** const componentData, TBaseCTorArgumentTypes&&... args)
             : Base_t(args...)
             , Chunk(chunkStructure, nodeCount, componentData)
         {}
 
-        DChunkPointer(const ChunkStructure_t* chunkStructure, Size_t nodeCount)
+        template<class... TBaseCTorArgumentTypes>
+        DChunkPointer(TBaseCTorArgumentTypes&&... args, const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void** const componentData)
+            : Base_t(args...)
+            , Chunk(chunkStructure, nodeCount, componentData)
+        {
+        }
+        template<class... TBaseCTorArgumentTypesBefore, class... TBaseCTorArgumentTypesAfter>
+        DChunkPointer(TBaseCTorArgumentTypesBefore&&... argsBefore, const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void** const componentData, TBaseCTorArgumentTypesAfter&&... argsAfter)
+            : Base_t(argsBefore..., argsAfter...)
+            , Chunk(chunkStructure, nodeCount, componentData)
+        {
+        }
+
+        DChunkPointer(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount)
             : Base_t()
             , Chunk(chunkStructure, nodeCount)
         {}
         template<class... TBaseCTorArgumentTypes>
-        DChunkPointer(const ChunkStructure_t* chunkStructure, Size_t nodeCount, TBaseCTorArgumentTypes&&... args)
+        DChunkPointer(const ChunkStructure_t*const chunkStructure, const Size_t nodeCount, TBaseCTorArgumentTypes&&... args)
             : Base_t(args...)
             , Chunk(chunkStructure, nodeCount)
         {}
+        template<class... TBaseCTorArgumentTypes>
+        DChunkPointer(TBaseCTorArgumentTypes&&... args, const ChunkStructure_t* const chunkStructure, const Size_t nodeCount)
+            : Base_t(args...)
+            , Chunk(chunkStructure, nodeCount)
+        {
+        }
+        template<class... TBaseCTorArgumentTypesBefore, class... TBaseCTorArgumentTypesAfter>
+        DChunkPointer(TBaseCTorArgumentTypesBefore&&... argsBefore, const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, TBaseCTorArgumentTypesAfter&&... argsAfter)
+            : Base_t(argsBefore..., argsAfter...)
+            , Chunk(chunkStructure, nodeCount)
+        {
+        }
+
+
 
         template<class... TBaseCTorArgumentTypes>
         DChunkPointer(TBaseCTorArgumentTypes&&... args)
@@ -58,9 +89,11 @@ namespace PNC
         bool IsVoidData()const { return Chunk.IsVoidData(); }
         bool IsStructNull()const { return Chunk.IsStructNull(); }
         bool IsStructData()const { return Chunk.IsStructData(); }
-        const ChunkStructure_t& GetStructure()const { return *Chunk.GetStructure(); }
+        const ChunkStructure_t& GetStructure()const { return Chunk.GetStructure(); }
         Size_t GetNodeCount()const { return Chunk.GetNodeCount(); }
+        Size_t GetNodeCapacity()const { return Chunk.GetNodeCapacity(); }
         Size_t GetChunkCount()const { return Chunk.GetChunkCount(); }
+        Size_t GetChunkCapacity()const { return Chunk.GetChunkCapacity(); }
         void* GetComponentData(const Size_t componentTypeIndexInChunk) { return Chunk.GetComponentData(componentTypeIndexInChunk); }
         void* GetComponentData(const Size_t componentTypeIndexInChunk)const { return Chunk.GetComponentData(componentTypeIndexInChunk); }
         void* GetComponentData(const type_info* const componentType) { return Chunk.GetComponentData(componentType); }
@@ -75,38 +108,43 @@ namespace PNC
         Chunk_t* operator->() { return &(Chunk_t&)Chunk; }
         const Chunk_t& GetChunk()const { return (const Chunk_t&)Chunk; }
         Chunk_t& GetChunk() { return (Chunk_t&)Chunk; }
-        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Chunk.Structure == b.Chunk.Structure; }
+        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameStructure(a.Chunk, b.Chunk); }
+        static bool IsSameData(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameData(a.Chunk, b.Chunk); }
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& chunkPointer) { return reinterpret_cast<ChunkPointerInternal_t&>(chunkPointer.Chunk); }
     protected:
         template<typename TChunk>
-        static void AllocateDataCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom, const Size_t newNodeCapacity) 
-            { return ChunkPointer_t::AllocateDataCopy(chunkToOverwrite, chunkFrom, newNodeCapacity); }
+        static void AllocateComponentDataArray(TChunk& chunk)
+            { return ChunkPointer_t::AllocateComponentDataArray(chunk); }
         template<typename TChunk>
-        static void AllocateDataCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom)
-            { AllocateDataCopy(chunkToOverwrite, chunkFrom, chunkFrom.GetNodeCapacity()); }
+        static void FreeComponentDataArray(TChunk& chunk)
+            { return ChunkPointer_t::FreeComponentDataArray(chunk); }
         template<typename TChunk>
-        static void ReallocateDataCopy(TChunk& chunkTo, const TChunk& chunkFrom, const Size_t newNodeCapacity)
-            { return ChunkPointer_t::ReallocateDataCopy(chunkTo, chunkFrom, newNodeCapacity); }
+        static void AllocateConstruct(TChunk& chunk, const Size_t nodeCapacity, const Size_t chunkCapacity)
+            { return ChunkPointer_t::AllocateConstruct(chunk, nodeCapacity, chunkCapacity); }
         template<typename TChunk>
-        static void ReallocateDataCopy(TChunk& chunkTo, const TChunk& chunkFrom)
-            { return ReallocateDataCopy(chunkTo, chunkFrom, chunkFrom.GetNodeCapacity()); }
+        static void AllocateConstruct(TChunk& chunk)
+            { return ChunkPointer_t::AllocateConstruct(chunk); }
         template<typename TChunk>
-        static void ReallocateDataMove(TChunk& chunkToReallocate, TChunk& chunkFrom, const Size_t newNodeCapacity)
-            { return ChunkPointer_t::ReallocateDataMove(chunkToReallocate, chunkFrom, newNodeCapacity); }
+        static void AllocateCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom, const Size_t nodeCapacity, const Size_t chunkCapacity)
+            { return ChunkPointer_t::AllocateCopy(chunkToOverwrite, chunkFrom, nodeCapacity, chunkCapacity); }
         template<typename TChunk>
-        static void ReallocateDataMove(TChunk& chunkToReallocate, TChunk& chunkFrom)
-            { return ReallocateDataMove(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity()); }
+        static void AllocateCopy(TChunk& chunkToOverwrite, const TChunk& chunkFrom)
+            { AllocateCopy(chunkToOverwrite, chunkFrom, chunkFrom.GetNodeCapacity()); }
         template<typename TChunk>
-        static void AllocateAndConstructData(TChunk& chunkToOverwrite, const Size_t nodeCapacity, const Size_t nodeCount)
-            { return ChunkPointer_t::AllocateAndConstructData(chunkToOverwrite, nodeCapacity, nodeCount); }
+        static void ReallocateCopy(TChunk& chunkTo, const TChunk& chunkFrom, const Size_t newNodeCapacity, const Size_t newChunkCapacity)
+            { return ChunkPointer_t::ReallocateCopy(chunkTo, chunkFrom, newNodeCapacity, newChunkCapacity); }
         template<typename TChunk>
-        static void AllocateDataArray(TChunk& chunk){ return ChunkPointer_t::AllocateDataArray(chunk); }
+        static void ReallocateCopy(TChunk& chunkTo, const TChunk& chunkFrom)
+            { return ReallocateCopy(chunkTo, chunkFrom, chunkFrom.GetNodeCapacity()); }
         template<typename TChunk>
-        static void DestructAndFreeData(TChunk& chunk){ return ChunkPointer_t::DestructAndFreeData(chunk); }
+        static void ReallocateMove(TChunk& chunkToReallocate, TChunk& chunkFrom, const Size_t newNodeCapacity, const Size_t newChunkCapacity)
+            { return ChunkPointer_t::ReallocateMove(chunkToReallocate, chunkFrom, newNodeCapacity, newChunkCapacity); }
         template<typename TChunk>
-        static void Destroy(TChunk& chunk){ return ChunkPointer_t::Destroy(chunk); }
+        static void ReallocateMove(TChunk& chunkToReallocate, TChunk& chunkFrom)
+            { return ReallocateMove(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity()); }
         template<typename TChunk>
-        static void FreeDataArray(TChunk& chunk){ return ChunkPointer_t::FreeDataArray(chunk); }
+        static void FreeDestruct(TChunk& chunk)
+            { return ChunkPointer_t::FreeDestruct(chunk); }
     };
 
 }

@@ -68,7 +68,10 @@ namespace PNC
     public:
 
         Size_t GetComponentCount() const { return Components.GetSize(); }
-
+        const ComponentType_t& GetComponentType(const Size_t index)const
+        {
+            return *Components[index];
+        }
         /// <summary>
         /// Get the index of a component type in the ComponentTypeSet of this ChunkStructure
         /// </summary>

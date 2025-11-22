@@ -16,11 +16,11 @@ namespace PNC
     {
         switch (this->Kind)
         {
-        case ChunkKind_Chunk:
-        case ChunkKind_ChunkArray:
+        case ChunkKind::Chunk:
+        case ChunkKind::ChunkArray:
             return reinterpret_cast<const KChunkPointerT<TChunkStructure>*>(this)->GetChunk();
-        case ChunkKind_ChunkTree:
-        case ChunkKind_ChunkArrayTree:
+        case ChunkKind::ChunkTree:
+        case ChunkKind::ChunkArrayTree:
             return reinterpret_cast<const KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
         pnc_assert_no_entry_return(*(Chunk_t*)nullptr);
@@ -31,11 +31,11 @@ namespace PNC
     {
         switch (this->Kind)
         {
-        case ChunkKind_Chunk:
-        case ChunkKind_ChunkArray:
+        case ChunkKind::Chunk:
+        case ChunkKind::ChunkArray:
             return reinterpret_cast<KChunkPointerT<TChunkStructure>*>(this)->GetChunk();
-        case ChunkKind_ChunkTree:
-        case ChunkKind_ChunkArrayTree:
+        case ChunkKind::ChunkTree:
+        case ChunkKind::ChunkArrayTree:
             return reinterpret_cast<KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
         pnc_assert_no_entry_return(*(Chunk_t*)nullptr);
@@ -46,13 +46,13 @@ namespace PNC
     {
         switch (this->Kind)
         {
-        case ChunkKind_Chunk:
+        case ChunkKind::Chunk:
             pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind_ChunkArray:
+        case ChunkKind::ChunkArray:
             return reinterpret_cast<const KChunkArrayPointerT<ChunkPointer_t>*>(this)->GetChunk();
-        case ChunkKind_ChunkTree:
+        case ChunkKind::ChunkTree:
             pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind_ChunkArrayTree:
+        case ChunkKind::ChunkArrayTree:
             return reinterpret_cast<const KChunkTreePointerT<TChunkStructure>*>(this)->GetChunk();
         }
         pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
@@ -63,13 +63,13 @@ namespace PNC
     {
         switch (this->Kind)
         {
-        case ChunkKind_Chunk:
+        case ChunkKind::Chunk:
             pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind_ChunkArray:
+        case ChunkKind::ChunkArray:
             return reinterpret_cast<KChunkArrayPointerT<ChunkPointer_t>*>(this)->GetChunk();
-        case ChunkKind_ChunkTree:
+        case ChunkKind::ChunkTree:
             pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind_ChunkArrayTree:
+        case ChunkKind::ChunkArrayTree:
             return reinterpret_cast<KChunkArrayTreePointerT<ChunkPointer_t>*>(this)->GetChunk();
         }
         pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);

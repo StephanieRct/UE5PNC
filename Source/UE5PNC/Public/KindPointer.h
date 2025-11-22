@@ -6,27 +6,32 @@
 
 namespace PNC
 {
-    enum ChunkKind
+    enum class ChunkKind 
     {
+        None,
         /// <summary>
         /// The Chunk is a ChunkPointer
         /// </summary>
-        ChunkKind_Chunk,
+        Chunk,
+        Bucket,
+        Bunch,
 
         /// <summary>
         /// The Chunk is a ChunkArrayPointer
         /// </summary>
-        ChunkKind_ChunkArray,
+        ChunkArray,
 
         /// <summary>
         /// The Chunk is a KChunkTreePointer
         /// </summary>
-        ChunkKind_ChunkTree,
+        ChunkTree,
+        BucketTree,
+        BunchTree,
 
         /// <summary>
         /// The Chunk is a KChunkArrayTreePointer
         /// </summary>
-        ChunkKind_ChunkArrayTree,
+        ChunkArrayTree,
     };
 
     /// <summary>
@@ -51,6 +56,10 @@ namespace PNC
         ChunkKind Kind;
 
     protected:
+        KindPointerT()
+            :Kind(ChunkKind::None)
+        {
+        }
         KindPointerT(ChunkKind kind)
             :Kind(kind)
         {
@@ -72,13 +81,13 @@ namespace PNC
         {
             switch (Kind)
             {
-            case PNC::ChunkKind_Chunk:
+            case ChunkKind::Chunk:
                 return false;
-            case PNC::ChunkKind_ChunkArray:
+            case ChunkKind::ChunkArray:
                 return false;
-            case PNC::ChunkKind_ChunkTree:
+            case ChunkKind::ChunkTree:
                 return true;
-            case PNC::ChunkKind_ChunkArrayTree:
+            case ChunkKind::ChunkArrayTree:
                 return true;
             }
         }
@@ -87,13 +96,13 @@ namespace PNC
         {
             switch (Kind)
             {
-            case PNC::ChunkKind_Chunk:
+            case ChunkKind::Chunk:
                 return false;
-            case PNC::ChunkKind_ChunkArray:
+            case ChunkKind::ChunkArray:
                 return true;
-            case PNC::ChunkKind_ChunkTree:
+            case ChunkKind::ChunkTree:
                 return false;
-            case PNC::ChunkKind_ChunkArrayTree:
+            case ChunkKind::ChunkArrayTree:
                 return true;
             }
         }
@@ -105,5 +114,36 @@ namespace PNC
         Chunk_t& GetChunk();
         const ChunkArray_t& GetChunkArray()const;
         ChunkArray_t& GetChunkArray();
+    };
+
+
+    template<ChunkKind TKind, typename TBase>
+    struct DKindT : public TBase
+    {
+    public:
+        using Base_t = TBase;
+        using Self_t = DKindT<TKind, TBase>;
+        using ChunkStructure_t = Base_t::ChunkStructure_t;
+
+        DKindT()
+            :Base_t(TKind)
+        {
+        }
+
+        template<class... TBaseCTorArgumentTypes>
+        DKindT(const ChunkStructure_t* chunkStructure, TBaseCTorArgumentTypes&&... args)
+            : Base_t(chunkStructure, args..., TKind)
+        {
+        }
+
+        DKindT(const ChunkKind overrideKind)
+            :Base_t(overrideKind)
+        {
+        }
+        template<class... TBaseCTorArgumentTypes>
+        DKindT(TBaseCTorArgumentTypes&&... args, const ChunkKind overrideKind)
+            : Base_t(args..., overrideKind)
+        {
+        }
     };
 }
