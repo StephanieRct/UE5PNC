@@ -45,8 +45,8 @@ namespace PNC
         DBarrelPointerT(Self_t&& o) = default;
 
     protected:
-        DBarrelPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount, const Size_t nodeCountPerChunk)
-            : Base_t(chunkStructure, chunkCount, nodeCapacityPerChunk)
+        DBarrelPointerT(const ChunkStructure_t* const chunkStructure, const Size_t chunkCapacity, const Size_t chunkCount, const Size_t nodeCapacityPerChunk, const Size_t nodeCountPerChunk)
+            : Base_t(chunkStructure, chunkCount, chunkCount * nodeCapacityPerChunk)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
             , ChunkCapacity(chunkCapacity)
         {

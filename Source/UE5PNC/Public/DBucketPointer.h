@@ -14,11 +14,11 @@ namespace PNC
         using Self_t = DBucketPointerT<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
+        using typename Base_t::Node_t;
+        using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointer_t;
         using typename Base_t::Chunk_t;
-        using typename Base_t::Node_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
-        using ChunkPointerInternal_t = ChunkPointerT<ChunkStructure_t>::ChunkPointerInternal_t;
 
     protected:
         /// <summary>
@@ -72,6 +72,7 @@ namespace PNC
 
     public:
         PNC_USING_CHUNKPOINTER_INTERFACE();
+        using Base_t::GetChunk;
         PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
 
         /// <summary>

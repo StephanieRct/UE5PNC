@@ -12,12 +12,12 @@ namespace PNC
     public:
         using Base_t = TBase;
         using Self_t = DGrowT<TBase>;
+        using typename Base_t::Size_t;
+        using typename Base_t::ComponentType_t;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Chunk_t;
-        using typename Base_t::Size_t;
         using typename Base_t::Node_t;
-        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
-        using ChunkPointerInternal_t = ChunkPointerT<ChunkStructure_t>::ChunkPointerInternal_t;
+        using typename Base_t::ChunkPointerInternal_t;
 
     public:
         using Base_t::Base_t;

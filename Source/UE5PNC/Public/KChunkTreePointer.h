@@ -9,7 +9,7 @@
 namespace PNC
 {
     template<typename TChunkStructure>
-    using KChunkTreePointerT = DChunkPointer<ChunkPointerT<TChunkStructure>, 
+    using KChunkTreePointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
                                DKindT<ChunkKind::ChunkTree, 
                                KTreePointerT<TChunkStructure>>>;
     template<typename TChunkStructure>

@@ -43,17 +43,17 @@ namespace PNC
         /// <param name="componentData">Points to an array of Component data pointers created according to the ChunkStructure.</param>
         /// <param name="chunks">Points to an array of ChunkPointerElement_t the size of chunkCount or more.</param>
         /// <param name="chunkCount">Number of Chunks in the Array.</param>
-        /// <param name="totalNodeCount">The total number of Nodes used by all Chunks in the Array.</param>
-        DArrayPointerT(const ChunkStructure_t* chunkStructure, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t totalNodeCount)
-            : Base_t(chunkStructure, totalNodeCount, componentData)
+        /// <param name="arrayNodeCount">The total number of Nodes used by all Chunks in the Array.</param>
+        DArrayPointerT(const ChunkStructure_t* chunkStructure, void** componentData, ChunkPointerElement_t* chunks, Size_t chunkCount, Size_t arrayNodeCount)
+            : Base_t(chunkStructure, arrayNodeCount, componentData)
             , Array(chunks, chunkCount)
         {
 
         }
 
     protected:
-        DArrayPointerT(const ChunkStructure_t* const chunkStructure, const Size_t chunkCount, const Size_t nodeCountPerChunk)
-            : Base_t(chunkStructure, chunkCount* nodeCountPerChunk)
+        DArrayPointerT(const ChunkStructure_t* const chunkStructure, const Size_t chunkCount, const Size_t arrayNodeCount)
+            : Base_t(chunkStructure, arrayNodeCount)
             , Array(chunkCount)
         {
         }
@@ -191,6 +191,7 @@ namespace PNC
         static void FreeDestruct(TChunk& chunk)
         {
             chunk.Array.Destruct(chunk);
+            chunk.Array.Deallocate(chunk);
             Base_t::FreeDestruct(chunk);
         }
 
@@ -314,7 +315,8 @@ namespace PNC
 #include "common.h"
 #include "ChunkArrayExtension.h"
 #include "DBarrelPointer.h"
-#include "ChunkArrayCapacityAllocation.h"
+#include "ChunkPointer.h"
+
 namespace PNC
 {
     template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>

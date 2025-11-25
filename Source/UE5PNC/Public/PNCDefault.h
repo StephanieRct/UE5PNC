@@ -425,7 +425,7 @@ namespace PNC
         // Add a chunk with a given chunk structure and capacity.
         ChunkArray_t* NewChunkArray(const ChunkStructure_t* const  chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount = 0, const Size_t nodeCountPerChunk = 0)
         {
-            ChunkArray_t* const chunk = pnc_new(ChunkArray_t)(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk);
+            ChunkArray_t* const chunk = pnc_new(ChunkArray_t)(chunkStructure, chunkCapacity, chunkCount, nodeCapacityPerChunk, nodeCountPerChunk);
             ChunkArrays.insert(chunk);
             return chunk;
         }

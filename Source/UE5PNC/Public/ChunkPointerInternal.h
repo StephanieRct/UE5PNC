@@ -21,6 +21,7 @@ namespace PNC
         using Size_t = typename ChunkStructure_t::Size_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
         using Node_t = NodeT<TChunkStructure>;
+        using ChunkPointerInternal_t = Self_t;
 
     public:
         /// <summary>
@@ -145,6 +146,8 @@ namespace PNC
         /// <returns></returns>
         static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Structure == b.Structure; }
         static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentData == b.ComponentData; }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return a; }
+        static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return a; }
         /// <summary>
         /// Get the size of the chunk.
         /// The size is the number of valid nodes in the chunk that can be processed by algorithms.
@@ -162,7 +165,29 @@ namespace PNC
         /// <returns></returns>
         const ChunkStructure_t& GetStructure()const { return *this->Structure; }
 
+        /// <summary>
+        /// Get the pointer to a component's memory array using the component type index in the ChunkStructure ComponentTypeSet.
+        /// For components with ComponentOwner_Node, the array will be at least the length of the size of the chunk.
+        /// For components with ComponentOwner_Chunk, the array will be of length 1.
+        /// This is the fastest way to access the chunk's component data.
+        /// </summary>
+        /// <param name="componentIndexInChunk">index in the ChunkStructure::Components ComponentTypeSet</param>
+        /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(const Size_t componentTypeIndexInChunk)
+        {
+            pnc_assert(!IsNull());
+            return this->ComponentData[componentTypeIndexInChunk];
+        }
+
+        /// <summary>
+        /// Get the const pointer to a component's memory array using the component type index in the ChunkStructure ComponentTypeSet.
+        /// For components with ComponentOwner_Node, the array will be at least the length of the size of the chunk.
+        /// For components with ComponentOwner_Chunk, the array will be of length 1.
+        /// This is the fastest way to access the chunk's component data.
+        /// </summary>
+        /// <param name="componentTypeIndexInChunk">index in the ChunkStructure::Components ComponentTypeSet</param>
+        /// <returns>Const pointer to the component memory array</returns>
+        const void* GetComponentData(const Size_t componentTypeIndexInChunk)const
         {
             pnc_assert(!IsNull());
             return this->ComponentData[componentTypeIndexInChunk];

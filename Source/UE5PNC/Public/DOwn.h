@@ -13,10 +13,11 @@ namespace PNC
         using Base_t = TBase;
         using Self_t = DOwnT<TBase>;
         using typename Base_t::ChunkStructure_t;
-        using typename Base_t::Chunk_t;
         using typename Base_t::Size_t;
         using typename Base_t::Node_t;
         using typename Base_t::ChunkPointerInternal_t;
+        using typename Base_t::ChunkPointer_t;
+        using typename Base_t::Chunk_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
 
 
@@ -64,7 +65,10 @@ namespace PNC
                 return *this;
             pnc_assertf(!IsVoidData(), TEXT("Cannot move over a VoidData Chunk without the Structure."));
             if (IsData())
+            {
                 FreeDestruct(*this);
+                FreeComponentDataArray(*this);
+            }
             Base_t::operator=(std::forward<Self_t>(chunkFrom));
             return *this;
         }
@@ -112,6 +116,7 @@ namespace PNC
                 else
                 {
                     FreeDestruct(*this);
+                    FreeComponentDataArray(*this);
                 }
             }
             Base_t::operator=(chunkFrom);

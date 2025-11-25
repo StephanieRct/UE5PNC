@@ -32,7 +32,7 @@ namespace PNC
         /// <returns></returns>
         static bool TryRun(TAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
         {
-            auto& chunk = *chunkPtr;
+            auto& chunk = chunkPtr.GetChunk();
             if (chunk.IsNull())
                 return false;
             if (!algorithm.Requirements(Routing::SetAlgorithmChunk<ChunkPointer_t>(&chunkPtr)))
@@ -52,7 +52,7 @@ namespace PNC
         template<typename TRouter>
         static bool TryRun(const TRouter& router, TAlgorithm& algorithm, ChunkPointer_t& chunkPtr)
         {
-            auto& chunk = *chunkPtr;
+            auto& chunk = chunkPtr.GetChunk();
             pnc_assert(!chunk.IsNull());
             if (!router.RouteAlgorithm(algorithm, chunkPtr))
                 return false;

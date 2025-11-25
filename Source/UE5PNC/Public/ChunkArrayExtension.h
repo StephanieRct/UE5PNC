@@ -80,7 +80,7 @@ namespace PNC
         {
             return (ChunkPointerElement_t*)pnc_alloc(chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
-        void Deallocate(ChunkPointerElement_t* chunks, const Size_t chunkCapacity)
+        void Deallocate(ChunkPointerElement_t*& chunks, const Size_t chunkCapacity)
         {
             pnc_free_clean(chunks, chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
@@ -104,6 +104,16 @@ namespace PNC
             }
         }
 
+
+        void SetComponentDataArrayValues(const ChunkStructure_t& structure, void** baseComponentData, const Size_t componentCount, const Size_t elementIndex, const Size_t fistNodeIndex, const Size_t fistChunkIndex)
+        {
+            void** elementComponentData = baseComponentData + elementIndex * componentCount;
+            for (Size_t iComp = 0; iComp < componentCount; ++iComp)
+            {
+                const ComponentType_t& componentType = structure.GetComponentType(iComp);
+                elementComponentData[iComp] = componentType.Forward(baseComponentData, fistNodeIndex, fistChunkIndex);
+            }
+        }
         ///// <summary>
         ///// Set the ComponentDataArray values of all chunk elements in an array of ChunkPointerElement_t to
         ///// an offset into the base array chunk ComponentDataArray.
@@ -152,30 +162,35 @@ namespace PNC
         ///     Called by DArrayPointerT
         /// </summary>
         template<typename TChunk>
+        void Deallocate(TChunk& chunk)
+        {
+            const Size_t chunkCapacity = chunk.GetChunkCapacity();
+            Deallocate(Chunks, chunkCapacity);
+        }
+
+        /// <summary>
+        /// Notes:
+        ///     Called by DArrayPointerT
+        /// </summary>
+        template<typename TChunk>
         void Construct(TChunk& chunk, const Size_t nodeCapacity, const Size_t chunkCapacity)
         {
             typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
             const Size_t nodeCount = chunk.GetNodeCount();
             const Size_t chunkCount = chunk.GetChunkCount();
-            const Size_t nodePerChunk = nodeCount / chunkCount;
-            const ChunkStructure_t* structure = &chunk.GetStructure();
-            const Size_t componentCount = structure->GetComponentCount();
-
-            // Set ComponentDataArray values for all chunks in the array full capacity.
-            for (Size_t iChunk = 0; iChunk < chunkCapacity; ++iChunk)
+            if (chunkCount > 0)
             {
-                void** elementComponentData = &internalChunk.ComponentData[iChunk * componentCount];
-                for (Size_t iComp = 0; iComp < componentCount; ++iComp)
+                const Size_t nodePerChunk = nodeCount / chunkCount;
+                const ChunkStructure_t& structure = chunk.GetStructure();
+                const Size_t componentCount = structure.GetComponentCount();
+
+                for (Size_t iChunk = 0; iChunk < chunkCount; ++iChunk)
                 {
-                    const ComponentType_t& componentType = structure->GetComponentType(iComp);
-                    elementComponentData[iComp] = componentType.Forward(internalChunk.ComponentData[iComp], iChunk * nodePerChunk, iChunk);
+                    SetComponentDataArrayValues(structure, internalChunk.ComponentData, componentCount, 
+                        /*elementIndex*/iChunk, /*firstNodeIndex*/ iChunk * nodePerChunk, /*firstChunkIndex*/iChunk);
+                    void** elementComponentData = &internalChunk.ComponentData[iChunk * componentCount];
+                    new(&Chunks[iChunk]) ChunkPointerElement_t(&structure, nodePerChunk, elementComponentData);
                 }
-            }
-
-            for (Size_t iChunk = 0; iChunk < chunkCount; ++iChunk)
-            {
-                void** elementComponentData = &internalChunk.ComponentData[iChunk * componentCount];
-                new(&Chunks[iChunk]) ChunkPointerElement_t(structure, nodePerChunk, elementComponentData);
             }
         }
 

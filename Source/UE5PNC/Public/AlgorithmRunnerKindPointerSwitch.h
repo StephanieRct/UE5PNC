@@ -43,9 +43,9 @@ namespace PNC
             switch (chunkPtr.Kind)
             {
             case ChunkKind::Chunk:
-                return AlgorithmRunnerChunk<Algorithm_t, ChunkPointer_t>::TryRun(algorithm, *(KChunkPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunk<Algorithm_t, KChunkPointer_t>::TryRun(algorithm, (KChunkPointer_t&)chunkPtr);
             case ChunkKind::ChunkArray:
-                return AlgorithmRunnerChunkArray<Algorithm_t, ChunkArrayPointer_t>::TryRun(algorithm, *(KChunkArrayPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayPointer_t>::TryRun(algorithm, (KChunkArrayPointer_t&)chunkPtr);
             case ChunkKind::ChunkTree:
                 return AlgorithmRunnerChunk<Algorithm_t, KChunkTreePointer_t>::TryRun(algorithm, (KChunkTreePointer_t&)chunkPtr);
             case ChunkKind::ChunkArrayTree:
@@ -68,9 +68,9 @@ namespace PNC
             switch (chunkPtr.Kind)
             {
             case ChunkKind::Chunk:
-                return AlgorithmRunnerChunk<Algorithm_t, ChunkPointer_t>::TryRun(router, algorithm, *(KChunkPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunk<Algorithm_t, KChunkPointer_t>::TryRun(router, algorithm, (KChunkPointer_t&)chunkPtr);
             case ChunkKind::ChunkArray:
-                return AlgorithmRunnerChunkArray<Algorithm_t, ChunkArrayPointer_t>::TryRun(router, algorithm, *(KChunkArrayPointer_t&)chunkPtr);
+                return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayPointer_t>::TryRun(router, algorithm, (KChunkArrayPointer_t&)chunkPtr);
             case ChunkKind::ChunkTree:
                 return AlgorithmRunnerChunk<Algorithm_t, KChunkTreePointer_t>::TryRun(router, algorithm, (KChunkTreePointer_t&)chunkPtr);
             case ChunkKind::ChunkArrayTree:

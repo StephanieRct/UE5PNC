@@ -9,7 +9,7 @@
 namespace PNC
 {
     template<typename TChunkStructure>
-    using KChunkPointerT = DChunkPointer<ChunkPointerT<TChunkStructure>, KindPointerT<TChunkStructure>>;
+    using KChunkPointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>, KindPointerT<TChunkStructure>>;
     ////TODO Remove
     ///// <summary>
     ///// A KChunkPointer is a KindPointer to a Chunk's Component data memory within a range of Nodes.
