@@ -3,7 +3,6 @@
 
 #pragma once
 #include "common.h"
-#include "ChunkPointerInternal.h"
 
 namespace PNC
 {
@@ -21,7 +20,7 @@ namespace PNC
         // can be called before index at (firstChunkIndex + chunkCount) is included by the chunk ChunkCount, 
         // making this function unsafe.
         template<typename TChunk>
-        static void ConstructAllChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
+        static void ConstructAllChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstChunkIndex >= 0);
@@ -54,7 +53,7 @@ namespace PNC
         // can be called before index at (firstNodeIndex + nodeCount) is included by the chunk NodeCount, 
         // making this function unsafe.
         template<typename TChunk>
-        static void ConstructAllNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
+        static void ConstructAllNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -86,8 +85,8 @@ namespace PNC
 
         template<typename TChunk>
         static void ConstructAllComponentsUnsafe(TChunk& chunk,
-                                                 const Size_t firstNodeIndex,      const Size_t nodeCount,
-                                                 const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
+                                                 const Size_t firstNodeIndex,      const NodeCountT<Size_t> nodeCount,
+                                                 const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -105,7 +104,7 @@ namespace PNC
         }
 
         template<typename TChunk>
-        static void DestructAllChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const Size_t chunkCount = 1)
+        static void DestructAllChunkComponentsUnsafe(TChunk& chunk, const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstChunkIndex >= 0);
@@ -136,7 +135,7 @@ namespace PNC
         }
 
         template<typename TChunk>
-        static void DestructAllNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
+        static void DestructAllNodeComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -168,7 +167,7 @@ namespace PNC
 
         template<typename TChunk>
         static void DestructAllComponentsUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                               const Size_t nodeCount,      const Size_t chunkCount)
+                                                               const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -188,7 +187,7 @@ namespace PNC
         template<typename TChunk>
         static void MoveAllNodeComponentsForwardUnsafe(TChunk& chunkTo,   const Size_t firstNodeIndexTo, 
                                                        TChunk& chunkFrom, const Size_t firstNodeIndexFrom, 
-                                                       const Size_t nodeCount)
+                                                       const NodeCountT<Size_t> nodeCount)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(firstNodeIndexTo >= 0);
@@ -216,7 +215,7 @@ namespace PNC
         template<typename TChunk>
         static void MoveAllChunkComponentsForwardUnsafe(TChunk& chunkTo,   const Size_t firstChunkIndexTo, 
                                                         TChunk& chunkFrom, const Size_t firstChunkIndexFrom, 
-                                                        const Size_t chunkCount)
+                                                        const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(firstChunkIndexTo >= 0);
@@ -252,7 +251,7 @@ namespace PNC
         template<typename TChunkTo, typename TChunkFrom>
         static void CopyConstructNodeComponentsForwardUnsafe(TChunkTo& chunkTo,     const Size_t firstNodeIndexTo,
                                                        const TChunkFrom& chunkFrom, const Size_t firstNodeIndexFrom, 
-                                                       const Size_t nodeCount)
+                                                       const NodeCountT<Size_t> nodeCount)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(!chunkFrom.IsNull());
@@ -281,7 +280,7 @@ namespace PNC
         template<typename TChunkTo, typename TChunkFrom>
         static void CopyConstructChunkComponentsForwardUnsafe(TChunkTo& chunkTo,     const Size_t firstChunkIndexTo,
                                                         const TChunkFrom& chunkFrom, const Size_t firstChunkIndexFrom, 
-                                                        const Size_t chunkCount)
+                                                        const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(!chunkFrom.IsNull());
@@ -311,7 +310,7 @@ namespace PNC
         template<typename TChunkTo, typename TChunkFrom>
         static void CopyConstructAllComponentsForwardUnsafe(TChunkTo& chunkTo,     const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                                       const TChunkFrom& chunkFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                      const Size_t nodeCount, const Size_t chunkCount)
+                                                      const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(!chunkFrom.IsNull());
@@ -358,8 +357,8 @@ namespace PNC
         template<typename TChunk>
         static void AllocateConstructAllComponentsUnsafe(TChunk& chunk,
                                                     const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                    const Size_t nodeCount,      const Size_t chunkCount,
-                                                    const Size_t nodeCapacity,   const Size_t chunkCapacity)
+                                                    const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount,
+                                                    const NodeCapacityT<Size_t> nodeCapacity,   const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!chunk.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -389,8 +388,8 @@ namespace PNC
         template<typename TChunkTo, typename TChunkFrom>
         static void AllocateCopyConstructAllComponentsForwardUnsafe(TChunkTo&   chunkTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                                               const TChunkFrom& chunkFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                              const Size_t nodeCount,    const Size_t chunkCount, 
-                                                              const Size_t nodeCapacity, const Size_t chunkCapacity)
+                                                              const NodeCountT<Size_t> nodeCount,    const ChunkCountT<Size_t> chunkCount, 
+                                                              const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(!chunkFrom.IsNull());
@@ -430,8 +429,8 @@ namespace PNC
         template<typename TChunkTo, typename TChunkFrom>
         static void ReallocateCopyConstructAllComponentsForwardUnsafe(TChunkTo&   chunkToReallocate, const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                                                 const TChunkFrom& chunkFrom,         const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                                const Size_t nodeCount,    const Size_t chunkCount, 
-                                                                const Size_t nodeCapacity, const Size_t chunkCapacity)
+                                                                const NodeCountT<Size_t> nodeCount,    const ChunkCountT<Size_t> chunkCount, 
+                                                                const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!chunkToReallocate.IsNull());
             pnc_assert(!chunkFrom.IsNull());
@@ -496,7 +495,7 @@ namespace PNC
         //static void CopyComponentForwardUnsafe(const ComponentType_t& componentType,
         //          void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
         //    const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
-        //    const Size_t nodeCount)
+        //    const NodeCountT<Size_t> nodeCount)
         //{
         //    CopyComponentForwardUnsafe(componentType, baseComponentDataTo, firstNodeIndexTo, 0, baseComponentDataFrom, firstNodeIndexFrom, 0, nodeCount, 1);
         //}
@@ -504,7 +503,7 @@ namespace PNC
         //static void CopyComponentForwardUnsafe(const ComponentType_t& componentType,
         //          void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
         //    const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom, 
-        //    const Size_t nodeCount, const Size_t chunkCount)
+        //    const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)
         //{
         //    componentType.CopyComponentForwardUnsafe(baseComponentDataTo  , firstNodeIndexTo  , firstChunkIndexTo,
         //                                             baseComponentDataFrom, firstNodeIndexFrom, firstChunkIndexFrom,
@@ -517,8 +516,8 @@ namespace PNC
 
         //static void MoveComponentForwardUnsafe(const ComponentType_t& componentType,
         //    void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)
         //{
         //    componentType.CopyComponentForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
         //        firstNodeIndexTo, firstNodeIndexFrom,
@@ -531,8 +530,8 @@ namespace PNC
 
         //static void SwapComponentForwardUnsafe(const ComponentType_t& componentType,
         //    void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)
         //{
         //    componentType.CopyComponentForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
         //        firstNodeIndexTo, firstNodeIndexFrom,
@@ -545,7 +544,7 @@ namespace PNC
         //template<typename TChunk>
         //static void CopyNodeComponentsUnsafe(const ComponentType_t& componentType,
         //    void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
         //{
         //    //pnc_assert(!chunk.IsNull());
         //    //pnc_assert(firstNodeIndex >= 0);
@@ -589,8 +588,8 @@ namespace PNC
 
         template<typename TChunkTo, typename TChunkFrom>
         static void MoveAllComponentsForward(TChunkTo& chunkTo, const TChunkFrom& chunkFrom,
-            const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-            const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
+            const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
+            const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)
         {
             pnc_assert(!chunkTo.IsNull());
             pnc_assert(!chunkFrom.IsNull());
@@ -625,8 +624,8 @@ namespace PNC
 
         //template<typename TChunkTo, typename TChunkFrom>
         //static void SwapNodeForward(TChunkTo& chunkTo, const TChunkFrom& chunkFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)
         //{
         //    pnc_assert(!chunkTo.IsNull());
         //    pnc_assert(!chunkFrom.IsNull());
@@ -665,14 +664,14 @@ namespace PNC
 
 
 
-        //static void DestructComponentUnsafe(const ComponentType_t& componentType, void* const componentData, const Size_t firstNodeIndex, const Size_t nodeCount)
+        //static void DestructComponentUnsafe(const ComponentType_t& componentType, void* const componentData, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
         //{
         //    pnc_assert(componentData);
         //    pnc_assert(firstNodeIndex >= 0);
         //    pnc_assert(nodeCount >= 0);
         //    componentType.DestructNodesUnsafe(componentData, firstNodeIndex, nodeCount);
         //}
-        //static void CopyComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
+        //static void CopyComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
         //{
         //    pnc_assert(componentDataTo);
         //    pnc_assert(componentDataFrom);
@@ -681,7 +680,7 @@ namespace PNC
         //    pnc_assert(nodeCount >= 0);
         //    componentType.CopyNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
         //}
-        //static void MoveComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
+        //static void MoveComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
         //{
         //    pnc_assert(componentDataTo);
         //    pnc_assert(componentDataFrom);
@@ -690,7 +689,7 @@ namespace PNC
         //    pnc_assert(nodeCount >= 0);
         //    componentType.MoveNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
         //}
-        //static void SwapComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount)
+        //static void SwapComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
         //{
         //    pnc_assert(componentDataTo);
         //    pnc_assert(componentDataFrom);
@@ -701,7 +700,7 @@ namespace PNC
         //}
 
         //template<typename TChunk>
-        //static void ConstructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
+        //static void ConstructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
         //{
         //    pnc_assert(!chunk.IsNull());
         //    pnc_assert(firstNodeIndex >= 0);
@@ -718,7 +717,7 @@ namespace PNC
         //}
 
         //template<typename TChunk>
-        //static void DestructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const Size_t nodeCount)
+        //static void DestructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
         //{
         //    pnc_assert(!chunk.IsNull());
         //    pnc_assert(firstNodeIndex >= 0);

@@ -37,7 +37,7 @@ namespace PNC
         /// <summary>
         /// Number of nodes (and not in bytes) all component data array contains
         /// </summary>
-        Size_t NodeCount;
+        NodeCountT<Size_t> NodeCount;
 
     public:
         /// <summary>
@@ -50,10 +50,18 @@ namespace PNC
         {
         }
 
+        template<typename TArgs>
+        ChunkPointerInternalT(const DArgsTag& tag, const TArgs& args)
+            : Structure(args.GetStructurePtr())
+            , ComponentData(args.GetComponentDataArray())
+            , NodeCount(args.GetNodeCount())
+        {
+        }
+
         /// <summary>
         /// Create a StructNull Chunk.
         /// </summary>
-        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure)
+        ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure)
             : Structure(chunkStructure)
             , ComponentData(nullptr)
             , NodeCount(0)
@@ -63,7 +71,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Chunk with a node count.
         /// </summary>
-        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, const Size_t nodeCount)
+        ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
             : Structure(chunkStructure)
             , ComponentData(nullptr)
             , NodeCount(nodeCount)
@@ -73,7 +81,7 @@ namespace PNC
         /// <summary>
         /// Create a VoidData Chunk
         /// </summary>
-        ChunkPointerInternalT(const Size_t nodeCount, void** const componentData)
+        ChunkPointerInternalT(const NodeCountT<Size_t> nodeCount, void** const componentData)
             : Structure(nullptr)
             , ComponentData(componentData)
             , NodeCount(nodeCount)
@@ -86,7 +94,7 @@ namespace PNC
         /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
         /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
         /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
-        ChunkPointerInternalT(const ChunkStructure_t* chunkStructure, const Size_t nodeCount, void** const componentData)
+        ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, void** const componentData)
             : Structure(chunkStructure)
             , ComponentData(componentData)
             , NodeCount(nodeCount)
@@ -154,10 +162,10 @@ namespace PNC
         /// The size can grow up to the capacity without having to reallocate the component's memory
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
-        Size_t GetNodeCount()const { return NodeCount; }
-        Size_t GetNodeCapacity()const { return NodeCount; }
-        Size_t GetChunkCount()const { return 1; }
-        Size_t GetChunkCapacity()const { return 1; }
+        NodeCountT<Size_t> GetNodeCount()const { return NodeCount; }
+        NodeCapacityT<Size_t> GetNodeCapacity()const { return PropCountToCapacity(NodeCount); }
+        ChunkCountT<Size_t> GetChunkCount()const { return 1; }
+        ChunkCapacityT<Size_t> GetChunkCapacity()const { return 1; }
         
         /// <summary>
         /// Get the ChunkStructure of this chunk

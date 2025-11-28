@@ -3,6 +3,7 @@
 
 #pragma once
 #include "common.h"
+#include "Containers.h"
 
 namespace PNC
 {
@@ -130,9 +131,15 @@ namespace PNC
         {
         }
 
+        //template<class... TBaseCTorArgumentTypes>
+        //DKindT(const StructurePtr<ChunkStructure_t>& chunkStructure, TBaseCTorArgumentTypes&&... args)
+        //    : Base_t(chunkStructure, TKind, args...)
+        //{
+        //}
+
         template<class... TBaseCTorArgumentTypes>
-        DKindT(const ChunkStructure_t* chunkStructure, TBaseCTorArgumentTypes&&... args)
-            : Base_t(chunkStructure, args..., TKind)
+        DKindT(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkKind overrideKind, TBaseCTorArgumentTypes&&... args)
+            : Base_t(chunkStructure, overrideKind, args...)
         {
         }
 
@@ -141,8 +148,8 @@ namespace PNC
         {
         }
         template<class... TBaseCTorArgumentTypes>
-        DKindT(TBaseCTorArgumentTypes&&... args, const ChunkKind overrideKind)
-            : Base_t(args..., overrideKind)
+        DKindT(const ChunkKind overrideKind, TBaseCTorArgumentTypes&&... args)
+            : Base_t(overrideKind, args...)
         {
         }
     };

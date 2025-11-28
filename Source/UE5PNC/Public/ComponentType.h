@@ -337,7 +337,8 @@ namespace PNC
 
     public:
         Size_t GetSize()const { return Size; }
-        Size_t GetSize(const Size_t nodeCount, const Size_t chunkCount = 1)const { return Size * GetComponentCount(nodeCount, chunkCount); }
+        Size_t GetSize(const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const { return Size * GetComponentCount(nodeCount, chunkCount); }
+        Size_t GetSize(const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity = 1)const { return Size * GetComponentCount(nodeCapacity, chunkCapacity); }
         Size_t GetAlignment()const { return Align; }
         ComponentOwner GetOwner()const { return Owner; }
         const type_info* GetTypeInfo()const { return TypeInfo; }
@@ -372,7 +373,7 @@ namespace PNC
         }
         
         void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                                     const Size_t nodeCount, const Size_t chunkCount) const
+                                                                     const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount) const
         {
             ConstructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
                                                    GetComponentCount(nodeCount,      chunkCount));
@@ -392,7 +393,7 @@ namespace PNC
         }
         
         void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                                    const Size_t nodeCount,      const Size_t chunkCount) const
+                                                                    const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount) const
         {
             DestructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
                                                   GetComponentCount(nodeCount,      chunkCount));
@@ -422,7 +423,7 @@ namespace PNC
         }
         void MoveConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                                  void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                 const Size_t nodeCount, const Size_t chunkCount)const
+                                                 const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             MoveConstructDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
                                            baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
@@ -453,7 +454,7 @@ namespace PNC
         }
         void MoveAssignComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                               void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                              const Size_t nodeCount, const Size_t chunkCount)const
+                                              const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             MoveAssignDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
                                         baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
@@ -483,7 +484,7 @@ namespace PNC
         }
         void CopyConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                            const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                           const Size_t nodeCount, const Size_t chunkCount)const
+                                           const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             CopyConstructDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
                                            baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
@@ -515,7 +516,7 @@ namespace PNC
         }
         void CopyAssignComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
                                         const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                        const Size_t nodeCount, const Size_t chunkCount)const
+                                        const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             CopyAssignDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
                                         baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
@@ -538,7 +539,7 @@ namespace PNC
 
         //void CopyConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
         //                                   const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
-        //                                   const Size_t nodeCount)const
+        //                                   const NodeCountT<Size_t> nodeCount)const
         //{
         //    CopyConstructDataForwardUnsafe(baseComponentDataTo,   firstNodeIndexTo,
         //                                   baseComponentDataFrom, firstNodeIndexFrom, 1);
@@ -590,8 +591,8 @@ namespace PNC
 
 
         //void MoveComponentForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)const
         //{
         //    MoveComponentDataForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
         //        GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
@@ -600,8 +601,8 @@ namespace PNC
         //}
 
         //void SwapComponentForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const Size_t nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const Size_t chunkCount = 1)const
+        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
+        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)const
         //{
         //    SwapComponentDataForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
         //        GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
@@ -616,7 +617,7 @@ namespace PNC
         ///// <param name="to">destination memory</param>
         ///// <param name="from">source memory</param>
         ///// <param name="nodeCount">How many component instances to copy</param>
-        //void Copy(void* const to, void const* from, const Size_t nodeCount, const Size_t chunkCapacity = 1)const
+        //void Copy(void* const to, void const* from, const NodeCountT<Size_t> nodeCount, const ChunkCapacityT<Size_t> chunkCapacity = 1)const
         //{
         //    auto count = GetComponentIndex(nodeCount, chunkCapacity);
         //    memcpy_s(to, count * Size, from, count * Size);
@@ -636,11 +637,11 @@ namespace PNC
         //    }
         //}
 
-        void* Forward(void* const ptr, const Size_t nodeCount, const Size_t chunkCount = 1)const
+        void* Forward(void* const ptr, const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const
         {
             return (uint8*)ptr + GetComponentCount(nodeCount, chunkCount) * Size;
         }
-        void* Backward(void* const ptr, const Size_t nodeCount, const Size_t chunkCount = 1)const
+        void* Backward(void* const ptr, const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const
         {
             return (uint8*)ptr - GetComponentCount(nodeCount, chunkCount) * Size;
         }
@@ -675,7 +676,11 @@ namespace PNC
                 pnc_assert_no_entry_return(-1);
             }
         }
-        Size_t GetComponentCount(const Size_t nodeCount, const Size_t chunkCount = 1)const
+        Size_t GetComponentCount(const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const
+        {
+            return GetComponentIndex(nodeCount, chunkCount);
+        }
+        Size_t GetComponentCount(const NodeCapacityT<Size_t> nodeCount, const ChunkCapacityT<Size_t> chunkCount = 1)const
         {
             return GetComponentIndex(nodeCount, chunkCount);
         }

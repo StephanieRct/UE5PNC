@@ -5,6 +5,8 @@
 #include "common.h"
 #include "AlgorithmRunnerChunk.h"
 #include "AlgorithmRunnerChunkArray.h"
+#include "KindPointer.h"
+#include "KContainers.h"
 
 namespace PNC
 {

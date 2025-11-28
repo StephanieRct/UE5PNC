@@ -3,7 +3,7 @@
 
 #pragma once
 #include "common.h"
-#include "AlgorithmRunnerKindPointerSwitch.h"
+
 
 namespace PNC
 {
@@ -13,22 +13,34 @@ namespace PNC
     /// <typeparam name="TChunkStructure"></typeparam>
     /// <typeparam name="TAlgorithm"></typeparam>
     /// <typeparam name="TKChunkPointer"></typeparam>
-    template<typename TChunkStructure, typename TAlgorithm, typename TKChunkPointer = KindPointerT<TChunkStructure>>
+    template<typename TChunkStructure, typename TAlgorithm, typename TKChunkPointer>// = KindPointerT<TChunkStructure>>
     struct AlgorithmRunner 
-        : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
+        //: public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
     {
     };
 
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkPointerT<TChunkStructure>> 
-        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>>
-    {
-    };
-
-
-    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> 
-        : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>
-    {
-    };
 }
+// TODO bring this back in another file
+//#include "KindPointer.h"
+//#include "AlgorithmRunnerKindPointerSwitch.h"
+//namespace PNC
+//{
+//    template<typename TChunkStructure, typename TAlgorithm>
+//    struct AlgorithmRunner<TChunkStructure, TAlgorithm, KindPointerT<TChunkStructure>>
+//        : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
+//    {
+//    };
+//
+//    template<typename TChunkStructure, typename TAlgorithm>
+//    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkPointerT<TChunkStructure>>
+//        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>>
+//    {
+//    };
+//
+//
+//    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
+//    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>
+//        : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>
+//    {
+//    };
+//}

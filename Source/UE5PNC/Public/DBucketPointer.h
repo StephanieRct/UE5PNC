@@ -7,11 +7,11 @@
 namespace PNC
 {
     template<typename TBase>
-    struct DBucketPointerT : public TBase
+    struct DBucketPointer : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DBucketPointerT<TBase>;
+        using Self_t = DBucketPointer<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
         using typename Base_t::Node_t;
@@ -24,13 +24,20 @@ namespace PNC
         /// <summary>
         /// Maximum number of Nodes this Chunk can grow to.
         /// </summary>
-        Size_t NodeCapacity;
+        NodeCapacityT<Size_t> NodeCapacity;
 
     protected:
+        template<typename TArgs>
+        DBucketPointer(const DArgsTag& tag, const TArgs& args)
+            : Base_t(tag, args)
+            , NodeCapacity(args.GetNodeCapacity())
+        {
+        }
+
         /// <summary>
         /// Create a VoidNull Chunk.
         /// </summary>
-        DBucketPointerT()
+        DBucketPointer()
             : Base_t()
             , NodeCapacity(0)
         {
@@ -44,13 +51,13 @@ namespace PNC
         /// <param name="chunkStructure">Structure of the Chunk's component data.</param>
         /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
         /// <param name="nodeCount"></param>
-        DBucketPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
+        DBucketPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityT<Size_t> nodeCapacity, const NodeCountT<Size_t> nodeCount = 0)
             : Base_t(chunkStructure, nodeCount)
             , NodeCapacity(nodeCapacity)
         {
         }
 
-        DBucketPointerT(Self_t&& o)
+        DBucketPointer(Self_t&& o)
             : Base_t(std::forward<Self_t>(o))
             , NodeCapacity(o.NodeCapacity)
         {
@@ -66,7 +73,7 @@ namespace PNC
             return *this;
         }
 
-        DBucketPointerT(const Self_t& o) = default;
+        DBucketPointer(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
 
 
@@ -79,10 +86,10 @@ namespace PNC
         /// Get the maximum number of Nodes the Chunk can grow to.
         /// </summary>
         /// <returns>The capacity of the chunk</returns>
-        Size_t GetNodeCapacity()const { return NodeCapacity; }
+        NodeCapacityT<Size_t> GetNodeCapacity()const { return NodeCapacity; }
 
 
-        Size_t AvailableNodes()const
+        NodeCountT<Size_t> AvailableNodes()const
         {
             return NodeCapacity - GetNodeCount();
         }
@@ -101,7 +108,7 @@ namespace PNC
             return -1;
         }
         
-        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const Size_t nodeCount = 1)
+        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const NodeCountT<Size_t> nodeCount = 1)
         {
             pnc_assert(firstNodexIndex >= 0);
             pnc_assert(nodeCount >= 0);
@@ -126,7 +133,7 @@ namespace PNC
                 internalChunk.NodeCount = firstNodexIndex;
         }
         
-        void RemoveNode(const Size_t firstNodeIndex, const Size_t nodeCount = 1)
+        void RemoveNode(const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount = 1)
         {
             pnc_assert(firstNodeIndex >= 0);
             pnc_assert(nodeCount >= 0);
@@ -137,7 +144,7 @@ namespace PNC
 
             Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodeIndex, nodeCount);
             const Size_t lastNodexIndex = firstNodeIndex + nodeCount;
-            const Size_t movingFirstNodeIndex = std::max(lastNodexIndex, internalChunk.NodeCount - nodeCount);
+            const Size_t movingFirstNodeIndex = std::max(Size_t(lastNodexIndex), Size_t(internalChunk.NodeCount - nodeCount));
             const Size_t movingNodeCount = internalChunk.NodeCount - movingFirstNodeIndex;
             if(movingNodeCount > 0)
             {
@@ -161,4 +168,7 @@ namespace PNC
 
         
     };
+
+
+
 }

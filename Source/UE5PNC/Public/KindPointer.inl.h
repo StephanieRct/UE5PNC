@@ -3,16 +3,18 @@
 
 #pragma once
 #include "common.h"
-#include "KindPointer.h"
-#include "KChunkTreePointer.h"
-#include "KChunkPointer.h"
-#include "KChunkArrayPointer.h"
-#include "KChunkArrayTreePointer.h"
+
+#include "Containers.h"
+#include "KContainers.h"
+//#include "KChunkTreePointer.h"
+//#include "KChunkPointer.h"
+//#include "KChunkArrayPointer.h"
+//#include "KChunkArrayTreePointer.h"
 
 namespace PNC
 {
     template<typename TChunkStructure>
-    const KindPointerT<TChunkStructure>::Chunk_t& KindPointerT<TChunkStructure>::GetChunk()const
+    const typename KindPointerT<TChunkStructure>::Chunk_t& KindPointerT<TChunkStructure>::GetChunk()const
     {
         switch (this->Kind)
         {
@@ -27,7 +29,7 @@ namespace PNC
     }
 
     template<typename TChunkStructure>
-    KindPointerT<TChunkStructure>::Chunk_t& KindPointerT<TChunkStructure>::GetChunk()
+    typename KindPointerT<TChunkStructure>::Chunk_t& KindPointerT<TChunkStructure>::GetChunk()
     {
         switch (this->Kind)
         {
@@ -42,7 +44,7 @@ namespace PNC
     }
 
     template<typename TChunkStructure>
-    const KindPointerT<TChunkStructure>::ChunkArray_t& KindPointerT<TChunkStructure>::GetChunkArray()const
+    const typename KindPointerT<TChunkStructure>::ChunkArray_t& KindPointerT<TChunkStructure>::GetChunkArray()const
     {
         switch (this->Kind)
         {
@@ -59,7 +61,7 @@ namespace PNC
     }
 
     template<typename TChunkStructure>
-    KindPointerT<TChunkStructure>::ChunkArray_t& KindPointerT<TChunkStructure>::GetChunkArray()
+    typename KindPointerT<TChunkStructure>::ChunkArray_t& KindPointerT<TChunkStructure>::GetChunkArray()
     {
         switch (this->Kind)
         {

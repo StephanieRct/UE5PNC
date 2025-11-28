@@ -57,13 +57,13 @@ public:
     }
 
     // Add a chunk with a given chunk structure and capacity.
-    PNC::KChunkTree* NewChunk(const PNC::ChunkStructure* chunkStructure, size_t nodeCapacity, size_t nodeCount = 0)
+    PNC::KBucketTree* NewChunk(const PNC::ChunkStructure* chunkStructure, size_t nodeCapacity, size_t nodeCount = 0)
     {
         return ChunkRegistry.NewChunk(chunkStructure, nodeCapacity, nodeCount);
     }
 
     // Add a chunk with a given chunk structure and capacity.
-    PNC::KChunkArrayTree* NewChunkArray(const PNC::ChunkStructure* chunkStructure, size_t nodeCapacityPerChunk, size_t chunkCapacity, size_t chunkCount = 0, size_t nodeCountPerChunk = 0)
+    PNC::KBucketBarrelTree* NewChunkArray(const PNC::ChunkStructure* chunkStructure, size_t nodeCapacityPerChunk, size_t chunkCapacity, size_t chunkCount = 0, size_t nodeCountPerChunk = 0)
     {
         return ChunkRegistry.NewChunkArray(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk);
     }

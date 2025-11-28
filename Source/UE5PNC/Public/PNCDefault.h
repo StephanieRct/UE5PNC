@@ -21,165 +21,25 @@
 
 #pragma once
 #include "common.h"
-#include "ComponentType.h"
-#include "ComponentTypeSet.h"
-#include "ChunkStructure.h"
-#include "ChunkPointer.h"
-#include "DChunkPointer.h"
-#include "DBucketPointer.h"
-#include "DOwn.h"
-#include "DGrow.h"
 
-#include "DArrayPointer.h"
-#include "ChunkArrayCapacityAllocation.h"
-#include "KindPointer.h"
-#include "KChunkArrayPointer.h"
-#include "Algorithm.h"
+#include "Containers.h"
+#include "KContainers.h"
+
+#include "ContainersAlgorithmRunner.h"
+#include "KContainersAlgorithmRunner.h"
+
+
+//#include "Algorithm.h"
 #include "Pipeline.h"
 #include "Components.h"
 #include "routing\AlgorithmRouter.h"
 #include "routing\AlgorithmCacheRouter.h"
-#include "DBarrelPointer.h"
 
 #include "KindPointer.inl.h"
 
-#include "KTreePointer.h"
 
 namespace PNC
 {
-    //template<typename TChunkStructure>
-    //using BucketChunk = ChunkCapacityAllocationT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
-
-    //template<typename TChunkStructure, typename TChunkPointerElement>
-    //using BucketChunkArray = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<ChunkArrayPointerT<ChunkStructure, TChunkPointerElement>>>;
-
-    //ChunkPointerT
-    //ChunkT
-    // -----------------
-    // |#|#|#|#|#|#|#|#|
-    // -----------------
-    template<typename TChunkStructure>
-    using ChunkT = DOwnT<ChunkPointerT<TChunkStructure>>;
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkT<TChunkStructure>> 
-        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
-
-    //template<typename TChunkStructure>
-    //using KChunkTreePointerT = DChunkPointer<ChunkPointerT<TChunkStructure>, KTreePointerT<TChunkStructure>>;
-    //template<typename TChunkStructure>
-    //using KChunkTreeT = DOwnT<DBucketPointerT<KChunkTreePointerT<TChunkStructure>>>;
-
-    //BucketPointerT
-    //BucketT
-    // -----------------
-    // |#|#|#|#|#| | | |
-    // -----------------
-    template<typename TChunkStructure>
-    using BucketPointerT = DBucketPointerT<ChunkPointerT<TChunkStructure>>;
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketPointerT<TChunkStructure>> :
-        public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
-    template<typename TChunkStructure>
-    using BucketT = DOwnT<BucketPointerT<TChunkStructure>>;
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BucketT<TChunkStructure>> 
-        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
-
-    
-    //BunchPointerT
-    //BunchT
-    // -----------------
-    // |#|#|#|#|#| | | | ...
-    // -----------------
-    template<typename TChunkStructure>
-    using BunchPointerT = DGrowT<DBucketPointerT<ChunkPointerT<TChunkStructure>>>;
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BunchPointerT<TChunkStructure>> :
-        public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
-    template<typename TChunkStructure>
-    using BunchT = DOwnT<BunchPointerT<TChunkStructure>>;
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, BunchT<TChunkStructure>>
-        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>> {};
-    
-
-
-
-
-
-
-
-    //ChunkArrayPointerT
-    //UniformChunkArrayPointerT
-    //UniformChunkArray
-    // -------------------------------------------------------
-    // |-----------------|-----------------|-----------------|
-    // ||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#||
-    // |-----------------|-----------------|-----------------|
-    // -------------------------------------------------------
-    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
-    using UniformChunkArrayPointerT = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
-    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
-    using UniformChunkArrayT = DOwnT<UniformChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>;
-    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, UniformChunkArrayT<TChunkStructure, TChunkPointerElement>>
-        : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> {
-    };
-
-
-    //UniformBucketArray
-    // -------------------------------------------------------
-    // |-----------------|-----------------|-----------------|
-    // ||#|#|#| | | | | |||#|#|#|#|#|#| | |||#| | | | | | | ||
-    // |-----------------|-----------------|-----------------|
-    // -------------------------------------------------------
-    //
-    //UniformChunkBarrel
-    // -------------------------------------------------------
-    // |-----------------|-----------------|                 |
-    // ||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#||                 |
-    // |-----------------|-----------------|                 |
-    // -------------------------------------------------------
-    //
-    //UniformBucketBarrel
-    // -------------------------------------------------------
-    // |-----------------|-----------------|                 |
-    // ||#|#|#|#|#| | | |||#|#| | | | | | ||                 |
-    // |-----------------|-----------------|                 |
-    // -------------------------------------------------------
-    
-
-
-    //ChunkArray
-    // -------------------------------------------------------
-    // |------|-----------------|--------|-------------------|
-    // ||#|#|#||#|#|#|#|#|#|#|#|||#|#|#|#||#|#|#|#|#|#|#|#|#||
-    // |------|-----------------|--------|-------------------|
-    // -------------------------------------------------------
-
-    //ChunkBarrel
-    // -------------------------------------------------------
-    // |------|-----------------|                            |
-    // ||#|#|#||#|#|#|#|#|#|#|#||                            |
-    // |------|-----------------|                            |
-    // -------------------------------------------------------
-    
-
-    //BucketBarrel
-    // -------------------------------------------------------
-    // |------|-----------------|--------|                   |
-    // ||#|#| ||#|#|#| | | | | |||#|#|#|#|                   |
-    // |------|-----------------|--------|                   |
-    // -------------------------------------------------------
-
-
-    //template<typename TChunkStructure, typename TChunkPointerElement>
-    //using ArrayChunkPointerT = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
-    //
-    //template<typename TChunkStructure, typename TChunkPointerElement>
-    //using ArrayChunkT = ChunkArrayCapacityAllocationT<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>;
-    //template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
-    //struct AlgorithmRunner< TChunkStructure, TAlgorithm, ArrayChunkT<TChunkStructure, TChunkPointerElement>> : public AlgorithmRunnerChunkArray<TAlgorithm, ArrayChunkPointerT<TChunkStructure, TChunkPointerElement>>{};
 
 
     using Size_t = int32;
@@ -201,24 +61,6 @@ namespace PNC
 
 
 
-
-
-
-
-    template<typename TChunkStructure>
-    using KChunkT = DOwnT<DBucketPointerT<KChunkPointerT<TChunkStructure>>>;
-
-    template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayT = DOwnT<DBarrelPointerT<KChunkArrayPointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
-
-
-    template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayTreeT = DOwnT<DBarrelPointerT<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
-
-
-
-
-
     using ChunkArrayPointer = ChunkArrayPointerT<ChunkStructure, ChunkPointer>;
 
     using KChunkPointer = KChunkPointerT<ChunkStructure>;
@@ -231,10 +73,18 @@ namespace PNC
     using ChunkArray = ChunkArrayT<ChunkStructure, ChunkPointer>;
 
     using KChunk = KChunkT<ChunkStructure>;
+    using KBucket = KBucketT<ChunkStructure>;
+    using KBunch = KBunchT<ChunkStructure>;
+
     using KChunkArray = KChunkArrayT<ChunkStructure, ChunkPointer>;
 
-    using KChunkArrayTree = KChunkArrayTreeT<ChunkStructure, ChunkPointer>;
+    using KChunkTree = KChunkTreeT<ChunkStructure>;
+    using KBucketTree = KBucketTreeT<ChunkStructure>;
+    using KBunchTree = KBunchTreeT<ChunkStructure>;
 
+    using KChunkArrayTree = KChunkArrayTreeT<ChunkStructure, ChunkPointer>;
+    using KBucketBarrelTree = KBucketBarrelTreeT<ChunkStructure, ChunkPointer>;
+    //KBucketBarrelTree
 
 
 
@@ -366,14 +216,14 @@ namespace PNC
     //    std::list<std::unique_ptr<Chunk_t>> Chunks;
 
     //    // Add a chunk with a given chunk structure and capacity.
-    //    KChunkTree& Add(const ChunkStructure_t* chunkStructure, const std::initializer_list<const ComponentType_t*>& args)
+    //    KChunkTree& Add(const StructurePtr<ChunkStructure_t>& chunkStructure, const std::initializer_list<const ComponentType_t*>& args)
     //    {
     //        auto* chunkStructure = std::make_unique<Chunk_t>(aComponents);
     //        return *Chunks[Chunks.Add(MakeUnique<KChunkTree>(chunkStructure, capacity, size))].Get();
     //    }
 
     //    // Add a chunk with a given chunk structure and capacity.
-    //    KChunkArrayTree& NewChunkArray(const ChunkStructure_t* chunkStructure, size_t nodeCapacityPerChunk, size_t chunkCapacity, size_t chunkCount = 0, size_t nodeCountPerChunk = 0)
+    //    KChunkArrayTree& NewChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure, size_t nodeCapacityPerChunk, size_t chunkCapacity, size_t chunkCount = 0, size_t nodeCountPerChunk = 0)
     //    {
     //        return *ChunkArrays[ChunkArrays.Add(MakeUnique<KChunkArrayTree>(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk))].Get();
     //    }
@@ -415,7 +265,7 @@ namespace PNC
 
     public:
         // Add a chunk with a given chunk structure and capacity.
-        Chunk_t* NewChunk(const ChunkStructure_t* const  chunkStructure, const Size_t capacity, const Size_t size = 0)
+        Chunk_t* NewChunk(const StructurePtr<ChunkStructure_t>&  chunkStructure, const Size_t capacity, const Size_t size = 0)
         {
             Chunk_t*const chunk = pnc_new(Chunk_t)(chunkStructure, capacity, size);
             Chunks.insert(chunk);
@@ -423,7 +273,7 @@ namespace PNC
         }
 
         // Add a chunk with a given chunk structure and capacity.
-        ChunkArray_t* NewChunkArray(const ChunkStructure_t* const  chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount = 0, const Size_t nodeCountPerChunk = 0)
+        ChunkArray_t* NewChunkArray(const StructurePtr<ChunkStructure_t>&  chunkStructure, const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk, const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount = 0, const NodeCountPerChunkT<Size_t> nodeCountPerChunk = 0)
         {
             ChunkArray_t* const chunk = pnc_new(ChunkArray_t)(chunkStructure, chunkCapacity, chunkCount, nodeCapacityPerChunk, nodeCountPerChunk);
             ChunkArrays.insert(chunk);
@@ -456,7 +306,7 @@ namespace PNC
 
     using ComponentTypeRegistry = ComponentTypeRegistryT<ComponentType>;
     using ChunkStructureRegistry = ChunkStructureRegistryT<ChunkStructure>;
-    using ChunkTreeRegistry = ChunkRegistryT<KChunkTree, KChunkArrayTree>;
+    using ChunkTreeRegistry = ChunkRegistryT<KBucketTree, KBucketBarrelTree>;
 
 
 #pragma region Hash
@@ -484,7 +334,7 @@ namespace PNC
     //        : Base_t()
     //    {
     //    }
-    //    HashChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCount, void** componentData)
+    //    HashChunkPointerT(const StructurePtr<ChunkStructure_t>& chunkStructure, NodeCountT<Size_t> nodeCount, void** componentData)
     //        : Base_t(chunkStructure, nodeCount, componentData)
     //    {
     //    }
@@ -496,7 +346,7 @@ namespace PNC
     //    }
 
     //protected:
-    //    HashChunkPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCount)
+    //    HashChunkPointerT(const StructurePtr<ChunkStructure_t>& chunkStructure, NodeCountT<Size_t> nodeCount)
     //        : Base_t(chunkStructure, nodeCount)
     //    {
     //    }
@@ -532,14 +382,14 @@ namespace PNC
     //    {
     //    }
 
-    //    ComponentChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount, void const** componentData, TComponent const* component)
+    //    ComponentChunkPointerT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, void const** componentData, TComponent const* component)
     //        : Base_t(chunkStructure, nodeCount, componentData)
     //        , Component(component)
     //    {
     //    }
 
     //protected:
-    //    ComponentChunkPointerT(const ChunkStructure_t* const chunkStructure, const Size_t nodeCount)
+    //    ComponentChunkPointerT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
     //        : Base_t(chunkStructure, nodeCount)
     //        , Component(nullptr)
     //    {
@@ -696,13 +546,13 @@ namespace PNC
         using KChunkArrayTreePointer_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointer_t>;
 
 
-        using Chunk_t = ChunkT<ChunkStructure_t>;
+        using Chunk_t = BunchT<ChunkStructure_t>;
         using ChunkArray_t = ChunkArrayT<ChunkStructure_t, ChunkPointer_t>;
 
-        using KChunk_t = KChunkT<ChunkStructure_t>;
+        using KChunk_t = KBunchT<ChunkStructure_t>;
         using KChunkArray_t = KChunkArrayT<ChunkStructure_t, ChunkPointer_t>;
 
-        using KChunkTree_t = KChunkTreeT<ChunkStructure_t>;
+        using KChunkTree_t = KBunchTreeT<ChunkStructure_t>;
         using KChunkArrayTree_t = KChunkArrayTreeT<ChunkStructure_t, ChunkPointer_t>;
 
         using ComponentTypeRegistry_t = ComponentTypeRegistryT<ComponentType_t>;
@@ -750,32 +600,32 @@ namespace PNC
             return ChunkStructureRegistry.GetOrAddChunkStructure<TComponentTypes...>(ComponentTypeRegistry);
         }
 
-        Chunk_t* NewChunk(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacity, const Size_t nodeCount = 0)
+        Chunk_t* NewChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityT<Size_t> nodeCapacity, const NodeCountT<Size_t> nodeCount = 0)
         {
             return ChunkRegistry.NewChunk(chunkStructure, nodeCapacity, nodeCount);
         }
 
-        ChunkArray_t* NewChunkArray(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount = 0, const Size_t nodeCountPerChunk = 0)
+        ChunkArray_t* NewChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk, const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount = 0, const NodeCountPerChunkT<Size_t> nodeCountPerChunk = 0)
         {
             return ChunkRegistry.NewChunkArray(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk);
         }
 
-        KChunk_t* AddKChunk(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacity, const Size_t nodeCount = 0)
+        KChunk_t* AddKChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityT<Size_t> nodeCapacity, const NodeCountT<Size_t> nodeCount = 0)
         {
             return KChunkRegistry.NewChunk(chunkStructure, nodeCapacity, nodeCount);
         }
 
-        KChunkArray_t* AddKChunkArray(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount = 0, const Size_t nodeCountPerChunk = 0)
+        KChunkArray_t* AddKChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk, const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount = 0, const NodeCountPerChunkT<Size_t> nodeCountPerChunk = 0)
         {
             return KChunkRegistry.NewChunkArray(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk);
         }
 
-        KChunkTree_t* AddKChunkTree(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacity, const Size_t nodeCount = 0)
+        KChunkTree_t* AddKChunkTree(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityT<Size_t> nodeCapacity, const NodeCountT<Size_t> nodeCount = 0)
         {
             return KChunkTreeRegistry.NewChunk(chunkStructure, nodeCapacity, nodeCount);
         }
 
-        KChunkArrayTree_t* AddKChunkArrayTree(const ChunkStructure_t* const chunkStructure, const Size_t nodeCapacityPerChunk, const Size_t chunkCapacity, const Size_t chunkCount = 0, const Size_t nodeCountPerChunk = 0)
+        KChunkArrayTree_t* AddKChunkArrayTree(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk, const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount = 0, const NodeCountPerChunkT<Size_t> nodeCountPerChunk = 0)
         {
             return KChunkTreeRegistry.NewChunkArray(chunkStructure, nodeCapacityPerChunk, chunkCapacity, chunkCount, nodeCountPerChunk);
         }

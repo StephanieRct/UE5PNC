@@ -23,5 +23,11 @@ namespace PNC
 
     public:
         ArrayExtension_t Array;
+
+        template<typename TArgs>
+        DArrayPointerInternalT(const DArgsTag& tag, const TArgs& args)
+            : Base_t(tag, args)
+        {
+        }
     };
 }

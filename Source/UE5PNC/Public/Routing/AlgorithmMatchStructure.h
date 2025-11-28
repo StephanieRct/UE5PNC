@@ -16,10 +16,10 @@ namespace PNC::Routing
         using ChunkStructure_t = TChunkStructure;
 
     protected:
-        const ChunkStructure_t* ChunkStructure;
+        const ChunkStructure_t*const ChunkStructure;
 
     public:
-        AlgorithmMatchStructure(const ChunkStructure_t* chunkStructure)
+        AlgorithmMatchStructure(const ChunkStructure_t*const chunkStructure)
             :ChunkStructure(chunkStructure)
         {
         }
