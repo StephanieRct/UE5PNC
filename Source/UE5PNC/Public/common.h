@@ -325,14 +325,14 @@ namespace PNC
         return Unique_Ptr<T>(pnc_new(T)(std::forward<TArgumentTypes>(args)...));
     }
 
-    template<typename TArg>
-    struct ArgTraits
+    template<typename TProp>
+    struct PropTraits
     {
 
     };
 
     template<template<typename TBase2> typename TDecorator>
-    struct ArgTraitsDefault
+    struct PropTraitsDefault
     {
         template<typename TBase>
         static TDecorator<TBase> Decorate(typename TDecorator<TBase>::Value_t value, const TBase& baseCopy)
@@ -356,13 +356,13 @@ namespace PNC
         // LocalNodeIndex
     };
     template<typename TValue, PropId TId >
-    struct Prop
+    struct IntProp
     {
         using Base_t = void;
-        using Self_t = Prop<TValue, TId>;
+        using Self_t = IntProp<TValue, TId>;
 
         TValue Value;
-        Prop(const TValue value)
+        IntProp(const TValue value)
             :Value(value) 
         {
         }
@@ -379,81 +379,81 @@ namespace PNC
         Self_t operator!() { return Self_t(!Value); }
     };
 
-    template<typename TValue, PropId TId> std::strong_ordering operator<=>(const Prop<TValue, TId>& a, const TValue& b) { return a.Value <=> b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator+(const Prop<TValue, TId>& a, const TValue& b) { return a.Value + b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator-(const Prop<TValue, TId>& a, const TValue& b) { return a.Value - b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator*(const Prop<TValue, TId>& a, const TValue& b) { return a.Value * b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator/(const Prop<TValue, TId>& a, const TValue& b) { return a.Value / b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator%(const Prop<TValue, TId>& a, const TValue& b) { return a.Value % b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator&(const Prop<TValue, TId>& a, const TValue& b) { return a.Value & b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator|(const Prop<TValue, TId>& a, const TValue& b) { return a.Value | b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator^(const Prop<TValue, TId>& a, const TValue& b) { return a.Value ^ b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator<<(const Prop<TValue, TId>& a, const TValue& b) { return a.Value << b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator>>(const Prop<TValue, TId>& a, const TValue& b) { return a.Value >> b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator&&(const Prop<TValue, TId>& a, const TValue& b) { return a.Value && b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator||(const Prop<TValue, TId>& a, const TValue& b) { return a.Value || b; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator+=(Prop<TValue, TId>& a, const TValue& b) { a.Value += b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator-=(Prop<TValue, TId>& a, const TValue& b) { a.Value -= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator*=(Prop<TValue, TId>& a, const TValue& b) { a.Value *= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator/=(Prop<TValue, TId>& a, const TValue& b) { a.Value /= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator%=(Prop<TValue, TId>& a, const TValue& b) { a.Value %= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator&=(Prop<TValue, TId>& a, const TValue& b) { a.Value &= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator|=(Prop<TValue, TId>& a, const TValue& b) { a.Value |= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator^=(Prop<TValue, TId>& a, const TValue& b) { a.Value ^= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator<<=(Prop<TValue, TId>& a, const TValue& b) { a.Value <<= b; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator>>=(Prop<TValue, TId>& a, const TValue& b) { a.Value >>= b; return a; }
+    template<typename TValue, PropId TId> std::strong_ordering operator<=>(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value <=> b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator+(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value + b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator-(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value - b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator*(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value * b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator/(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value / b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator%(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value % b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator&(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value & b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator|(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value | b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator^(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value ^ b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator<<(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value << b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator>>(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value >> b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator&&(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value && b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator||(const IntProp<TValue, TId>& a, const TValue& b) { return a.Value || b; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator+=(IntProp<TValue, TId>& a, const TValue& b) { a.Value += b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator-=(IntProp<TValue, TId>& a, const TValue& b) { a.Value -= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator*=(IntProp<TValue, TId>& a, const TValue& b) { a.Value *= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator/=(IntProp<TValue, TId>& a, const TValue& b) { a.Value /= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator%=(IntProp<TValue, TId>& a, const TValue& b) { a.Value %= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator&=(IntProp<TValue, TId>& a, const TValue& b) { a.Value &= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator|=(IntProp<TValue, TId>& a, const TValue& b) { a.Value |= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator^=(IntProp<TValue, TId>& a, const TValue& b) { a.Value ^= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator<<=(IntProp<TValue, TId>& a, const TValue& b) { a.Value <<= b; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator>>=(IntProp<TValue, TId>& a, const TValue& b) { a.Value >>= b; return a; }
 
 
-    template<typename TValue, PropId TId> std::strong_ordering operator<=>(const TValue& a, const Prop<TValue, TId>& b) { return a <=> b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator+(const TValue& a, const Prop<TValue, TId>& b) { return a + b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator-(const TValue& a, const Prop<TValue, TId>& b) { return a - b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator*(const TValue& a, const Prop<TValue, TId>& b) { return a * b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator/(const TValue& a, const Prop<TValue, TId>& b) { return a / b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator%(const TValue& a, const Prop<TValue, TId>& b) { return a % b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator&(const TValue& a, const Prop<TValue, TId>& b) { return a & b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator|(const TValue& a, const Prop<TValue, TId>& b) { return a | b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator^(const TValue& a, const Prop<TValue, TId>& b) { return a ^ b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator<<(const TValue& a, const Prop<TValue, TId>& b) { return a << b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator>>(const TValue& a, const Prop<TValue, TId>& b) { return a >> b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator&&(const TValue& a, const Prop<TValue, TId>& b) { return a && b.Value ; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator||(const TValue& a, const Prop<TValue, TId>& b) { return a || b.Value ; }
-    template<typename TValue, PropId TId> TValue& operator+=(TValue& a, const Prop<TValue, TId>& b) { a += b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator-=(TValue& a, const Prop<TValue, TId>& b) { a -= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator*=(TValue& a, const Prop<TValue, TId>& b) { a *= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator/=(TValue& a, const Prop<TValue, TId>& b) { a /= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator%=(TValue& a, const Prop<TValue, TId>& b) { a %= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator&=(TValue& a, const Prop<TValue, TId>& b) { a &= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator|=(TValue& a, const Prop<TValue, TId>& b) { a |= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator^=(TValue& a, const Prop<TValue, TId>& b) { a ^= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator<<=(TValue& a, const Prop<TValue, TId>& b) { a <<= b.Value; return a; }
-    template<typename TValue, PropId TId> TValue& operator>>=(TValue& a, const Prop<TValue, TId>& b) { a >>= b.Value; return a; }
+    template<typename TValue, PropId TId> std::strong_ordering operator<=>(const TValue& a, const IntProp<TValue, TId>& b) { return a <=> b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator+(const TValue& a, const IntProp<TValue, TId>& b) { return a + b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator-(const TValue& a, const IntProp<TValue, TId>& b) { return a - b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator*(const TValue& a, const IntProp<TValue, TId>& b) { return a * b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator/(const TValue& a, const IntProp<TValue, TId>& b) { return a / b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator%(const TValue& a, const IntProp<TValue, TId>& b) { return a % b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator&(const TValue& a, const IntProp<TValue, TId>& b) { return a & b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator|(const TValue& a, const IntProp<TValue, TId>& b) { return a | b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator^(const TValue& a, const IntProp<TValue, TId>& b) { return a ^ b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator<<(const TValue& a, const IntProp<TValue, TId>& b) { return a << b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator>>(const TValue& a, const IntProp<TValue, TId>& b) { return a >> b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator&&(const TValue& a, const IntProp<TValue, TId>& b) { return a && b.Value ; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator||(const TValue& a, const IntProp<TValue, TId>& b) { return a || b.Value ; }
+    template<typename TValue, PropId TId> TValue& operator+=(TValue& a, const IntProp<TValue, TId>& b) { a += b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator-=(TValue& a, const IntProp<TValue, TId>& b) { a -= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator*=(TValue& a, const IntProp<TValue, TId>& b) { a *= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator/=(TValue& a, const IntProp<TValue, TId>& b) { a /= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator%=(TValue& a, const IntProp<TValue, TId>& b) { a %= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator&=(TValue& a, const IntProp<TValue, TId>& b) { a &= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator|=(TValue& a, const IntProp<TValue, TId>& b) { a |= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator^=(TValue& a, const IntProp<TValue, TId>& b) { a ^= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator<<=(TValue& a, const IntProp<TValue, TId>& b) { a <<= b.Value; return a; }
+    template<typename TValue, PropId TId> TValue& operator>>=(TValue& a, const IntProp<TValue, TId>& b) { a >>= b.Value; return a; }
 
-    template<typename TValue, PropId TId> std::strong_ordering operator<=>(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value <=> b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator+(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value + b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator-(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value - b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator*(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value * b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator/(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value / b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator%(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value % b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator&(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value & b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator|(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value | b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator^(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value ^ b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator<<(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value << b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator>>(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value >> b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator&&(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value && b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId> operator||(const Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { return a.Value || b.Value; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator+=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value += b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator-=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value -= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator*=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value *= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator/=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value /= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator%=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value %= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator&=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value &= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator|=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value |= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator^=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value ^= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator<<=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value <<= b.Value; return a; }
-    template<typename TValue, PropId TId> Prop<TValue, TId>& operator>>=(Prop<TValue, TId>& a, const Prop<TValue, TId>& b) { a.Value >>= b.Value; return a; }
+    template<typename TValue, PropId TId> std::strong_ordering operator<=>(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value <=> b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator+(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value + b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator-(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value - b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator*(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value * b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator/(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value / b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator%(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value % b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator&(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value & b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator|(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value | b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator^(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value ^ b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator<<(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value << b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator>>(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value >> b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator&&(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value && b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId> operator||(const IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { return a.Value || b.Value; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator+=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value += b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator-=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value -= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator*=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value *= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator/=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value /= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator%=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value %= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator&=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value &= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator|=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value |= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator^=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value ^= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator<<=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value <<= b.Value; return a; }
+    template<typename TValue, PropId TId> IntProp<TValue, TId>& operator>>=(IntProp<TValue, TId>& a, const IntProp<TValue, TId>& b) { a.Value >>= b.Value; return a; }
 
     template<typename TValue, PropId TId>
-    struct Cleaner<Prop<TValue, TId>, false>
+    struct Cleaner<IntProp<TValue, TId>, false>
     {
     public:
         template<typename TProp>
@@ -466,21 +466,21 @@ namespace PNC
     };
 
     template<typename TSize>
-    using NodeCountT = Prop<TSize, PropId::NodeCount>;
+    using NodeCountT = IntProp<TSize, PropId::NodeCount>;
     template<typename TSize>
-    using NodeCapacityT = Prop<TSize, PropId::NodeCapacity>;
+    using NodeCapacityT = IntProp<TSize, PropId::NodeCapacity>;
     template<typename TSize>
-    using ChunkCountT = Prop<TSize, PropId::ChunkCount>;
+    using ChunkCountT = IntProp<TSize, PropId::ChunkCount>;
     template<typename TSize>
-    using ChunkCapacityT = Prop<TSize, PropId::ChunkCapacity>;
+    using ChunkCapacityT = IntProp<TSize, PropId::ChunkCapacity>;
     template<typename TSize>
-    using NodeCountPerChunkT = Prop<TSize, PropId::NodeCountPerChunk>;
+    using NodeCountPerChunkT = IntProp<TSize, PropId::NodeCountPerChunk>;
     template<typename TSize>
-    using NodeCapacityPerChunkT = Prop<TSize, PropId::NodeCapacityPerChunk>;
+    using NodeCapacityPerChunkT = IntProp<TSize, PropId::NodeCapacityPerChunk>;
     template<typename TSize>
-    using ArrayNodeCountT = Prop<TSize, PropId::ArrayNodeCount>;
+    using ArrayNodeCountT = IntProp<TSize, PropId::ArrayNodeCount>;
     template<typename TSize>
-    using ArrayNodeCapacityT = Prop<TSize, PropId::ArrayNodeCapacity>;
+    using ArrayNodeCapacityT = IntProp<TSize, PropId::ArrayNodeCapacity>;
 
     template<typename TSize>
     NodeCapacityT<TSize> PropCountToCapacity(const NodeCountT<TSize> nodeCount)
@@ -565,16 +565,16 @@ namespace PNC
     }
 
 
-    template <typename TArg, typename... TArgs>
-    constexpr TArg ArgOfType(TArgs&&... args) {
-        return std::get<TArg>(std::forward_as_tuple(std::forward<TArgs>(args)...));
-    }
+    //template <typename TArg, typename... TArgs>
+    //constexpr TArg ArgOfType(TArgs&&... args) {
+    //    return std::get<TArg>(std::forward_as_tuple(std::forward<TArgs>(args)...));
+    //}
 
 
-    struct DArgsTag {};
+    struct DPropsTag {};
 
     template<typename TSize>
-    struct DArgs
+    struct DProps
     {
         using Size_t = TSize;
     };
@@ -615,7 +615,7 @@ namespace PNC
     };
 
     template<typename TChunkStructure>
-    struct ArgTraits<StructurePtr<TChunkStructure>>
+    struct PropTraits<StructurePtr<TChunkStructure>>
     {
         template<typename TBase>
         static DStructurePtr<TChunkStructure, TBase> Decorate(const StructurePtr<TChunkStructure> value, const TBase& baseCopy)
@@ -624,6 +624,20 @@ namespace PNC
         }
     };
 
+    struct PropComponentDataArray
+    {
+        void** const ComponentDataArray;
+        void** GetComponentDataArray() const { return ComponentDataArray; }
+
+        PropComponentDataArray(void** value)
+            : ComponentDataArray(value)
+        {
+        }
+        operator void** ()const { return ComponentDataArray; }
+
+        void* operator->()const { return *ComponentDataArray; }
+        void*& operator*()const { return *ComponentDataArray; }
+    };
     template<typename TBase>
     struct DComponentDataArray : public TBase
     {
@@ -639,9 +653,9 @@ namespace PNC
         }
     };
     template<>
-    struct ArgTraits<void**> : public ArgTraitsDefault<DComponentDataArray>
-    {
-    };
+    struct PropTraits<void**> : public PropTraitsDefault<DComponentDataArray> { };
+    template<>
+    struct PropTraits<PropComponentDataArray> : public PropTraitsDefault<DComponentDataArray> { };
 
     template<typename TBase>
     struct DNodeCount : public TBase
@@ -658,7 +672,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<NodeCountT<TSize>> : public ArgTraitsDefault<DNodeCount>
+    struct PropTraits<NodeCountT<TSize>> : public PropTraitsDefault<DNodeCount>
     {
     };
     //
@@ -676,7 +690,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<NodeCapacityT<TSize>> : public ArgTraitsDefault<DNodeCapacity>
+    struct PropTraits<NodeCapacityT<TSize>> : public PropTraitsDefault<DNodeCapacity>
     {
     };
 
@@ -695,7 +709,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<ChunkCountT<TSize>> : public ArgTraitsDefault<DChunkCount>
+    struct PropTraits<ChunkCountT<TSize>> : public PropTraitsDefault<DChunkCount>
     {
     };
 
@@ -713,7 +727,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<ChunkCapacityT<TSize>> : public ArgTraitsDefault<DChunkCapacity>
+    struct PropTraits<ChunkCapacityT<TSize>> : public PropTraitsDefault<DChunkCapacity>
     {
     };
 
@@ -732,7 +746,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<NodeCountPerChunkT<TSize>> : public ArgTraitsDefault<DNodeCountPerChunk>
+    struct PropTraits<NodeCountPerChunkT<TSize>> : public PropTraitsDefault<DNodeCountPerChunk>
     {
     };
 
@@ -750,7 +764,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<NodeCapacityPerChunkT<TSize>> : public ArgTraitsDefault<DNodeCapacityPerChunk>
+    struct PropTraits<NodeCapacityPerChunkT<TSize>> : public PropTraitsDefault<DNodeCapacityPerChunk>
     {
     };
 
@@ -771,7 +785,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<ArrayNodeCountT<TSize>> : public ArgTraitsDefault<DArrayNodeCount>
+    struct PropTraits<ArrayNodeCountT<TSize>> : public PropTraitsDefault<DArrayNodeCount>
     {
     };
 
@@ -791,7 +805,7 @@ namespace PNC
         }
     };
     template<typename TSize>
-    struct ArgTraits<ArrayNodeCapacityT<TSize>> : public ArgTraitsDefault<DArrayNodeCapacity>
+    struct PropTraits<ArrayNodeCapacityT<TSize>> : public PropTraitsDefault<DArrayNodeCapacity>
     {
     };
 
@@ -800,45 +814,36 @@ namespace PNC
 
 
 
-    template<typename TSize, typename TArg>
-    auto MakeArg(const TArg& arg)
+    template<typename TSize, typename TProp>
+    auto MakeProp(const TProp& prop)
     {
-        return ArgTraits<TArg>::Decorate(arg, DArgs<TSize>());
+        return PropTraits<TProp>::Decorate(prop, DProps<TSize>());
     }
-    template<typename TArg, typename TBase>
-    auto MakeArg(const TArg& arg, const TBase& baseCopy)
+
+    template<typename TProp, typename TProps>
+    auto AppendProp(const TProps& props, const TProp& newProp)
     {
-        return ArgTraits<TArg>::Decorate(arg, baseCopy);
+        return PropTraits<TProp>::Decorate(newProp, props);
     }
 
 
     template <typename TSize, typename T>
-    auto MakeArgRecursive(const T& arg) {
-        return MakeArg<TSize>(arg);
+    auto MakePropUnfold(const T& prop) {
+        return MakeProp<TSize>(prop);
     }
 
     template <typename TSize, typename T, typename... Rest>
-    auto MakeArgRecursive(const T& first, Rest&&... rest) {
+    auto MakePropUnfold(const T& first, Rest&&... rest) {
         static_assert(!std::is_same_v<TSize, T>);
-        return MakeArg(first, MakeArgRecursive<TSize>(rest...));
+        return AppendProp(MakePropUnfold<TSize>(rest...), first);
     }
 
-    template<typename TSize, typename... TArgs>
-    auto MakeArgs(TArgs&&... args)
+    template<typename TSize, typename... TProps>
+    auto MakeProps(TProps&&... props)
     {
-        return MakeArgRecursive<TSize>(args...);
+        return MakePropUnfold<TSize>(props...);
     }
-    //template <typename... TArgs>
-    //auto Args(TArgs... args)
-    //{
-    //    //(TArgs<);
-    //}
 
-    //template <typename T1, typename... TArgs>
-    //auto Args1(T1 a1, TArgs... args)
-    //{
-    //    
-    //}
 }
 
 

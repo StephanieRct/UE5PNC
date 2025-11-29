@@ -34,10 +34,10 @@ namespace PNC
     public:
         DArrayPointerT() = default;
 
-        template<typename TArgs>
-        DArrayPointerT(const DArgsTag& tag, const TArgs& args)
-            : Base_t(tag, args)
-            , Array(tag, args)
+        template<typename TProps>
+        DArrayPointerT(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, props)
+            , Array(tag, props)
         {
         }
 

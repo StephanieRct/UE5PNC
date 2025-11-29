@@ -445,14 +445,14 @@ namespace PNC
             pnc_assert(nodeCapacity >= nodeCount);
             pnc_assert(chunkCapacity >= chunkCount);
 
-            const Size_t nodeCountTo       = chunkToReallocate.GetNodeCount();
-            const Size_t nodeCapacityTo    = chunkToReallocate.GetNodeCapacity();
-            const Size_t chunkCountTo      = chunkToReallocate.GetChunkCount();
-            const Size_t chunkCapacityTo   = chunkToReallocate.GetChunkCapacity();
-            const Size_t chunkCapacityFrom = chunkToReallocate.GetChunkCapacity();
+            const auto nodeCountTo       = chunkToReallocate.GetNodeCount();
+            const auto nodeCapacityTo    = chunkToReallocate.GetNodeCapacity();
+            const auto chunkCountTo      = chunkToReallocate.GetChunkCount();
+            const auto chunkCapacityTo   = chunkToReallocate.GetChunkCapacity();
+            const auto chunkCapacityFrom = chunkToReallocate.GetChunkCapacity();
             void** const componentDataArrayTo = TChunkTo::GetInternalChunk(chunkToReallocate).ComponentData;
             const ChunkStructure_t& structure = chunkToReallocate.GetStructure();
-            const Size_t componentCount = structure.GetComponentCount();
+            const auto componentCount = structure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const void* const dataFrom = chunkFrom.GetComponentData(i);
@@ -610,7 +610,7 @@ namespace PNC
             pnc_assert(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
 
             const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
-            Size_t componentCount = chunkStructure.GetComponentCount();
+            const auto componentCount = chunkStructure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t* componentType = chunkStructure.Components[i];

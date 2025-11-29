@@ -24,17 +24,17 @@ namespace PNC
     public:
         DOwn() = default;
 
-        template<typename TArgs>
-        DOwn(const DArgsTag& tag, const TArgs& args)
-            : Base_t(tag, args)
+        template<typename TProps>
+        DOwn(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, AppendProp(props, PropComponentDataArray(nullptr)))
         {
             AllocateComponentDataArray(*this);
-            AllocateConstruct(*this, args);
+            AllocateConstruct(*this, props);
         }
 
         template< typename... TArgs>
         DOwn(const StructurePtr<ChunkStructure_t>& chunkStructure, TArgs&&... args)
-            : DOwn(DArgsTag(), MakeArgs<Size_t>(chunkStructure, args...))
+            : DOwn(DPropsTag(), MakeProps<Size_t>(chunkStructure, args...))
         {
         }
 

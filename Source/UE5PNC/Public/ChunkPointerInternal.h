@@ -50,11 +50,11 @@ namespace PNC
         {
         }
 
-        template<typename TArgs>
-        ChunkPointerInternalT(const DArgsTag& tag, const TArgs& args)
-            : Structure(args.GetStructurePtr())
-            , ComponentData(args.GetComponentDataArray())
-            , NodeCount(args.GetNodeCount())
+        template<typename TProps>
+        ChunkPointerInternalT(const DPropsTag& tag, const TProps& props)
+            : Structure(props.GetStructurePtr())
+            , ComponentData(props.GetComponentDataArray())
+            , NodeCount(props.GetNodeCount())
         {
         }
 

@@ -65,6 +65,12 @@ namespace PNC
         }
         KTreePointerT& operator=(const KTreePointerT&) = delete;
 
+    protected:
+        template<typename TProps>
+        KTreePointerT(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, props)
+        {
+        }
     public:
         /// <summary>
         /// Get the parent KTreePointer common with all siblings.

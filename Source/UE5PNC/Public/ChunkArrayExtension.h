@@ -37,10 +37,10 @@ namespace PNC
 
     public:
 
-        template<typename TArgs>
-        ChunkArrayExtensionT(const DArgsTag& tag, const TArgs& args)
+        template<typename TProps>
+        ChunkArrayExtensionT(const DPropsTag& tag, const TProps& props)
             : Chunks(nullptr)
-            , ChunkCount(args.GetChunkCount())
+            , ChunkCount(props.GetChunkCount())
         {
         }
 

@@ -81,7 +81,7 @@ namespace PNC
         KChunkTreePointerT<TChunkStructure>>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayTreeT = DChunkArray<DOwn<DBarrelPointer<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>>;
+    using KChunkArrayTreeT = DChunkArray<DOwn<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
 
 
     template<typename TChunkStructure, typename TChunkPointerElement>

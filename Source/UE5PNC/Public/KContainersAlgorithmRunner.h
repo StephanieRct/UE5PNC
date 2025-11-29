@@ -9,9 +9,12 @@
 //#include "routing\AlgorithmCacheRouter.h"
 #include "Algorithm.h"
 #include "AlgorithmRunnerChunk.h"
+#include "AlgorithmRunnerKindPointerSwitch.h"
 
 namespace PNC
 {
+    template<typename TChunkStructure, typename TAlgorithm> struct AlgorithmRunner< TChunkStructure, TAlgorithm, KTreePointerT<TChunkStructure>> : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm> {};
+    template<typename TChunkStructure, typename TAlgorithm> struct AlgorithmRunner< TChunkStructure, TAlgorithm, KindPointerT <TChunkStructure>> : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm> {};
 }
 
 namespace PNC::Routing

@@ -33,11 +33,11 @@ namespace PNC
 
 
     public:
-        template<typename TArgs>
-        DBarrelPointer(const DArgsTag& tag, const TArgs& args)
-            : Base_t(tag, args)
-            , NodeCapacityPerChunk(args.GetNodeCapacityPerChunk())
-            , ChunkCapacity(args.GetChunkCapacity())
+        template<typename TProps>
+        DBarrelPointer(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, props)
+            , NodeCapacityPerChunk(props.GetNodeCapacityPerChunk())
+            , ChunkCapacity(props.GetChunkCapacity())
         {
         }
 

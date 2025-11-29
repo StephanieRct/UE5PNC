@@ -105,7 +105,7 @@ namespace PNC
         ChunkPointerT<TChunkStructure>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
-    using ChunkArrayT = DChunkArray<DOwn<DBarrelPointer<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>>;
+    using ChunkArrayT = DChunkArray<DOwn<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
 
 
 

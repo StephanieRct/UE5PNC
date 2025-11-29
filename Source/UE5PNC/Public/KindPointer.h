@@ -35,6 +35,33 @@ namespace PNC
         ChunkArrayTree,
     };
 
+    //using PropChunkKind = Prop<ChunkKind, PropId::ChunkKind>;
+
+    template<typename TBase>
+    struct DPropChunkKind : public TBase
+    {
+        using Value_t = ChunkKind;
+        
+        ChunkKind Kind;
+        ChunkKind GetChunkKind() const { return Kind; }
+
+        DPropChunkKind(const ChunkKind kind, const TBase& baseCopy)
+            : TBase(baseCopy)
+            , Kind(kind)
+        {
+        }
+    };
+
+    template<>
+    struct PropTraits<ChunkKind>
+    {
+        template<typename TBase>
+        static DPropChunkKind<TBase> Decorate(const ChunkKind value, const TBase& baseCopy)
+        {
+            return DPropChunkKind<TBase>(value, baseCopy);
+        }
+    };
+
     /// <summary>
     /// A KindPointer is an abstract Pointer with a differnt implementation according to the Chunk's kind.
     /// </summary>
@@ -63,6 +90,12 @@ namespace PNC
         }
         KindPointerT(ChunkKind kind)
             :Kind(kind)
+        {
+        }
+
+        template<typename TProps>
+        KindPointerT(const DPropsTag& tag, const TProps& props)
+            : Kind(props.GetChunkKind())
         {
         }
 
@@ -118,6 +151,10 @@ namespace PNC
     };
 
 
+    /// <summary>
+    /// Force a compile-time ChunkKind value.
+    /// The most derived decorator of the same type will take precedence
+    /// </summary>
     template<ChunkKind TKind, typename TBase>
     struct DKindT : public TBase
     {
@@ -131,26 +168,13 @@ namespace PNC
         {
         }
 
-        //template<class... TBaseCTorArgumentTypes>
-        //DKindT(const StructurePtr<ChunkStructure_t>& chunkStructure, TBaseCTorArgumentTypes&&... args)
-        //    : Base_t(chunkStructure, TKind, args...)
-        //{
-        //}
+    protected:
+        template<typename TProps>
+        DKindT(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, AppendProp(props, TKind))
+        {
+        }
+    public:
 
-        template<class... TBaseCTorArgumentTypes>
-        DKindT(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkKind overrideKind, TBaseCTorArgumentTypes&&... args)
-            : Base_t(chunkStructure, overrideKind, args...)
-        {
-        }
-
-        DKindT(const ChunkKind overrideKind)
-            :Base_t(overrideKind)
-        {
-        }
-        template<class... TBaseCTorArgumentTypes>
-        DKindT(const ChunkKind overrideKind, TBaseCTorArgumentTypes&&... args)
-            : Base_t(overrideKind, args...)
-        {
-        }
     };
 }
