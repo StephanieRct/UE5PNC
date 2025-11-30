@@ -25,7 +25,6 @@ namespace PNC
         using Base_t::GetChunkCapacity;
         using Base_t::AddNodes;
         PNC_USING_CHUNKPOINTER_INTERFACE();
-        PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
 
 
         Size_t AddNode() 

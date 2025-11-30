@@ -18,12 +18,12 @@ namespace PNC
         template<typename TAlgorithm>
         static bool TryRun(TAlgorithm& algorithm, TContainer& container)
         {
-            auto& chunk = container.GetChunk();
-            if (chunk.IsNull())
+            if (container.IsNull())
                 return false;
             if (!algorithm.Requirements(Routing::SetAlgorithmChunk<TContainer>(&container)))
                 return false;
-            algorithm.Execute(chunk.GetNodeCount());
+            const auto nodeCount = container.GetNodeCount();
+            algorithm.Execute(nodeCount);
             return true;
         }
 
@@ -33,11 +33,11 @@ namespace PNC
         template<typename TRouter, typename TAlgorithm>
         static bool TryRun(const TRouter& router, TAlgorithm& algorithm, TContainer& container)
         {
-            auto& chunk = container.GetChunk();
-            pnc_assert(!chunk.IsNull());
+            pnc_assert(!container.IsNull());
             if (!router.RouteAlgorithm(algorithm, container))
                 return false;
-            algorithm.Execute(chunk.GetNodeCount());
+            const auto nodeCount = container.GetNodeCount();
+            algorithm.Execute(nodeCount);
             return true;
         }
     };

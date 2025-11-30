@@ -54,7 +54,7 @@ namespace PNC
             : Base_t(chunkStructure,
                 chunkCount,
                 ChunkCapacityT<Size_t>(chunkCount),
-                NodeCountT<Size_t>(nodeCapacity),
+                NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
                 NodeCapacityT<Size_t>(nodeCapacity),
                 nodeCountPerChunk)
         {

@@ -127,7 +127,6 @@ namespace PNC
         PNC_USING_CHUNKPOINTER_INTERFACE();
         using Base_t::GetNodeCapacity;
         using Base_t::GetChunk;
-        PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
 
     protected:
         using Base_t::AllocateComponentDataArray;

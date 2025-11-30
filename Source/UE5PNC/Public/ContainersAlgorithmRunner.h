@@ -22,8 +22,8 @@ namespace PNC
 
     
 
-    // Need an AlgorithmRunner for KTreePointerT and KindPointerT that direct to AlgorithmRunnerKindPointerSwitch
 
-    //template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement, typename TBase> struct AlgorithmRunner< TChunkStructure, TAlgorithm, UniformChunkArrayT<TChunkStructure, TChunkPointerElement>> : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> {};
-    //template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement, typename TBase> struct AlgorithmRunner< TChunkStructure, TAlgorithm, UniformChunkArrayT<TChunkStructure, TChunkPointerElement>> : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> { };
+    template<typename TChunkStructure, typename TAlgorithm, typename TArrayExtension, typename TBase> struct AlgorithmRunner< TChunkStructure, TAlgorithm, DArrayPointerT    <TArrayExtension, TBase>> : public AlgorithmRunnerChunkArray<TAlgorithm, DArrayPointerT    <TArrayExtension, TBase>> { };
+    template<typename TChunkStructure, typename TAlgorithm,                           typename TBase> struct AlgorithmRunner< TChunkStructure, TAlgorithm, DChunkArray       <                 TBase>> : public AlgorithmRunnerChunkArray<TAlgorithm, DChunkArray       <                 TBase>> { };
+    template<typename TChunkStructure, typename TAlgorithm,                           typename TBase> struct AlgorithmRunner< TChunkStructure, TAlgorithm, DUniformChunkArray<                 TBase>> : public AlgorithmRunnerChunkArray<TAlgorithm, DUniformChunkArray<                 TBase>> { };
 }

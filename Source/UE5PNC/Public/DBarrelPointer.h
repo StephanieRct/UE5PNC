@@ -81,8 +81,7 @@ namespace PNC
         /// The total maximum number of Nodes the Array can grow to.
         /// </summary>
         /// <returns></returns>
-        NodeCapacityT<Size_t> GetNodeCapacity()const { return PropArrayToChunk(ChunkCapacity * NodeCapacityPerChunk); }
-        ArrayNodeCapacityT<Size_t> GetArrayNodeCapacity()const { return ChunkCapacity * NodeCapacityPerChunk; }
+        NodeCapacityT<Size_t> GetNodeCapacity()const { return ChunkCapacity * NodeCapacityPerChunk; }
 
         /// <summary>
         /// The maximum number of Nodes each Chunks in the Array can grow to.
@@ -101,33 +100,46 @@ namespace PNC
 
     protected:
 
-        /// <summary>
-        /// Notes:
-        ///     Called by derived structs
-        /// </summary>
-        template<typename TChunk, typename TArgs>
-        static void AllocateConstruct(TChunk& chunk, const TArgs& args)
-        {
-            Base_t::AllocateConstruct(chunk, args);
-            //const auto nodePerChunk = args.GetNodeCapacityPerChunk();
-            const auto nodeCapacity = args.GetNodeCapacity();
-            const auto chunkCapacity = args.GetChunkCapacity();
-            const auto chunkCount = args.GetChunkCount();
+        ///// <summary>
+        ///// Notes:
+        /////     Called by derived structs
+        ///// </summary>
+        //template<typename TChunk, typename TProps>
+        //static void AllocateConstruct(TChunk& chunk, const TProps& props)
+        //{
+        //    Base_t::AllocateConstruct(chunk, props);
+        //    const auto nodeCapacity = props.GetNodeCapacity();
+        //    const auto chunkCapacity = props.GetChunkCapacity();
+        //    const auto chunkCount = props.GetChunkCount();
 
-            chunk.Array.Allocate(chunk, nodeCapacity, chunkCapacity);
-            if (chunkCount > 0)
-            {
-                const auto nodeCountPerChunk = args.GetNodeCountPerChunk();
-                for (Size_t i = 0; i < chunkCount; ++i)
-                    chunk.Array.ConstructElement(chunk,
-                        /*elementIndex:*/i,
-                        /*firstNodeInArray:*/i * nodeCountPerChunk,
-                        /*nodeCapacity:*/nodeCountPerChunk,
-                        /*nodeCount:*/nodeCountPerChunk);
-            }
+        //    chunk.Array.Allocate(chunk, nodeCapacity, chunkCapacity);
+        //    if (chunkCount > 0)
+        //    {
+        //        const auto nodeCountPerChunk = props.GetNodeCountPerChunk();
+        //        for (Size_t i = 0; i < chunkCount; ++i)
+        //            chunk.Array.ConstructElement(chunk,
+        //                /*elementIndex:*/i,
+        //                /*firstNodeInArray:*/i * nodeCountPerChunk,
+        //                /*nodeCount:*/ChunkCountT<Size_t>(1) * nodeCountPerChunk);
+        //    }
 
-        }
+        //}
 
+        ///// <summary>
+        ///// Notes:
+        /////     Called by derived structs
+        ///// </summary>
+        //template<typename TChunk>
+        //static void FreeDestruct(TChunk& chunk)
+        //{
+        //    chunk.Array.Destruct(chunk);
+        //    chunk.Array.Deallocate(chunk);
+        //    const auto nodeCapacity = chunk.GetNodeCapacity();
+        //    const auto nodeCount = chunk.GetNodeCount();
+        //    const auto chunkCapacity = chunk.GetChunkCapacity();
+        //    const auto chunkCount = chunk.GetChunkCount();
+        //    Base_t::FreeDestruct(chunk, nodeCapacity, nodeCount, chunkCapacity, chunkCount);
+        //}
 
         static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const NodeCountT<Size_t> nodeCount, void** const componentDataArray)
         {

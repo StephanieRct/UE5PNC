@@ -31,6 +31,7 @@
 #   define PNC_MEMORY_NODE_DESTRUCTZERO
 // Clean up data fields on destruction (ex.: set pointers to null after freeing them)
 #   define PNC_MEMORYCLEANUP
+#   define PNC_MEMORY_ALLOC_LOG
 #endif
 
 
@@ -59,8 +60,8 @@
 #   define pnc_assert_no_entry_return(expression) checkNoEntry(); return (expression);
 #endif
 
-#ifdef UE_BUILD_DEBUG //default: pnc_assert_no_entry_return(); break
-#   define pnc_assert_switch_default_no_entry() 
+#ifdef UE_BUILD_DEBUG //
+#   define pnc_assert_switch_default_no_entry() default: pnc_assert_no_entry_return(); break
 #else
 #   define pnc_assert_switch_default_no_entry() 
 #endif
@@ -171,7 +172,9 @@ namespace PNC
             {
                 ++instance.AllocationCount;
                 instance.Allocations.insert({ (uint8*)ptr + size - 1, {(uint8*)ptr, size} });
+#ifdef PNC_MEMORY_ALLOC_LOG
                 UE_LOG(LogTemp, Log, TEXT("Alloc %016x (new count %d)"), ptr, instance.AllocationCount);
+#endif
             }
             return ptr;
         }
@@ -182,9 +185,9 @@ namespace PNC
             {
                 //pnc_assert(AllocationCount > 0);
                 --Instance.AllocationCount;
-
+#ifdef PNC_MEMORY_ALLOC_LOG
                 UE_LOG(LogTemp, Log, TEXT("Free  %016x (new count %d)"), ptr, instance.AllocationCount);
-
+#endif
                 auto it = instance.Allocations.lower_bound((uint8*)ptr);
                 pnc_assert(it != instance.Allocations.end());
                 pnc_assert(it->second.Includes((uint8*)ptr, size));
@@ -331,16 +334,61 @@ namespace PNC
 
     };
 
-    template<template<typename TBase2> typename TDecorator>
+    template<template<typename TProps2> typename TDecorator>
     struct PropTraitsDefault
     {
-        template<typename TBase>
-        static TDecorator<TBase> Decorate(typename TDecorator<TBase>::Value_t value, const TBase& baseCopy)
+        
+        template<typename TProps>
+        constexpr static TDecorator<TProps> Decorate(const TProps& props, typename TDecorator<TProps>::Value_t value)
         {
-            return TDecorator<TBase>(value, baseCopy);
+            return TDecorator<TProps>(props, value);
+        }
+
+        template<typename TProps>
+        __declspec(noinline) constexpr static auto DecorateSingle(const TProps& props, typename TDecorator<TProps>::Value_t value)
+        {
+            return fff(props, props, value);
+        }
+
+        template<typename TBase, typename TProps>
+        __declspec(noinline) constexpr static auto fff(const TDecorator<TBase> d, const TProps& props, typename TDecorator<TProps>::Value_t value)
+        {
+            return props;
+        }
+        template<typename TBase, typename TProps, template<typename TProps2Other> typename TDecoratorOther>
+        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TBase> d, const TProps& props, typename TDecorator<TProps>::Value_t value)
+        {
+            return Decorate(props, value);
         }
     };
 
+    template<typename TValue, template<typename TValue2, typename TProps2> typename TDecorator>
+    struct PropTraitsDefault2
+    {
+
+        template<typename TProps>
+        constexpr static TDecorator<TValue, TProps> Decorate(const TProps& props, TValue value)
+        {
+            return TDecorator<TValue, TProps>(props, value);
+        }
+
+        template<typename TProps>
+        __declspec(noinline) constexpr static auto DecorateSingle(const TProps& props, TValue value)
+        {
+            return fff(props, props, value);
+        }
+
+        template<typename TBase, typename TProps>
+        __declspec(noinline) constexpr static auto fff(const TDecorator<TValue, TBase> d, const TProps& props, TValue value)
+        {
+            return props;
+        }
+        template<typename TValueOther, typename TBase, typename TProps, template<typename TValue2Other, typename TProps2Other> typename TDecoratorOther>
+        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TValueOther, TBase> d, const TProps& props, TValue value)
+        {
+            return Decorate(props, value);
+        }
+    };
     enum class PropId 
     {
         NodeCount,
@@ -349,8 +397,8 @@ namespace PNC
         ChunkCapacity,
         NodeCountPerChunk,
         NodeCapacityPerChunk,
-        ArrayNodeCount,
-        ArrayNodeCapacity,
+        //ArrayNodeCount,
+        //ArrayNodeCapacity,
         // 
         // ComponentTypeIndexInChunk (rename to LocalComponentTypeIndex)
         // LocalNodeIndex
@@ -477,10 +525,10 @@ namespace PNC
     using NodeCountPerChunkT = IntProp<TSize, PropId::NodeCountPerChunk>;
     template<typename TSize>
     using NodeCapacityPerChunkT = IntProp<TSize, PropId::NodeCapacityPerChunk>;
-    template<typename TSize>
-    using ArrayNodeCountT = IntProp<TSize, PropId::ArrayNodeCount>;
-    template<typename TSize>
-    using ArrayNodeCapacityT = IntProp<TSize, PropId::ArrayNodeCapacity>;
+    //template<typename TSize>
+    //using ArrayNodeCountT = IntProp<TSize, PropId::ArrayNodeCount>;
+    //template<typename TSize>
+    //using ArrayNodeCapacityT = IntProp<TSize, PropId::ArrayNodeCapacity>;
 
     template<typename TSize>
     NodeCapacityT<TSize> PropCountToCapacity(const NodeCountT<TSize> nodeCount)
@@ -497,71 +545,72 @@ namespace PNC
     {
         return NodeCapacityPerChunkT<TSize>(nodeCountPerChunk.Value);
     }
-    template<typename TSize>
-    ArrayNodeCapacityT<TSize> PropCountToCapacity(const ArrayNodeCountT<TSize> arrayNodeCount)
-    {
-        return ArrayNodeCapacityT<TSize>(arrayNodeCount.Value);
-    }
+
+    //template<typename TSize>
+    //NodeCapacityT<TSize> PropArrayToChunk(const ArrayNodeCapacityT<TSize> arrayNodeCapacity)
+    //{
+    //    return NodeCapacityT<TSize>(arrayNodeCapacity.Value);
+    //}
+    //template<typename TSize>
+    //NodeCountT<TSize> PropArrayToChunk(const ArrayNodeCountT<TSize> arrayNodeCount)
+    //{
+    //    return NodeCountT<TSize>(arrayNodeCount.Value);
+    //}
 
 
-    template<typename TSize>
-    NodeCapacityT<TSize> PropArrayToChunk(const ArrayNodeCapacityT<TSize> arrayNodeCapacity)
-    {
-        return NodeCapacityT<TSize>(arrayNodeCapacity.Value);
-    }
-    template<typename TSize>
-    ArrayNodeCapacityT<TSize> PropChunkToArray(const NodeCapacityT<TSize> nodeCapacity)
-    {
-        return ArrayNodeCapacityT<TSize>(nodeCapacity.Value);
-    }
+    //template<typename TSize>
+    //ArrayNodeCapacityT<TSize> PropCountToCapacity(const ArrayNodeCountT<TSize> arrayNodeCount)
+    //{
+    //    return ArrayNodeCapacityT<TSize>(arrayNodeCount.Value);
+    //}
+    //template<typename TSize>
+    //ArrayNodeCapacityT<TSize> PropChunkToArray(const NodeCapacityT<TSize> nodeCapacity)
+    //{
+    //    return ArrayNodeCapacityT<TSize>(nodeCapacity.Value);
+    //}
 
-    template<typename TSize>
-    NodeCountT<TSize> PropArrayToChunk(const ArrayNodeCountT<TSize> arrayNodeCount)
-    {
-        return NodeCountT<TSize>(arrayNodeCount.Value);
-    }
-    template<typename TSize>
-    ArrayNodeCountT<TSize> PropChunkToArray(const NodeCountT<TSize> nodeCount)
-    {
-        return ArrayNodeCountT<TSize>(nodeCount.Value);
-    }
+    //template<typename TSize>
+    //ArrayNodeCountT<TSize> PropChunkToArray(const NodeCountT<TSize> nodeCount)
+    //{
+    //    return ArrayNodeCountT<TSize>(nodeCount.Value);
+    //}
 
 
 
     template<typename TSize>
     NodeCountT<TSize> operator-(const NodeCapacityT<TSize>& nodeCapacity, const NodeCountT<TSize>& nodeCount)
     {
-        return NodeCountT<TSize>(nodeCapacity.Value * nodeCount.Value);
+        return NodeCountT<TSize>(nodeCapacity.Value - nodeCount.Value);
     }
 
 
     template<typename TSize>
     ChunkCountT<TSize> operator-(const ChunkCapacityT<TSize>& chunkCapacity, const ChunkCountT<TSize>& chunkCount)
     {
-        return ChunkCountT<TSize>(chunkCapacity.Value * chunkCount.Value);
+        return ChunkCountT<TSize>(chunkCapacity.Value - chunkCount.Value);
     }
 
 
     template<typename TSize>
-    ArrayNodeCountT<TSize> operator*(const ChunkCountT<TSize>& chunkCount, const NodeCountPerChunkT<TSize>& nodeCountPerChunk)
+    NodeCountT<TSize> operator*(const ChunkCountT<TSize>& chunkCount, const NodeCountPerChunkT<TSize>& nodeCountPerChunk)
     {
-        return ArrayNodeCountT<TSize>(chunkCount.Value * nodeCountPerChunk.Value);
+        return NodeCountT<TSize>(chunkCount.Value * nodeCountPerChunk.Value);
     }
     template<typename TSize>
-    ArrayNodeCountT<TSize> operator*(const NodeCountPerChunkT<TSize>& nodeCountPerChunk, const ChunkCountT<TSize>& chunkCount)
+    NodeCountT<TSize> operator*(const NodeCountPerChunkT<TSize>& nodeCountPerChunk, const ChunkCountT<TSize>& chunkCount)
     {
-        return ArrayNodeCountT<TSize>(nodeCountPerChunk.Value * chunkCount.Value);
+        return NodeCountT<TSize>(nodeCountPerChunk.Value * chunkCount.Value);
     }
 
     template<typename TSize>
-    ArrayNodeCapacityT<TSize> operator*(const ChunkCapacityT<TSize>& chunkCapacity, const NodeCapacityPerChunkT<TSize>& nodeCapacityPerChunk)
+    NodeCapacityT<TSize> operator*(const ChunkCapacityT<TSize>& chunkCapacity, const NodeCapacityPerChunkT<TSize>& nodeCapacityPerChunk)
     {
-        return ArrayNodeCapacityT<TSize>(chunkCapacity.Value * nodeCapacityPerChunk.Value);
+        return NodeCapacityT<TSize>(chunkCapacity.Value * nodeCapacityPerChunk.Value);
     }
     template<typename TSize>
-    ArrayNodeCapacityT<TSize> operator*(const NodeCapacityPerChunkT<TSize>& nodeCapacityPerChunk, const ChunkCapacityT<TSize>& chunkCapacity)
+    NodeCapacityT<TSize> operator*(const NodeCapacityPerChunkT<TSize>& nodeCapacityPerChunk, const ChunkCapacityT<TSize>& chunkCapacity)
     {
-        return ArrayNodeCapacityT<TSize>(nodeCapacityPerChunk.Value * chunkCapacity.Value);
+        return NodeCapacityT<TSize>(nodeCapacityPerChunk.Value * chunkCapacity.Value);
     }
 
 
@@ -598,29 +647,62 @@ namespace PNC
         const ChunkStructure_t& operator*()const { return *StructurePtr; }
     };
     
-    template<typename TChunkStructure, typename TBase>
-    struct DStructurePtr : public TBase
+    template<typename TChunkStructure, typename TProps>
+    struct DStructurePtr : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = const TChunkStructure*;
         using ChunkStructure_t = TChunkStructure;
         const ChunkStructure_t* const ChunkStructure;
         const ChunkStructure_t* GetStructurePtr() const { return ChunkStructure; }
 
-        DStructurePtr(const StructurePtr<ChunkStructure_t>& chunkStructure, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DStructurePtr(const TProps& props, const StructurePtr<ChunkStructure_t>& chunkStructure)
+            : TProps(props)
+            , ChunkStructure(chunkStructure)
+        {
+        }
+        DStructurePtr(const TProps& props, const ChunkStructure_t* const chunkStructure)
+            : TProps(props)
             , ChunkStructure(chunkStructure)
         {
         }
     };
 
     template<typename TChunkStructure>
-    struct PropTraits<StructurePtr<TChunkStructure>>
+    struct PropTraits<StructurePtr<TChunkStructure>> //: public PropTraitsDefault2<TChunkStructure, DStructurePtr>
     {
-        template<typename TBase>
-        static DStructurePtr<TChunkStructure, TBase> Decorate(const StructurePtr<TChunkStructure> value, const TBase& baseCopy)
+        //template<typename TProps>
+        //static DStructurePtr<TChunkStructure, TProps> Decorate(const TProps& props, const StructurePtr<TChunkStructure> value)
+        //{
+        //    return DStructurePtr<TChunkStructure, TProps>(props, value);
+        //}
+
+        template<typename TProps>
+        constexpr static DStructurePtr<TChunkStructure, TProps> Decorate(const TProps& props, const StructurePtr<TChunkStructure> value)
         {
-            return DStructurePtr<TChunkStructure, TBase>(value, baseCopy);
+            return DStructurePtr<TChunkStructure, TProps>(props, value);
+        }
+
+        template<typename TProps>
+        __declspec(noinline) constexpr static auto DecorateSingle(const TProps& props, const StructurePtr<TChunkStructure> value)
+        {
+            return fff(props, props, value);
+        }
+
+        template<typename TBase, typename TProps>
+        __declspec(noinline) constexpr static auto fff(const DStructurePtr<TChunkStructure, TBase> d, const TProps& props, const StructurePtr<TChunkStructure> value)
+        {
+            return props;
+        }
+        template<typename TBase, typename TProps, template<typename TProps2Other> typename TDecoratorOther>
+        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TBase> d, const TProps& props, const StructurePtr<TChunkStructure> value)
+        {
+            return Decorate(props, value);
+        }
+        template<typename TValueOther, typename TBase, typename TProps, template<typename TValue2Other, typename TProps2Other> typename TDecoratorOther>
+        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TValueOther, TBase> d, const TProps& props, const StructurePtr<TChunkStructure> value)
+        {
+            return Decorate(props, value);
         }
     };
 
@@ -638,16 +720,16 @@ namespace PNC
         void* operator->()const { return *ComponentDataArray; }
         void*& operator*()const { return *ComponentDataArray; }
     };
-    template<typename TBase>
-    struct DComponentDataArray : public TBase
+    template<typename TProps>
+    struct DComponentDataArray : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = void**;
-        void**const ComponentDataArray;
+        void** const ComponentDataArray;
         void** GetComponentDataArray() const { return ComponentDataArray; }
 
-        DComponentDataArray(void** const componentDataArray, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DComponentDataArray(const TProps& props, void** const componentDataArray)
+            : TProps(props)
             , ComponentDataArray(componentDataArray)
         {
         }
@@ -657,16 +739,16 @@ namespace PNC
     template<>
     struct PropTraits<PropComponentDataArray> : public PropTraitsDefault<DComponentDataArray> { };
 
-    template<typename TBase>
-    struct DNodeCount : public TBase
+    template<typename TProps>
+    struct DNodeCount : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = NodeCountT<Size_t>;
         const NodeCountT<Size_t> NodeCount;
         NodeCountT<Size_t> GetNodeCount() const { return NodeCount; }
 
-        DNodeCount(const NodeCountT<Size_t>& nodeCount, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DNodeCount(const TProps& props, const NodeCountT<Size_t>& nodeCount)
+            : TProps(props)
             , NodeCount(nodeCount)
         {
         }
@@ -676,15 +758,15 @@ namespace PNC
     {
     };
     //
-    template<typename TBase>
-    struct DNodeCapacity : public TBase
+    template<typename TProps>
+    struct DNodeCapacity : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = NodeCapacityT<Size_t>;
         NodeCapacityT<Size_t> NodeCapacity;
         NodeCapacityT<Size_t> GetNodeCapacity() const { return NodeCapacity; }
-        DNodeCapacity(const NodeCapacityT<Size_t> nodeCapacity, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DNodeCapacity(const TProps& props, const NodeCapacityT<Size_t> nodeCapacity)
+            : TProps(props)
             , NodeCapacity(nodeCapacity)
         {
         }
@@ -694,16 +776,16 @@ namespace PNC
     {
     };
 
-    template<typename TBase>
-    struct DChunkCount : public TBase
+    template<typename TProps>
+    struct DChunkCount : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = ChunkCountT<Size_t>;
         const ChunkCountT<Size_t> ChunkCount;
         ChunkCountT<Size_t> GetChunkCount() const { return ChunkCount; }
 
-        DChunkCount(const ChunkCountT<Size_t>& chunkCount, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DChunkCount(const TProps& props, const ChunkCountT<Size_t>& chunkCount)
+            : TProps(props)
             , ChunkCount(chunkCount)
         {
         }
@@ -713,15 +795,15 @@ namespace PNC
     {
     };
 
-    template<typename TBase>
-    struct DChunkCapacity : public TBase
+    template<typename TProps>
+    struct DChunkCapacity : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = ChunkCapacityT<Size_t>;
         ChunkCapacityT<Size_t> ChunkCapacity;
         ChunkCapacityT<Size_t> GetChunkCapacity() const { return ChunkCapacity; }
-        DChunkCapacity(const ChunkCapacityT<Size_t> chunkCapacity, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DChunkCapacity(const TProps& props, const ChunkCapacityT<Size_t> chunkCapacity)
+            : TProps(props)
             , ChunkCapacity(chunkCapacity)
         {
         }
@@ -731,16 +813,16 @@ namespace PNC
     {
     };
 
-    template<typename TBase>
-    struct DNodeCountPerChunk : public TBase
+    template<typename TProps>
+    struct DNodeCountPerChunk : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = NodeCountPerChunkT<Size_t>;
         const NodeCountPerChunkT<Size_t> NodeCountPerChunk;
         NodeCountPerChunkT<Size_t> GetNodeCountPerChunk() const { return NodeCountPerChunk; }
 
-        DNodeCountPerChunk(const NodeCountPerChunkT<Size_t>& nodeCountPerChunk, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DNodeCountPerChunk(const TProps& props, const NodeCountPerChunkT<Size_t>& nodeCountPerChunk)
+            : TProps(props)
             , NodeCountPerChunk(nodeCountPerChunk)
         {
         }
@@ -750,15 +832,15 @@ namespace PNC
     {
     };
 
-    template<typename TBase>
-    struct DNodeCapacityPerChunk : public TBase
+    template<typename TProps>
+    struct DNodeCapacityPerChunk : public TProps
     {
-        using typename TBase::Size_t;
+        using typename TProps::Size_t;
         using Value_t = NodeCapacityPerChunkT<Size_t>;
         NodeCapacityPerChunkT<Size_t> NodeCapacityPerChunk;
         NodeCapacityPerChunkT<Size_t> GetNodeCapacityPerChunk() const { return NodeCapacityPerChunk; }
-        DNodeCapacityPerChunk(const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DNodeCapacityPerChunk(const TProps& props, const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk)
+            : TProps(props)
             , NodeCapacityPerChunk(nodeCapacityPerChunk)
         {
         }
@@ -769,92 +851,117 @@ namespace PNC
     };
 
 
-    // TODO may not be needed
-    template<typename TBase>
-    struct DArrayNodeCount : public TBase
+    //// TODO may not be needed
+    //template<typename TBase>
+    //struct DArrayNodeCount : public TBase
+    //{
+    //    using typename TBase::Size_t;
+    //    using Value_t = ArrayNodeCountT<Size_t>;
+    //    const ArrayNodeCountT<Size_t> ArrayNodeCount;
+    //    ArrayNodeCountT<Size_t> GetArrayNodeCount() const { return ArrayNodeCount; }
+
+    //    DArrayNodeCount(const ArrayNodeCountT<Size_t>& arrayNodeCount, const TBase& props)
+    //        : TBase(props)
+    //        , ArrayNodeCount(arrayNodeCount)
+    //    {
+    //    }
+    //};
+    //template<typename TSize>
+    //struct PropTraits<ArrayNodeCountT<TSize>> : public PropTraitsDefault<DArrayNodeCount>
+    //{
+    //};
+
+    //// TODO may not be needed
+    //template<typename TBase>
+    //struct DArrayNodeCapacity : public TBase
+    //{
+    //    using typename TBase::Size_t;
+    //    using Value_t = ArrayNodeCapacityT<Size_t>;
+    //    const ArrayNodeCapacityT<Size_t> ArrayNodeCapacity;
+    //    ArrayNodeCapacityT<Size_t> GetArrayNodeCapacity() const { return ArrayNodeCapacity; }
+
+    //    DArrayNodeCapacity(const ArrayNodeCapacityT<Size_t>& arrayNodeCapacity, const TBase& props)
+    //        : TBase(props)
+    //        , ArrayNodeCapacity(arrayNodeCapacity)
+    //    {
+    //    }
+    //};
+    //template<typename TSize>
+    //struct PropTraits<ArrayNodeCapacityT<TSize>> : public PropTraitsDefault<DArrayNodeCapacity>
+    //{
+    //};
+    //template<bool TIsBase>
+    //struct PropDecorateIf
+    //{
+    //    template<typename TProp, typename TProps>
+    //    __declspec(noinline) static constexpr auto Decorate(const TProps& props, const TProp& newProp)
+    //    {
+    //        return PropTraits<TProp>::Decorate(newProp, props);
+    //    }
+    //};
+    //template<>
+    //struct PropDecorateIf<false>
+    //{
+    //    template<typename TProp, typename TProps>
+    //    __declspec(noinline) static constexpr auto Decorate(const TProps& props, const TProp& newProp)
+    //    {
+    //        return props;
+    //    }
+    //};
+
+    template<typename TProps, typename TProp>
+    __declspec(noinline) constexpr auto AppendPropSingle(const TProps& props, const TProp& newProp)
     {
-        using typename TBase::Size_t;
-        using Value_t = ArrayNodeCountT<Size_t>;
-        const ArrayNodeCountT<Size_t> ArrayNodeCount;
-        ArrayNodeCountT<Size_t> GetArrayNodeCount() const { return ArrayNodeCount; }
-
-        DArrayNodeCount(const ArrayNodeCountT<Size_t>& arrayNodeCount, const TBase& baseCopy)
-            : TBase(baseCopy)
-            , ArrayNodeCount(arrayNodeCount)
-        {
-        }
-    };
-    template<typename TSize>
-    struct PropTraits<ArrayNodeCountT<TSize>> : public PropTraitsDefault<DArrayNodeCount>
-    {
-    };
-
-    // TODO may not be needed
-    template<typename TBase>
-    struct DArrayNodeCapacity : public TBase
-    {
-        using typename TBase::Size_t;
-        using Value_t = ArrayNodeCapacityT<Size_t>;
-        const ArrayNodeCapacityT<Size_t> ArrayNodeCapacity;
-        ArrayNodeCapacityT<Size_t> GetArrayNodeCapacity() const { return ArrayNodeCapacity; }
-
-        DArrayNodeCapacity(const ArrayNodeCapacityT<Size_t>& arrayNodeCapacity, const TBase& baseCopy)
-            : TBase(baseCopy)
-            , ArrayNodeCapacity(arrayNodeCapacity)
-        {
-        }
-    };
-    template<typename TSize>
-    struct PropTraits<ArrayNodeCapacityT<TSize>> : public PropTraitsDefault<DArrayNodeCapacity>
-    {
-    };
-
-
+        return PropTraits<TProp>::DecorateSingle(props, newProp);
+        //using Decorator_t = PropTraits<TProp>::Decorator_t;
+        //return PropDecorateSingle<TProps, Decorator_t>::Decorate(props, newProp);
+        //return PropDecorateIf<!std::is_base_of_v<TProp, TProps>>::Decorate(props, newProp);
+    }
 
 
 
 
     template<typename TSize, typename TProp>
-    auto MakeProp(const TProp& prop)
+    constexpr auto MakeProp(const TProp& prop)
     {
-        return PropTraits<TProp>::Decorate(prop, DProps<TSize>());
+        return PropTraits<TProp>::Decorate(DProps<TSize>(), prop);
     }
 
     template<typename TProp, typename TProps>
-    auto AppendProp(const TProps& props, const TProp& newProp)
+    constexpr auto AppendProp(const TProps& props, const TProp& newProp)
     {
-        return PropTraits<TProp>::Decorate(newProp, props);
+        return PropTraits<TProp>::Decorate(props, newProp);
     }
 
 
     template <typename TSize, typename T>
-    auto MakePropUnfold(const T& prop) {
+    constexpr auto MakePropUnfold(const T& prop) {
         return MakeProp<TSize>(prop);
     }
 
     template <typename TSize, typename T, typename... Rest>
-    auto MakePropUnfold(const T& first, Rest&&... rest) {
+    constexpr auto MakePropUnfold(const T& first, Rest&&... rest) {
         static_assert(!std::is_same_v<TSize, T>);
         return AppendProp(MakePropUnfold<TSize>(rest...), first);
     }
 
     template<typename TSize, typename... TProps>
-    auto MakeProps(TProps&&... props)
+    constexpr auto MakeProps(TProps&&... props)
     {
         return MakePropUnfold<TSize>(props...);
     }
 
 }
-
-
-#define PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER()\
-    const Chunk_t& operator*()const { return *this; }\
-    Chunk_t& operator*() { return *this; }\
-    const Chunk_t* operator->()const { return this; }\
-    Chunk_t* operator->() { return this; }\
-    const Chunk_t& GetChunk()const { return *this; }\
-    Chunk_t& GetChunk() { return *this; }\
-    static_assert(true)
+//
+//
+//#define PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER()\
+//    const Chunk_t& operator*()const { return *this; }\
+//    Chunk_t& operator*() { return *this; }\
+//    const Chunk_t* operator->()const { return this; }\
+//    Chunk_t* operator->() { return this; }\
+//    const Chunk_t& GetChunk()const { return *this; }\
+//    Chunk_t& GetChunk() { return *this; }\
+//    static_assert(true)
 
 #define PNC_USING_CHUNKPOINTERINTERNAL_INTERFACE()\
     using Base_t::IsVoid;\

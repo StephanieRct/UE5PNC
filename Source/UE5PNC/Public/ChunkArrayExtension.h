@@ -44,15 +44,11 @@ namespace PNC
         {
         }
 
-        /// <summary>
-        /// Create a null pointer.
-        /// </summary>
-        /// <param name="chunkCount"></param>
-        ChunkArrayExtensionT(const ChunkCountT<Size_t> chunkCount = 0)
-            : Chunks(nullptr)
-            , ChunkCount(chunkCount)
-        {
-        }
+        //ChunkArrayExtensionT(const ChunkCountT<Size_t> chunkCount = 0)
+        //    : Chunks(nullptr)
+        //    , ChunkCount(chunkCount)
+        //{
+        //}
 
         ///// <summary>
         ///// Contructs from its member data fields.
@@ -120,7 +116,7 @@ namespace PNC
             for (Size_t iComp = 0; iComp < componentCount; ++iComp)
             {
                 const ComponentType_t& componentType = structure.GetComponentType(iComp);
-                elementComponentData[iComp] = componentType.Forward(baseComponentData, fistNodeIndex, fistChunkIndex);
+                elementComponentData[iComp] = componentType.Forward(baseComponentData[iComp], fistNodeIndex, fistChunkIndex);
             }
         }
         ///// <summary>
@@ -161,7 +157,7 @@ namespace PNC
         ///     Called by DArrayPointerT
         /// </summary>
         template<typename TChunk>
-        void Allocate(TChunk& chunk, const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity)
+        void Allocate(TChunk& chunk, const ChunkCapacityT<Size_t> chunkCapacity, const NodeCapacityT<Size_t> nodeCapacity)
         { 
             Chunks = Allocate(chunkCapacity);
         }
@@ -182,7 +178,7 @@ namespace PNC
         ///     Called by DArrayPointerT
         /// </summary>
         template<typename TChunk>
-        void ConstructElement(TChunk& chunk, const Size_t elementIndex, const Size_t firstNodeInArray, const NodeCapacityT<Size_t> nodeCapacity, const NodeCountT<Size_t> nodeCount)
+        void ConstructElement(TChunk& chunk, const Size_t elementIndex, const Size_t firstNodeInArray, const NodeCountT<Size_t> nodeCount)
         {
             typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
             const ChunkStructure_t& structure = chunk.GetStructure();

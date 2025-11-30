@@ -37,29 +37,29 @@ namespace PNC
 
     //using PropChunkKind = Prop<ChunkKind, PropId::ChunkKind>;
 
-    template<typename TBase>
-    struct DPropChunkKind : public TBase
+    template<typename TProps>
+    struct DPropChunkKind : public TProps
     {
         using Value_t = ChunkKind;
         
         ChunkKind Kind;
         ChunkKind GetChunkKind() const { return Kind; }
 
-        DPropChunkKind(const ChunkKind kind, const TBase& baseCopy)
-            : TBase(baseCopy)
+        DPropChunkKind(const TProps& props, const ChunkKind kind)
+            : TProps(props)
             , Kind(kind)
         {
         }
     };
 
     template<>
-    struct PropTraits<ChunkKind>
+    struct PropTraits<ChunkKind> : public PropTraitsDefault<DPropChunkKind>
     {
-        template<typename TBase>
-        static DPropChunkKind<TBase> Decorate(const ChunkKind value, const TBase& baseCopy)
-        {
-            return DPropChunkKind<TBase>(value, baseCopy);
-        }
+        //template<typename TBase>
+        //static DPropChunkKind<TBase> Decorate(const TBase& baseCopy, const ChunkKind value)
+        //{
+        //    return DPropChunkKind<TBase>(baseCopy, value);
+        //}
     };
 
     /// <summary>
@@ -74,8 +74,11 @@ namespace PNC
         using ChunkStructure_t = TChunkStructure;
         using Size_t = typename ChunkStructure_t::Size_t;
         using ChunkPointer_t = ChunkPointerT<TChunkStructure>;
-        using Chunk_t = ChunkPointerT<TChunkStructure>;
-        using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerT<TChunkStructure>>;
+
+        using Chunk_t = ChunkPointerT<ChunkStructure_t>;//ChunkPointerInternalT<TChunkStructure>;
+        using ChunkPointerElement_t = ChunkPointerT<ChunkStructure_t>;
+        //using ArrayExtension_t = ChunkArrayExtensionT<TChunkStructure, ChunkPointerElement_t>;
+        using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;//DArrayPointerInternalT<ArrayExtension_t, ChunkPointerInternalT<TChunkStructure>>;
 
     public:
         /// <summary>
@@ -94,7 +97,7 @@ namespace PNC
         }
 
         template<typename TProps>
-        KindPointerT(const DPropsTag& tag, const TProps& props)
+        __declspec(noinline) KindPointerT(const DPropsTag& tag, const TProps& props)
             : Kind(props.GetChunkKind())
         {
         }
@@ -140,10 +143,10 @@ namespace PNC
                 return true;
             }
         }
-        const Chunk_t& operator*()const { return GetChunk(); }
-        Chunk_t& operator*() { return GetChunk(); }
-        const Chunk_t* operator->()const { return &GetChunk(); }
-        Chunk_t* operator->() { return &GetChunk(); }
+        //const Chunk_t& operator*()const { return GetChunk(); }
+        //Chunk_t& operator*() { return GetChunk(); }
+        //const Chunk_t* operator->()const { return &GetChunk(); }
+        //Chunk_t* operator->() { return &GetChunk(); }
         const Chunk_t& GetChunk()const;
         Chunk_t& GetChunk();
         const ChunkArray_t& GetChunkArray()const;
@@ -170,8 +173,8 @@ namespace PNC
 
     protected:
         template<typename TProps>
-        DKindT(const DPropsTag& tag, const TProps& props)
-            : Base_t(tag, AppendProp(props, TKind))
+        __declspec(noinline) DKindT(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, AppendPropSingle(props, TKind))
         {
         }
     public:

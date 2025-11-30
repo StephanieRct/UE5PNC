@@ -80,7 +80,6 @@ namespace PNC
     public:
         PNC_USING_CHUNKPOINTER_INTERFACE();
         using Base_t::GetChunk;
-        PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
 
         /// <summary>
         /// Get the maximum number of Nodes the Chunk can grow to.
@@ -172,11 +171,11 @@ namespace PNC
         ///     Called by derived structs
         ///     Does not set the NodeCapacity nor NodeCount on chunk. It only allocate, construct and set componentData
         /// </summary>
-        template<typename TChunk, typename TArgs>
-        static void AllocateConstruct(TChunk& chunk, const TArgs& args)
+        template<typename TChunk, typename TProps>
+        static void AllocateConstruct(TChunk& chunk, const TProps& props)
         {
-            const auto nodeCapacity = chunk.GetNodeCapacity();
-            const auto nodeCount = chunk.GetNodeCount();
+            const auto nodeCapacity = props.GetNodeCapacity();
+            const auto nodeCount = props.GetNodeCount();
             Node_t::AllocateConstructAllComponentsUnsafe(chunk, 0, 0, nodeCount, 1, nodeCapacity, 1);
         }
 
@@ -273,6 +272,7 @@ namespace PNC
                     }
                     break;
                 case ComponentOwner_Node:
+                {
                     void* const dataNew = (void*)pnc_alloc(componentType.GetSize(newNodeCapacity), componentType.GetAlignment());
                     componentType.MoveConstructDataForwardUnsafe(
                         dataNew, 0,
@@ -283,6 +283,7 @@ namespace PNC
 
                     componentDataArrayTo[i] = dataNew;
                     break;
+                }
                     pnc_assert_switch_default_no_entry();
                 }
             }

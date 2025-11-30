@@ -56,7 +56,7 @@ namespace PNC
 
         using ChunkPointerInternal_t = TChunkPointer;
         using ChunkPointer_t = TChunkPointer;
-        using Chunk_t = DChunkPointer<TChunkPointer, DCStructure<ChunkStructure_t>>;
+        using Chunk_t = TChunkPointer;//DChunkPointer<TChunkPointer, DCStructure<ChunkStructure_t>>;
 
         ///// <summary>
         ///// Chunk_t is the type a ChunkPointer points to
@@ -117,8 +117,8 @@ namespace PNC
         ChunkCapacityT<Size_t> GetChunkCapacity()const { return Chunk.GetChunkCapacity(); }
         void* GetComponentData(const Size_t componentTypeIndexInChunk) { return Chunk.GetComponentData(componentTypeIndexInChunk); }
         const void* GetComponentData(const Size_t componentTypeIndexInChunk)const { return Chunk.GetComponentData(componentTypeIndexInChunk); }
-        Chunk_t& GetChunk() { return *reinterpret_cast<Chunk_t*>(this); }
-        const Chunk_t& GetChunk()const { return *reinterpret_cast<const Chunk_t*>(this); }
+        Chunk_t& GetChunk() { return Chunk; }
+        const Chunk_t& GetChunk()const { return Chunk; }
 
         static bool IsSameStructure(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameStructure(a.Chunk, b.Chunk); }
         static bool IsSameData(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameData(a.Chunk, b.Chunk); }
@@ -230,10 +230,10 @@ namespace PNC
         ///     Called by derived structs
         ///     Does not set the NodeCapacity nor NodeCount on chunk. It only allocate, construct and set componentData
         /// </summary>
-        template<typename TChunk, typename TArgs>
-        static void AllocateConstruct(TChunk& chunk, const TArgs& args)
+        template<typename TChunk, typename TProps>
+        static void AllocateConstruct(TChunk& chunk, const TProps& props)
         {
-            const auto nodeCount = chunk.GetNodeCount();
+            const auto nodeCount = props.GetNodeCount();
             Node_t::AllocateConstructAllComponentsUnsafe(chunk, 0, 0, nodeCount, 1, PropCountToCapacity(nodeCount), 1);
         }
 
@@ -353,18 +353,29 @@ namespace PNC
         ///     Called by derived structs
         /// </summary>
         template<typename TChunk>
-        static void FreeDestruct(TChunk& chunk)
+        static void FreeDestruct(TChunk& chunk, const NodeCapacityT<Size_t> nodeCapacity, const NodeCountT<Size_t> nodeCount,  
+                                                const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount)
         {
-            const auto nodeCount     = chunk.GetNodeCount();
             void** const componentDataArrayTo = TChunk::GetInternalChunk(chunk).ComponentData;
             const ChunkStructure_t& structure = chunk.GetStructure();
             auto componentCount = structure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = structure.GetComponentType(i);
-                componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, 0, nodeCount, ChunkCountT<Size_t>(1));
-                pnc_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCount), componentType.GetAlignment());
+                componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, 0, nodeCount, chunkCount);
+                pnc_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
             }
+        }
+
+        /// <summary>
+        /// Notes:
+        ///     Called by derived structs
+        /// </summary>
+        template<typename TChunk>
+        static void FreeDestruct(TChunk& chunk)
+        {
+            const auto nodeCount = chunk.GetNodeCount();
+            FreeDestruct(chunk, PropCountToCapacity(nodeCount), nodeCount, ChunkCapacityT<Size_t>(1), ChunkCountT<Size_t>(1));
         }
 
     };

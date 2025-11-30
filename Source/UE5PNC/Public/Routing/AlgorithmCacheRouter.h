@@ -38,13 +38,13 @@ namespace PNC::Routing
         }
     };
 
-    template<typename TChunkPointer, typename TSize>
-    struct RouteAlgorithmToCacheT : public SetAlgorithmChunk<TChunkPointer>
+    template<typename TContainer, typename TSize>
+    struct RouteAlgorithmToCacheT : public SetAlgorithmChunk<TContainer>
     {
     public:
-        using Base_t = SetAlgorithmChunk<TChunkPointer>;
-        using Self_t = RouteAlgorithmToCacheT<TChunkPointer, TSize>;
-        using ChunkPointer_t = TChunkPointer;
+        using Base_t = SetAlgorithmChunk<TContainer>;
+        using Self_t = RouteAlgorithmToCacheT<TContainer, TSize>;
+        using Container_t = TContainer;
         using Size_t = TSize;
         using AlgorithmRoute_t = RouteT<Size_t>;
 
@@ -54,8 +54,8 @@ namespace PNC::Routing
         AlgorithmRoute_t* Route;
 
     public:
-        RouteAlgorithmToCacheT(ChunkPointer_t* chunkPointer, AlgorithmRoute_t* route)
-            : Base_t(chunkPointer)
+        RouteAlgorithmToCacheT(Container_t* container, AlgorithmRoute_t* route)
+            : Base_t(container)
             , MatchForChunk(true)
             , Route(route)
         {
@@ -64,8 +64,7 @@ namespace PNC::Routing
         template<typename T>
         bool Component(T*& component)
         {
-            auto& chunk = this->ChunkPointer->GetChunk();
-            const auto& chunkStructure = chunk.GetStructure();
+            const auto& chunkStructure = this->Container->GetStructure();
             auto componentTypeIndexInChunk = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             Route->AddRoute(componentTypeIndexInChunk);
 
@@ -75,19 +74,19 @@ namespace PNC::Routing
                 MatchForChunk = false;
                 return false;
             }
-            component = (T*)chunk.GetComponentData(componentTypeIndexInChunk);
+            component = (T*)this->Container->GetComponentData(componentTypeIndexInChunk);
             return true;
         }
 
     };
 
-    template<typename TChunkPointer, typename TSize>
-    struct RouteAlgorithmWithCacheT : public SetAlgorithmChunk<TChunkPointer>
+    template<typename TContainer, typename TSize>
+    struct RouteAlgorithmWithCacheT : public SetAlgorithmChunk<TContainer>
     {
     public:
-        using Base_t = SetAlgorithmChunk<TChunkPointer>;
-        using Self_t = RouteAlgorithmWithCacheT<TChunkPointer, TSize>;
-        using ChunkPointer_t = TChunkPointer;
+        using Base_t = SetAlgorithmChunk<TContainer>;
+        using Self_t = RouteAlgorithmWithCacheT<TContainer, TSize>;
+        using Container_t = TContainer;
         using Size_t = TSize;
         using AlgorithmRoute_t = typename RouteT<TSize>;
 
@@ -96,8 +95,8 @@ namespace PNC::Routing
         Size_t CurrentComponentRoute;
 
     public:
-        RouteAlgorithmWithCacheT(ChunkPointer_t* chunkPointer, AlgorithmRoute_t* route)
-            : Base_t(chunkPointer)
+        RouteAlgorithmWithCacheT(Container_t* container, AlgorithmRoute_t* route)
+            : Base_t(container)
             , Route(route)
             , CurrentComponentRoute(0)
         {
@@ -114,8 +113,7 @@ namespace PNC::Routing
             if (componentTypeIndexInChunk == (Size_t)-1)
                 return false;
 
-            auto& chunk = this->ChunkPointer->GetChunk();
-            component = (T*)chunk.GetComponentData(componentTypeIndexInChunk);
+            component = (T*)this->Container->GetComponentData(componentTypeIndexInChunk);
             return true;
         }
 
@@ -162,14 +160,13 @@ namespace PNC::Routing
             return ((TAlgorithm*)nullptr)->Requirements(req);
         }
 
-        template<typename TChunkPointer>
-        bool RouteAlgorithm(Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        bool RouteAlgorithm(Algorithm_t& algorithm, TContainer& container) const
         {
-            using AlgorithmRouteToCache_t = RouteAlgorithmToCacheT<TChunkPointer, Size_t>;
-            using AlgorithmRouteWithCache_t = RouteAlgorithmWithCacheT<TChunkPointer, Size_t>;
+            using AlgorithmRouteToCache_t = RouteAlgorithmToCacheT<TContainer, Size_t>;
+            using AlgorithmRouteWithCache_t = RouteAlgorithmWithCacheT<TContainer, Size_t>;
             //TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("Routing"));
-            auto& chunk = *chunkPointer;
-            const ChunkStructure_t* chunkStructure = &chunk.GetStructure();
+            const ChunkStructure_t* chunkStructure = &container.GetStructure();
 
             typename Map_t::iterator i = Cache.find(chunkStructure);
             if (i == Cache.end())
@@ -177,7 +174,7 @@ namespace PNC::Routing
                 CachedRoutes.push_back(AlgorithmRoute_t());
                 AlgorithmRoute_t* route = &CachedRoutes.back();
                 Cache[chunkStructure] = route;
-                AlgorithmRouteToCache_t routeToCache(&chunkPointer, route);
+                AlgorithmRouteToCache_t routeToCache(&container, route);
                 bool matches = algorithm.template Requirements<AlgorithmRouteToCache_t&>(routeToCache);
                 if (!routeToCache.MatchForChunk)
                 {
@@ -190,33 +187,33 @@ namespace PNC::Routing
             {
                 if (i->second->IsMismatch())
                     return false;
-                AlgorithmRouteWithCache_t router(&chunkPointer, i->second);
+                AlgorithmRouteWithCache_t router(&container, i->second);
                 return algorithm.template Requirements<AlgorithmRouteWithCache_t&>(router);
             }
         }
 
-        template<typename TChunkPointer>
-        bool TryRun(const Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        bool TryRun(const Algorithm_t& algorithm, TContainer& container) const
         {
-            return algorithm.TryRun(*this, chunkPointer);
+            return algorithm.TryRun(*this, container);
         }
 
-        template<typename TChunkPointer>
-        bool TryRun(TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        bool TryRun(TContainer& container) const
         {
-            return Algorithm_t().TryRun(*this, chunkPointer);
+            return Algorithm_t().TryRun(*this, container);
         }
 
-        template<typename TChunkPointer>
-        void Run(const Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        void Run(const Algorithm_t& algorithm, TContainer& container) const
         {
-            algorithm.Run(*this, chunkPointer);
+            algorithm.Run(*this, container);
         }
 
-        template<typename TChunkPointer>
-        void Run(TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        void Run(TContainer& container) const
         {
-            Algorithm_t().Run(*this, chunkPointer);
+            Algorithm_t().Run(*this, container);
         }
     };
 
