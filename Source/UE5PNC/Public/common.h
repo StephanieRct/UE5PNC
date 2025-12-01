@@ -32,6 +32,9 @@
 // Clean up data fields on destruction (ex.: set pointers to null after freeing them)
 #   define PNC_MEMORYCLEANUP
 #   define PNC_MEMORY_ALLOC_LOG
+#   define PNC_DEBUG_NOINLINE __declspec(noinline)
+#else
+#   define PNC_DEBUG_NOINLINE
 #endif
 
 
@@ -345,50 +348,56 @@ namespace PNC
         }
 
         template<typename TProps>
-        __declspec(noinline) constexpr static auto DecorateSingle(const TProps& props, typename TDecorator<TProps>::Value_t value)
+        constexpr static auto DecorateSingle(const TProps& props, typename TDecorator<TProps>::Value_t value)
         {
-            return fff(props, props, value);
+            return DecorateIfNotSameDecorate(props, props, value);
         }
 
         template<typename TBase, typename TProps>
-        __declspec(noinline) constexpr static auto fff(const TDecorator<TBase> d, const TProps& props, typename TDecorator<TProps>::Value_t value)
+        constexpr static auto DecorateIfNotSameDecorate(const TDecorator<TBase> d, const TProps& props, typename TDecorator<TProps>::Value_t value)
         {
             return props;
         }
         template<typename TBase, typename TProps, template<typename TProps2Other> typename TDecoratorOther>
-        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TBase> d, const TProps& props, typename TDecorator<TProps>::Value_t value)
+        constexpr static auto DecorateIfNotSameDecorate(TDecoratorOther<TBase> d, const TProps& props, typename TDecorator<TProps>::Value_t value)
         {
             return Decorate(props, value);
         }
     };
-
-    template<typename TValue, template<typename TValue2, typename TProps2> typename TDecorator>
+    template<typename TValue, typename TValue2, template<typename, typename > typename TDecorator>
     struct PropTraitsDefault2
     {
 
         template<typename TProps>
-        constexpr static TDecorator<TValue, TProps> Decorate(const TProps& props, TValue value)
+        constexpr static TDecorator<TValue, TProps> Decorate(const TProps& props, const TValue2 value)
         {
             return TDecorator<TValue, TProps>(props, value);
         }
 
         template<typename TProps>
-        __declspec(noinline) constexpr static auto DecorateSingle(const TProps& props, TValue value)
+        constexpr static auto DecorateSingle(const TProps& props, const TValue2 value)
         {
-            return fff(props, props, value);
+            return DecorateIfNotSameDecorate(props, props, value);
         }
 
         template<typename TBase, typename TProps>
-        __declspec(noinline) constexpr static auto fff(const TDecorator<TValue, TBase> d, const TProps& props, TValue value)
+        constexpr static auto DecorateIfNotSameDecorate(const TDecorator<TValue, TBase> d, const TProps& props, const TValue2 value)
         {
             return props;
         }
-        template<typename TValueOther, typename TBase, typename TProps, template<typename TValue2Other, typename TProps2Other> typename TDecoratorOther>
-        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TValueOther, TBase> d, const TProps& props, TValue value)
+        template<typename TBase, typename TProps, template<typename TProps2Other> typename TDecoratorOther>
+        constexpr static auto DecorateIfNotSameDecorate(TDecoratorOther<TBase> d, const TProps& props, TValue2 value)
         {
             return Decorate(props, value);
         }
+        template<typename TValueOther, typename TBase, typename TProps, template<typename, typename> typename TDecoratorOther>
+        constexpr static auto DecorateIfNotSameDecorate(TDecoratorOther<TValueOther, TBase> d, const TProps& props, TValue2 value)
+        {
+            return Decorate(props, value);
+        }
+
     };
+
     enum class PropId 
     {
         NodeCount,
@@ -669,41 +678,8 @@ namespace PNC
     };
 
     template<typename TChunkStructure>
-    struct PropTraits<StructurePtr<TChunkStructure>> //: public PropTraitsDefault2<TChunkStructure, DStructurePtr>
+    struct PropTraits<StructurePtr<TChunkStructure>> : public PropTraitsDefault2<TChunkStructure, StructurePtr<TChunkStructure>, DStructurePtr>
     {
-        //template<typename TProps>
-        //static DStructurePtr<TChunkStructure, TProps> Decorate(const TProps& props, const StructurePtr<TChunkStructure> value)
-        //{
-        //    return DStructurePtr<TChunkStructure, TProps>(props, value);
-        //}
-
-        template<typename TProps>
-        constexpr static DStructurePtr<TChunkStructure, TProps> Decorate(const TProps& props, const StructurePtr<TChunkStructure> value)
-        {
-            return DStructurePtr<TChunkStructure, TProps>(props, value);
-        }
-
-        template<typename TProps>
-        __declspec(noinline) constexpr static auto DecorateSingle(const TProps& props, const StructurePtr<TChunkStructure> value)
-        {
-            return fff(props, props, value);
-        }
-
-        template<typename TBase, typename TProps>
-        __declspec(noinline) constexpr static auto fff(const DStructurePtr<TChunkStructure, TBase> d, const TProps& props, const StructurePtr<TChunkStructure> value)
-        {
-            return props;
-        }
-        template<typename TBase, typename TProps, template<typename TProps2Other> typename TDecoratorOther>
-        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TBase> d, const TProps& props, const StructurePtr<TChunkStructure> value)
-        {
-            return Decorate(props, value);
-        }
-        template<typename TValueOther, typename TBase, typename TProps, template<typename TValue2Other, typename TProps2Other> typename TDecoratorOther>
-        __declspec(noinline) constexpr static auto fff(TDecoratorOther<TValueOther, TBase> d, const TProps& props, const StructurePtr<TChunkStructure> value)
-        {
-            return Decorate(props, value);
-        }
     };
 
     struct PropComponentDataArray
@@ -851,66 +827,8 @@ namespace PNC
     };
 
 
-    //// TODO may not be needed
-    //template<typename TBase>
-    //struct DArrayNodeCount : public TBase
-    //{
-    //    using typename TBase::Size_t;
-    //    using Value_t = ArrayNodeCountT<Size_t>;
-    //    const ArrayNodeCountT<Size_t> ArrayNodeCount;
-    //    ArrayNodeCountT<Size_t> GetArrayNodeCount() const { return ArrayNodeCount; }
-
-    //    DArrayNodeCount(const ArrayNodeCountT<Size_t>& arrayNodeCount, const TBase& props)
-    //        : TBase(props)
-    //        , ArrayNodeCount(arrayNodeCount)
-    //    {
-    //    }
-    //};
-    //template<typename TSize>
-    //struct PropTraits<ArrayNodeCountT<TSize>> : public PropTraitsDefault<DArrayNodeCount>
-    //{
-    //};
-
-    //// TODO may not be needed
-    //template<typename TBase>
-    //struct DArrayNodeCapacity : public TBase
-    //{
-    //    using typename TBase::Size_t;
-    //    using Value_t = ArrayNodeCapacityT<Size_t>;
-    //    const ArrayNodeCapacityT<Size_t> ArrayNodeCapacity;
-    //    ArrayNodeCapacityT<Size_t> GetArrayNodeCapacity() const { return ArrayNodeCapacity; }
-
-    //    DArrayNodeCapacity(const ArrayNodeCapacityT<Size_t>& arrayNodeCapacity, const TBase& props)
-    //        : TBase(props)
-    //        , ArrayNodeCapacity(arrayNodeCapacity)
-    //    {
-    //    }
-    //};
-    //template<typename TSize>
-    //struct PropTraits<ArrayNodeCapacityT<TSize>> : public PropTraitsDefault<DArrayNodeCapacity>
-    //{
-    //};
-    //template<bool TIsBase>
-    //struct PropDecorateIf
-    //{
-    //    template<typename TProp, typename TProps>
-    //    __declspec(noinline) static constexpr auto Decorate(const TProps& props, const TProp& newProp)
-    //    {
-    //        return PropTraits<TProp>::Decorate(newProp, props);
-    //    }
-    //};
-    //template<>
-    //struct PropDecorateIf<false>
-    //{
-    //    template<typename TProp, typename TProps>
-    //    __declspec(noinline) static constexpr auto Decorate(const TProps& props, const TProp& newProp)
-    //    {
-    //        return props;
-    //    }
-    //};
-
     template<typename TProps, typename TProp>
-    __declspec(noinline) constexpr auto AppendPropSingle(const TProps& props, const TProp& newProp)
+    PNC_DEBUG_NOINLINE constexpr auto AppendPropSingle(const TProps& props, const TProp& newProp)
     {
         return PropTraits<TProp>::DecorateSingle(props, newProp);
         //using Decorator_t = PropTraits<TProp>::Decorator_t;
@@ -951,6 +869,80 @@ namespace PNC
         return MakePropUnfold<TSize>(props...);
     }
 
+
+    template<typename TChunkStructure>
+    struct DCStructure
+    {
+    public:
+        using Base_t = void;
+        using Self_t = DCStructure<TChunkStructure>;
+        using Size_t = typename TChunkStructure::Size_t;
+        using ChunkStructure_t = TChunkStructure;
+        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
+
+        DCStructure() = default;
+        template<typename TProps>
+        DCStructure(const DPropsTag& tag, const TProps& props)
+        {
+        }
+    };
+    template<template<typename> typename TDecorator0>
+    struct ContainerHasDecorator0T
+    {
+
+        template<typename TContainer, typename TBase>
+        consteval static bool Select(const TContainer* c, const TDecorator0<TBase>* d)
+        {
+            //return TContainer::nothing;
+            //static_assert(false);
+            return true;
+        }
+        template<typename TContainer, typename TChunkStructure>
+        consteval static bool Select(const TContainer* c, const DCStructure<TChunkStructure>* d)
+        {
+            //return TContainer::nothing;
+            return false;
+        }
+        //template<typename TContainer, typename TBase, template<typename> typename TDecoratorOther>
+        //consteval static bool Select(const TContainer* c, const TDecoratorOther<TBase>* d)
+        //{
+        //    return TContainer::nothing;
+        //    return false;
+        //}
+        //template<typename TContainer, typename TBase, typename TValueOther, template<typename, typename> typename TDecoratorOther>
+        //consteval static bool Select(const TContainer* c, const TDecoratorOther<TValueOther, TBase>* d)
+        //{
+        //    return TContainer::nothing;
+        //    return false;
+        //}
+    };
+    template<template<typename, typename > typename TDecorator1, typename TValue>
+    struct ContainerHasDecorator1T
+    {
+        template<typename TContainer, typename TBase>
+        consteval static bool Select(const TContainer* c, const TDecorator1<TValue, TBase>* d)
+        {
+            //return TContainer::nothing;
+            return true;
+        }
+        template<typename TContainer, typename TChunkStructurer>
+        consteval static bool Select(const TContainer* c, const DCStructure<TChunkStructurer>* d)
+        {
+            //return TContainer::nothing;
+            return false;
+        }
+    };
+
+    template<typename TContainer, template<typename> typename TDecorator>
+    consteval bool ContainerHasDecorator()
+    {
+        return ContainerHasDecorator0T< TDecorator>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
+    }
+    template<typename TContainer, template<typename, typename> typename TDecorator, typename TValue >
+    consteval bool ContainerHasDecorator()
+    {
+        return ContainerHasDecorator1T< TDecorator, TValue>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
+    }
 }
 //
 //

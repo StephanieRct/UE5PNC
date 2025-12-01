@@ -34,7 +34,7 @@ namespace PNC
 
         template< typename... TArgs>
         DOwn(const StructurePtr<ChunkStructure_t>& chunkStructure, TArgs&&... args)
-            : DOwn(DPropsTag(), MakeProps<Size_t>(chunkStructure, args...))
+            : DOwn(DPropsTag(), MakeProps<Size_t>((StructurePtr<ChunkStructure_t>)chunkStructure, (TArgs...)args...))
         {
         }
 

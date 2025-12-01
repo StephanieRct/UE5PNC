@@ -7,23 +7,6 @@
 
 namespace PNC
 {
-    template<typename TChunkStructure>
-    struct DCStructure
-    {
-    public:
-        using Base_t = void;
-        using Self_t = DCStructure<TChunkStructure>;
-        using Size_t = typename TChunkStructure::Size_t;
-        using ChunkStructure_t = TChunkStructure;
-        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
-        using Node_t = NodeT<TChunkStructure>;
-
-        DCStructure() = default;
-        template<typename TProps>
-        DCStructure(const DPropsTag& tag, const TProps& props)
-        {
-        }
-    };
 
     //template<typename TChunkStructure>
     //struct ChunkPointerInternalProtectedT : protected ChunkPointerInternalT<TChunkStructure>

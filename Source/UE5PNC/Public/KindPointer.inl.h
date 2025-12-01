@@ -70,9 +70,9 @@ namespace PNC
         case ChunkKind::ChunkTree:
             pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
         case ChunkKind::ChunkArray:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayPointerT<ChunkPointer_t, ChunkPointerElement_t>*>(this)->GetChunk());
+            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayPointerT<TChunkStructure, ChunkPointerElement_t>*>(this)->GetChunk());
         case ChunkKind::ChunkArrayTree:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayTreePointerT<ChunkPointer_t, ChunkPointerElement_t>*>(this)->GetChunk());
+            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerElement_t>*>(this)->GetChunk());
         }
         pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
     }

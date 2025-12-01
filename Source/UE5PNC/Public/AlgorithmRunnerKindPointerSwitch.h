@@ -15,16 +15,16 @@ namespace PNC
     /// It will retreive the pointed Chunk according to the kind of KindPointer and
     /// execute the algorithm using the appropriate AlgorithmRunner Chunk/ChunkArray
     /// </summary>
-    /// <typeparam name="TChunkStructure"></typeparam>
-    /// <typeparam name="TAlgorithm"></typeparam>
-    template<typename TChunkStructure, typename TAlgorithm>
+    template<typename TAlgorithm, typename TContainer>
     struct AlgorithmRunnerKindPointerSwitch
     {
     public:
-        using Self_t = AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>;
-        using ChunkStructure_t = TChunkStructure;
+        using Self_t = AlgorithmRunnerKindPointerSwitch<TAlgorithm, TContainer>;
         using Algorithm_t = TAlgorithm;
-        using Size_t = typename ChunkStructure_t::Size_t;
+        using Container_t = TContainer;
+        using ChunkStructure_t = typename TContainer::ChunkStructure_t;
+        using Size_t = typename Container_t::Size_t;
+
         using KindPointer_t = KindPointerT<ChunkStructure_t>;
         using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
         using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
@@ -40,9 +40,9 @@ namespace PNC
         /// <param name="algorithm"></param>
         /// <param name="container"></param>
         /// <returns></returns>
-        static bool TryRun(Algorithm_t& algorithm, KindPointer_t& container)
+        static bool TryRun(Algorithm_t& algorithm, Container_t& container)
         {
-            switch (container.Kind)
+            switch (container.GetKind())
             {
             case ChunkKind::Chunk:
                 return AlgorithmRunnerChunk<KChunkPointer_t>::TryRun(algorithm, (KChunkPointer_t&)container);
@@ -65,9 +65,9 @@ namespace PNC
         /// <param name="container"></param>
         /// <returns></returns>
         template<typename TRouter>
-        static bool TryRun(const TRouter& router, Algorithm_t& algorithm, KindPointer_t& container)
+        static bool TryRun(const TRouter& router, Algorithm_t& algorithm, Container_t& container)
         {
-            switch (container.Kind)
+            switch (container.GetKind())
             {
             case ChunkKind::Chunk:
                 return AlgorithmRunnerChunk<KChunkPointer_t>::TryRun(router, algorithm, (KChunkPointer_t&)container);

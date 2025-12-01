@@ -13,8 +13,9 @@
 
 namespace PNC
 {
-    template<typename TChunkStructure, typename TAlgorithm> struct AlgorithmRunner< TChunkStructure, TAlgorithm, KTreePointerT<TChunkStructure>> : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm> {};
-    template<typename TChunkStructure, typename TAlgorithm> struct AlgorithmRunner< TChunkStructure, TAlgorithm, KindPointerT <TChunkStructure>> : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm> {};
+    //template<typename TA, typename TC, bool THasCunk, bool THasArray> 
+    //struct AlgorithmRunnerSelector< TA, TC, THasCunk, THasArray, /*THasKind:*/true> : AlgorithmRunnerKindPointerSwitch<TA, TC> {};
+
 }
 
 namespace PNC::Routing

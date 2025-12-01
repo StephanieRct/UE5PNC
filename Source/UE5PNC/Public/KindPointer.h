@@ -53,34 +53,28 @@ namespace PNC
     };
 
     template<>
-    struct PropTraits<ChunkKind> : public PropTraitsDefault<DPropChunkKind>
-    {
-        //template<typename TBase>
-        //static DPropChunkKind<TBase> Decorate(const TBase& baseCopy, const ChunkKind value)
-        //{
-        //    return DPropChunkKind<TBase>(baseCopy, value);
-        //}
-    };
+    struct PropTraits<ChunkKind> : public PropTraitsDefault<DPropChunkKind> { };
 
+    // TODO Replace with a Decorator DKindPointer (or DKind)
     /// <summary>
     /// A KindPointer is an abstract Pointer with a differnt implementation according to the Chunk's kind.
     /// </summary>
     /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
     template<typename TChunkStructure>
-    struct KindPointerT
+    struct KindPointerT : public DCStructure<TChunkStructure>
     {
     public:
         using Self_t = KindPointerT<TChunkStructure>;
         using ChunkStructure_t = TChunkStructure;
         using Size_t = typename ChunkStructure_t::Size_t;
-        using ChunkPointer_t = ChunkPointerT<TChunkStructure>;
+        //using ChunkPointer_t = ChunkPointerT<TChunkStructure>;
 
         using Chunk_t = ChunkPointerT<ChunkStructure_t>;//ChunkPointerInternalT<TChunkStructure>;
         using ChunkPointerElement_t = ChunkPointerT<ChunkStructure_t>;
         //using ArrayExtension_t = ChunkArrayExtensionT<TChunkStructure, ChunkPointerElement_t>;
         using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;//DArrayPointerInternalT<ArrayExtension_t, ChunkPointerInternalT<TChunkStructure>>;
 
-    public:
+    protected:
         /// <summary>
         /// The kind of the Chunk being pointed at.
         /// </summary>
@@ -113,6 +107,10 @@ namespace PNC
         // TODO: GetStructure
         // TODO: GetComponentData
         // TODO: GetNodeCount
+        ChunkKind GetKind()const 
+        {
+            return Kind;
+        }
 
         bool IsTree()const
         {
@@ -153,7 +151,7 @@ namespace PNC
         ChunkArray_t& GetChunkArray();
     };
 
-
+    // TODO Remove To DOfKind
     /// <summary>
     /// Force a compile-time ChunkKind value.
     /// The most derived decorator of the same type will take precedence
@@ -180,4 +178,39 @@ namespace PNC
     public:
 
     };
+
+
+
+
+    //template<template<typename> typename TDecorator0>
+    //struct ContainerHasKindT
+    //{
+    //    template<typename TContainer>
+    //    consteval static auto HasDecorator()
+    //    {
+    //        return Select((TContainer*)nullptr);
+    //    }
+
+    //    template<typename TBase>
+    //    consteval static bool Select(const TDecorator0<TBase>* d)
+    //    {
+    //        return true;
+    //    }
+    //    template<typename TBase, template<typename> typename TDecoratorOther>
+    //    consteval static bool Select(TDecoratorOther<TBase>* d)
+    //    {
+    //        return false;
+    //    }
+    //    template<typename TBase, typename TValueOther, template<typename, typename> typename TDecoratorOther>
+    //    consteval static bool Select(TDecoratorOther<TValueOther, TBase>* d)
+    //    {
+    //        return false;
+    //    }
+    //};
+
+    //template<typename TContainer>
+    //consteval bool ContainerHasKind()
+    //{
+    //    return ContainerHasDecorator0T< TDecorator>::HasDecorator<TContainer>();
+    //}
 }

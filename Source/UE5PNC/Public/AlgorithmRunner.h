@@ -7,17 +7,10 @@
 
 namespace PNC
 {
-    /// <summary>
-    /// Add a template specialization if you need a special implementation for any specific type that inherit of KindPointer
-    /// </summary>
-    /// <typeparam name="TChunkStructure"></typeparam>
-    /// <typeparam name="TAlgorithm"></typeparam>
-    /// <typeparam name="TKChunkPointer"></typeparam>
-    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointer>// = KindPointerT<TChunkStructure>>
-    struct AlgorithmRunner 
-        //: public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
-    {
-    };
+
+    template<typename TAlgorithm, typename TContainer>// = KindPointerT<TChunkStructure>>
+    struct AlgorithmRunner {};
+
 
 }
 // TODO bring this back in another file

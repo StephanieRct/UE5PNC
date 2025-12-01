@@ -25,35 +25,35 @@ namespace PNC
         /// 
         /// TODO: Add a TryRun(const TChunkPointer& chunkPointer) version.
         /// </summary>
-        /// <typeparam name="TChunk">Typename of the chunk to execute the algorithm on.</typeparam>
+        /// <typeparam name="TContainer">Typename of the chunk to execute the algorithm on.</typeparam>
         /// <param name="chunk">The chunk to execute the algorithm on.</param>
         /// <returns>If it successfully executed the algorithm on the chunk.</returns>
-        template<typename TChunkPointer>
-        bool TryRun(TChunkPointer& chunkPointer)const
+        template<typename TContainer>
+        bool TryRun(TContainer& container)const
         {
-            return AlgorithmRunner<typename TChunkPointer::ChunkStructure_t, Algorithm_t, TChunkPointer>::TryRun(*Impl(), chunkPointer);
+            return AlgorithmRunner<Algorithm_t, TContainer>::TryRun(*Impl(), container);
         }
 
-        template<typename TChunkPointer>
-        bool TryRun(TChunkPointer* chunkPointer)
+        template<typename TContainer>
+        bool TryRun(TContainer* container)
         {
-            if (!chunkPointer)
+            if (!container)
                 return false;
-            return TryRun(*chunkPointer);
+            return TryRun(*container);
         }
 
         /// <summary>
         /// Route using a router and execute an algorithm on a chunk if all requirements are fulfilled and return true.
         /// </summary>
         /// <typeparam name="TRouter"></typeparam>
-        /// <typeparam name="TChunkPointer"></typeparam>
+        /// <typeparam name="TContainer"></typeparam>
         /// <param name="router"></param>
         /// <param name="chunkPointer"></param>
         /// <returns></returns>
-        template<typename TRouter, typename TChunkPointer>
-        bool TryRun(const TRouter& router, TChunkPointer& chunkPointer)const
+        template<typename TRouter, typename TContainer>
+        bool TryRun(const TRouter& router, TContainer& container)const
         {
-            return AlgorithmRunner<typename TChunkPointer::ChunkStructure_t, Algorithm_t, TChunkPointer>::TryRun(router, *Impl(), chunkPointer);
+            return AlgorithmRunner<Algorithm_t, TContainer>::TryRun(router, *Impl(), container);
         }
 
         /// <summary>
@@ -64,23 +64,23 @@ namespace PNC
         /// </summary>
         /// <typeparam name="TChunkPointer"></typeparam>
         /// <param name="chunk"></param>
-        template<typename TChunkPointer>
-        void Run(TChunkPointer& chunkPointer)const
+        template<typename TContainer>
+        void Run(TContainer& container)const
         {
-            if (!TryRun(chunkPointer))
+            if (!TryRun(container))
             {
-                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TContainer).name());
             }
         }
 
-        template<typename TChunkPointer>
-        void Run(TChunkPointer* chunkPointer)
+        template<typename TContainer>
+        void Run(TContainer* container)
         {
-            if (!chunkPointer)
+            if (!container)
             {
-                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TContainer).name());
             }
-            return Run(*chunkPointer);
+            return Run(*container);
         }
 
 
@@ -88,18 +88,14 @@ namespace PNC
         /// Route using a router and execute an algorithm on a chunk
         /// The chunk must not be null and must match the algorithm or it halt execution
         /// 
-        /// TODO: Add a Run(const TRouter& router, const TChunkPointer& chunkPointer) version.
+        /// TODO: Add a Run(const TRouter& router, const TContainer& container) version.
         /// </summary>
-        /// <typeparam name="TRouter"></typeparam>
-        /// <typeparam name="TChunkPointer"></typeparam>
-        /// <param name="router"></param>
-        /// <param name="chunkPointer"></param>
-        template<typename TRouter, typename TChunkPointer>
-        void Run(const TRouter& router, TChunkPointer& chunkPointer)const
+        template<typename TRouter, typename TContainer>
+        void Run(const TRouter& router, TContainer& container)const
         {
-            if (!TryRun(router, chunkPointer))
+            if (!TryRun(router, container))
             {
-                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TChunkPointer).name());
+                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TContainer).name());
             }
         }
 
