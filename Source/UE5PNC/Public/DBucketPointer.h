@@ -310,7 +310,7 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = structure.GetComponentType(i);
-                componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, nodeCount, 0, chunkCount);
+                componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, 0, nodeCount, chunkCount);
                 pnc_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
             }
         }

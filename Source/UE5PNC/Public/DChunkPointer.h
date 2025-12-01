@@ -320,8 +320,9 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = structure.GetComponentType(i);
-                componentType.DestructComponentUnsafe(/*base:*/componentDataArrayTo[i], /*firstNodexIndex:*/0, /*nodeCount: */nodeCount, 
-                                                                                        /*firstChunkIndex:*/0, /*chunkCount:*/chunkCount);
+                componentType.DestructComponentUnsafe(/*base:*/componentDataArrayTo[i], 
+                                                      /*firstNodexIndex:*/0,         /*firstChunkIndex:*/0,
+                                                      /*nodeCount:      */nodeCount, /*chunkCount:     */chunkCount);
                 pnc_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
             }
         }

@@ -392,8 +392,8 @@ namespace PNC
 #endif
         }
         
-        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex,  const NodeCountT<Size_t> nodeCount,
-                                                                    const Size_t firstChunkIndex, const ChunkCountT<Size_t> chunkCount) const
+        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
+                                                                    const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount) const
         {
             DestructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
                                                   GetComponentCount(nodeCount,      chunkCount));
