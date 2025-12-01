@@ -5,7 +5,7 @@
 #include "common.h"
 #include "Containers.h"
 #include "KContainers.h"
-#include "KindPointer.h"
+#include "DKind.h"
 
 //#include "routing\AlgorithmRouter.h"
 //#include "routing\AlgorithmCacheRouter.h"
@@ -34,17 +34,17 @@ namespace PNC
     //};
     //ContainerHasDecorator<TContainer, KindPointerT>()
     //                                                                                Container                                                               Container                          Chunk , Array, Kind                  
-    template<typename TA, typename TChunk, typename TBase> struct AlgorithmRunner<TA, DChunkPointer     <TChunk, TBase>> : public AlgorithmRunnerSelector<TA, DChunkPointer     <TChunk, TBase>, true  , false, ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DChunk            <        TBase>> : public AlgorithmRunnerSelector<TA, DChunk            <        TBase>, true  , false, ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DBucketPointer    <        TBase>> : public AlgorithmRunnerSelector<TA, DBucketPointer    <        TBase>, true  , false, ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DBucket           <        TBase>> : public AlgorithmRunnerSelector<TA, DBucket           <        TBase>, true  , false, ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DGrow             <        TBase>> : public AlgorithmRunnerSelector<TA, DGrow             <        TBase>, true  , false, ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DBunch            <        TBase>> : public AlgorithmRunnerSelector<TA, DBunch            <        TBase>, true  , false, ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA, typename TAExt,  typename TBase> struct AlgorithmRunner<TA, DArrayPointerT    <TAExt,  TBase>> : public AlgorithmRunnerSelector<TA, DArrayPointerT    <TAExt,  TBase>, true  , true , ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DChunkArray       <        TBase>> : public AlgorithmRunnerSelector<TA, DChunkArray       <        TBase>, true  , true , ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DUniformChunkArray<        TBase>> : public AlgorithmRunnerSelector<TA, DUniformChunkArray<        TBase>, true  , true , ContainerHasDecorator<TBase, KindPointerT>() > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, KindPointerT      <        TBase>> : public AlgorithmRunnerSelector<TA, KindPointerT      <        TBase>, true  , true , true > {};
-    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, KTreePointerT     <        TBase>> : public AlgorithmRunnerSelector<TA, KTreePointerT     <        TBase>, true  , true , true > {};
+    template<typename TA, typename TChunk, typename TBase> struct AlgorithmRunner<TA, DChunkPointer     <TChunk, TBase>> : public AlgorithmRunnerSelector<TA, DChunkPointer     <TChunk, TBase>, true  , false, ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DChunk            <        TBase>> : public AlgorithmRunnerSelector<TA, DChunk            <        TBase>, true  , false, ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DBucketPointer    <        TBase>> : public AlgorithmRunnerSelector<TA, DBucketPointer    <        TBase>, true  , false, ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DBucket           <        TBase>> : public AlgorithmRunnerSelector<TA, DBucket           <        TBase>, true  , false, ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DGrow             <        TBase>> : public AlgorithmRunnerSelector<TA, DGrow             <        TBase>, true  , false, ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DBunch            <        TBase>> : public AlgorithmRunnerSelector<TA, DBunch            <        TBase>, true  , false, ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA, typename TAExt,  typename TBase> struct AlgorithmRunner<TA, DArrayPointerT    <TAExt,  TBase>> : public AlgorithmRunnerSelector<TA, DArrayPointerT    <TAExt,  TBase>, true  , true , ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DChunkArray       <        TBase>> : public AlgorithmRunnerSelector<TA, DChunkArray       <        TBase>, true  , true , ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DUniformChunkArray<        TBase>> : public AlgorithmRunnerSelector<TA, DUniformChunkArray<        TBase>, true  , true , ContainerHasDecorator<TBase, DKind>() > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DKind      <        TBase>> : public AlgorithmRunnerSelector<TA, DKind      <        TBase>, true  , true , true > {};
+    template<typename TA,                  typename TBase> struct AlgorithmRunner<TA, DTreePointer     <        TBase>> : public AlgorithmRunnerSelector<TA, DTreePointer     <        TBase>, true  , true , true > {};
 
     //                                                                                             Chunk, Array, Kind
     template<typename TA, typename TC                    > struct AlgorithmRunnerSelector< TA, TC, true , false, false> : AlgorithmRunnerChunk<TC> {};

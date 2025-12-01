@@ -35,7 +35,7 @@
 #include "routing\AlgorithmRouter.h"
 #include "routing\AlgorithmCacheRouter.h"
 
-#include "KindPointer.inl.h"
+#include "DKind.inl.h"
 
 
 namespace PNC

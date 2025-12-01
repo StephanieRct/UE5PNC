@@ -5,14 +5,14 @@
 #include "common.h"
 #include "AlgorithmRunnerChunk.h"
 #include "AlgorithmRunnerChunkArray.h"
-#include "KindPointer.h"
+#include "DKind.h"
 #include "KContainers.h"
 
 namespace PNC
 {
     /// <summary>
-    /// Execute an algorithm on a KindPointer Chunk
-    /// It will retreive the pointed Chunk according to the kind of KindPointer and
+    /// Execute an algorithm on a DKind container
+    /// It will retreive the container's ChunkPointer according to the kind in DKind and
     /// execute the algorithm using the appropriate AlgorithmRunner Chunk/ChunkArray
     /// </summary>
     template<typename TAlgorithm, typename TContainer>
@@ -25,7 +25,7 @@ namespace PNC
         using ChunkStructure_t = typename TContainer::ChunkStructure_t;
         using Size_t = typename Container_t::Size_t;
 
-        using KindPointer_t = KindPointerT<ChunkStructure_t>;
+        using KindPointer_t = KKindPointerT<ChunkStructure_t>;
         using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
         using ChunkArrayPointer_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
         using KChunkPointer_t = KChunkPointerT<ChunkStructure_t>;

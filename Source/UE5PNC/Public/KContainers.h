@@ -23,15 +23,17 @@
 #include "common.h"
 #include "Containers.h"
 
-#include "KChunkArrayPointer.h"
-#include "KTreePointer.h"
+#include "DTreePointer.h"
 
 
 namespace PNC
 {
 
     template<typename TChunkStructure>
-    using KChunkPointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>, KindPointerT<TChunkStructure>>;
+    using KKindPointerT = DKind<DCStructure<TChunkStructure>>;
+
+    template<typename TChunkStructure>
+    using KChunkPointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>, KKindPointerT<TChunkStructure>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KChunkArrayPointerT = DArrayPointerT<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
@@ -58,8 +60,10 @@ namespace PNC
 
     template<typename TChunkStructure>
     using KChunkTreePointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
-        DKindT<ChunkKind::ChunkTree,
-        KTreePointerT<TChunkStructure>>>;
+        DOfKind<ChunkKind::ChunkTree,
+        DTreePointer<
+        DKind<
+        DCStructure<TChunkStructure>>>>>;
 
     template<typename TChunkStructure>
     // TODO replace DChunk with a DChunkTree decorator
@@ -77,7 +81,7 @@ namespace PNC
 
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KChunkArrayTreePointerT = DArrayPointerT<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
-        DKindT<ChunkKind::ChunkArrayTree,
+        DOfKind<ChunkKind::ChunkArrayTree,
         KChunkTreePointerT<TChunkStructure>>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>

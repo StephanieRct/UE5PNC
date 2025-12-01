@@ -55,24 +55,22 @@ namespace PNC
     template<>
     struct PropTraits<ChunkKind> : public PropTraitsDefault<DPropChunkKind> { };
 
-    // TODO Replace with a Decorator DKindPointer (or DKind)
+    // TODO add template parameter for TKind (ChunkKind)
     /// <summary>
     /// A KindPointer is an abstract Pointer with a differnt implementation according to the Chunk's kind.
     /// </summary>
-    /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
-    template<typename TChunkStructure>
-    struct KindPointerT : public DCStructure<TChunkStructure>
+    template<typename TBase>
+    struct DKind : public TBase
     {
     public:
-        using Self_t = KindPointerT<TChunkStructure>;
-        using ChunkStructure_t = TChunkStructure;
-        using Size_t = typename ChunkStructure_t::Size_t;
-        //using ChunkPointer_t = ChunkPointerT<TChunkStructure>;
+        using Base_t = TBase;
+        using Self_t = DKind<TBase>;
+        using typename Base_t::ChunkStructure_t;
+        using typename Base_t::Size_t;
 
-        using Chunk_t = ChunkPointerT<ChunkStructure_t>;//ChunkPointerInternalT<TChunkStructure>;
+        using Chunk_t = ChunkPointerT<ChunkStructure_t>;
         using ChunkPointerElement_t = ChunkPointerT<ChunkStructure_t>;
-        //using ArrayExtension_t = ChunkArrayExtensionT<TChunkStructure, ChunkPointerElement_t>;
-        using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;//DArrayPointerInternalT<ArrayExtension_t, ChunkPointerInternalT<TChunkStructure>>;
+        using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;
 
     protected:
         /// <summary>
@@ -81,23 +79,23 @@ namespace PNC
         ChunkKind Kind;
 
     protected:
-        KindPointerT()
+        DKind()
             :Kind(ChunkKind::None)
         {
         }
-        KindPointerT(ChunkKind kind)
-            :Kind(kind)
-        {
-        }
+        //KindPointerT(ChunkKind kind)
+        //    :Kind(kind)
+        //{
+        //}
 
         template<typename TProps>
-        __declspec(noinline) KindPointerT(const DPropsTag& tag, const TProps& props)
+        PNC_DEBUG_NOINLINE DKind(const DPropsTag& tag, const TProps& props)
             : Kind(props.GetChunkKind())
         {
         }
 
 #ifdef PNC_MEMORYCLEANUP
-        ~KindPointerT()
+        ~DKind()
         {
             pnc_clean(Kind);
         }
@@ -157,21 +155,21 @@ namespace PNC
     /// The most derived decorator of the same type will take precedence
     /// </summary>
     template<ChunkKind TKind, typename TBase>
-    struct DKindT : public TBase
+    struct DOfKind : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DKindT<TKind, TBase>;
+        using Self_t = DOfKind<TKind, TBase>;
         using ChunkStructure_t = Base_t::ChunkStructure_t;
 
-        DKindT()
+        DOfKind()
             :Base_t(TKind)
         {
         }
 
     protected:
         template<typename TProps>
-        __declspec(noinline) DKindT(const DPropsTag& tag, const TProps& props)
+        PNC_DEBUG_NOINLINE DOfKind(const DPropsTag& tag, const TProps& props)
             : Base_t(tag, AppendPropSingle(props, TKind))
         {
         }
