@@ -15,7 +15,6 @@ namespace PNC
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
         using typename Base_t::ChunkStructure_t;
-        using typename Base_t::Chunk_t;
         using typename Base_t::Node_t;
         using typename Base_t::ChunkPointerInternal_t;
 

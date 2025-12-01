@@ -30,7 +30,7 @@ namespace PNC
 {
 
     template<typename TChunkStructure>
-    using KKindPointerT = DKind<DCStructure<TChunkStructure>>;
+    using KKindPointerT = DKind<Container<TChunkStructure>>;
 
     template<typename TChunkStructure>
     using KChunkPointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>, KKindPointerT<TChunkStructure>>;
@@ -63,7 +63,7 @@ namespace PNC
         DOfKind<ChunkKind::ChunkTree,
         DTreePointer<
         DKind<
-        DCStructure<TChunkStructure>>>>>;
+        Container<TChunkStructure>>>>>;
 
     template<typename TChunkStructure>
     // TODO replace DChunk with a DChunkTree decorator

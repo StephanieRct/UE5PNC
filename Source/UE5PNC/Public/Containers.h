@@ -52,7 +52,25 @@ namespace PNC
 {
 
     template<typename TChunkStructure>
-    using ChunkPointerT = DChunkPointer< ChunkPointerInternalT<TChunkStructure>, DCStructure<TChunkStructure>>;
+    struct Container
+    {
+    public:
+        using Base_t = void;
+        using Self_t = Container<TChunkStructure>;
+        using Size_t = typename TChunkStructure::Size_t;
+        using ChunkStructure_t = TChunkStructure;
+        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
+
+        Container() = default;
+        template<typename TProps>
+        Container(const DPropsTag& tag, const TProps& props)
+        {
+        }
+    };
+
+
+    template<typename TChunkStructure>
+    using ChunkPointerT = DChunkPointer< ChunkPointerInternalT<TChunkStructure>, Container<TChunkStructure>>;
 
     //template<typename TChunkStructure>
     //using BucketChunk = ChunkCapacityAllocationT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
@@ -183,6 +201,63 @@ namespace PNC
     ///////////////////////////////////////////////////////////////////
 
 
+    template<template<typename> typename TDecorator0>
+    struct ContainerHasDecorator0T
+    {
+
+        template<typename TContainer, typename TBase>
+        consteval static bool Select(const TContainer* c, const TDecorator0<TBase>* d)
+        {
+            //return TContainer::nothing;
+            //static_assert(false);
+            return true;
+        }
+        template<typename TContainer, typename TChunkStructure>
+        consteval static bool Select(const TContainer* c, const Container<TChunkStructure>* d)
+        {
+            //return TContainer::nothing;
+            return false;
+        }
+        //template<typename TContainer, typename TBase, template<typename> typename TDecoratorOther>
+        //consteval static bool Select(const TContainer* c, const TDecoratorOther<TBase>* d)
+        //{
+        //    return TContainer::nothing;
+        //    return false;
+        //}
+        //template<typename TContainer, typename TBase, typename TValueOther, template<typename, typename> typename TDecoratorOther>
+        //consteval static bool Select(const TContainer* c, const TDecoratorOther<TValueOther, TBase>* d)
+        //{
+        //    return TContainer::nothing;
+        //    return false;
+        //}
+    };
+    template<template<typename, typename > typename TDecorator1, typename TValue>
+    struct ContainerHasDecorator1T
+    {
+        template<typename TContainer, typename TBase>
+        consteval static bool Select(const TContainer* c, const TDecorator1<TValue, TBase>* d)
+        {
+            //return TContainer::nothing;
+            return true;
+        }
+        template<typename TContainer, typename TChunkStructurer>
+        consteval static bool Select(const TContainer* c, const Container<TChunkStructurer>* d)
+        {
+            //return TContainer::nothing;
+            return false;
+        }
+    };
+
+    template<typename TContainer, template<typename> typename TDecorator>
+    consteval bool ContainerHasDecorator()
+    {
+        return ContainerHasDecorator0T< TDecorator>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
+    }
+    template<typename TContainer, template<typename, typename> typename TDecorator, typename TValue >
+    consteval bool ContainerHasDecorator()
+    {
+        return ContainerHasDecorator1T< TDecorator, TValue>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
+    }
 
 
 

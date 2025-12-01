@@ -17,7 +17,6 @@ namespace PNC
         using typename Base_t::Node_t;
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointer_t;
-        using typename Base_t::Chunk_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
 
     protected:
@@ -311,7 +310,7 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = structure.GetComponentType(i);
-                componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, 0, nodeCount, chunkCount);
+                componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, nodeCount, 0, chunkCount);
                 pnc_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
             }
         }

@@ -180,7 +180,7 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t* componentType = chunkStructure.Components[i];
-                componentType->DestructComponentUnsafe(chunk.GetComponentData(i), firstNodeIndex, firstChunkIndex, nodeCount, chunkCount);
+                componentType->DestructComponentUnsafe(chunk.GetComponentData(i), firstNodeIndex, nodeCount, firstChunkIndex, chunkCount);
             }
         }
 
@@ -469,7 +469,7 @@ namespace PNC
                     componentType.CopyConstructComponentForwardUnsafe(dataNew,  0, 0,
                                                                       dataFrom, 0, 0,
                                                                       nodeCount, chunkCount);
-                    componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, 0, nodeCountTo, chunkCountTo);
+                    componentType.DestructComponentUnsafe(componentDataArrayTo[i], 0, nodeCountTo, 0, chunkCountTo);
                     pnc_free_dirty(componentDataArrayTo[i], componentType.GetSize(nodeCapacityTo), componentType.GetAlignment());
                     componentDataArrayTo[i] = dataNew;
                 }
@@ -621,117 +621,11 @@ namespace PNC
         }
 
 
-
-        //template<typename TChunkTo, typename TChunkFrom>
-        //static void SwapNodeForward(TChunkTo& chunkTo, const TChunkFrom& chunkFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)
-        //{
-        //    pnc_assert(!chunkTo.IsNull());
-        //    pnc_assert(!chunkFrom.IsNull());
-        //    pnc_assert(IsSameStructure(chunkTo, chunkFrom));
-        //    pnc_assert(firstNodeIndexTo >= 0);
-        //    pnc_assert(firstNodeIndexFrom >= 0);
-        //    pnc_assert(nodeCount >= 0);
-        //    pnc_assert(firstChunkIndexTo >= 0);
-        //    pnc_assert(firstChunkIndexFrom >= 0);
-        //    pnc_assert(chunkCount >= 0);
-        //    pnc_assert(firstNodeIndexTo < chunkTo.GetNodeCount());
-        //    pnc_assert(firstNodeIndexTo + nodeCount <= chunkTo.GetNodeCount());
-        //    pnc_assert(firstChunkIndexTo < chunkTo.GetChunkCount());
-        //    pnc_assert(firstChunkIndexTo + chunkCount <= chunkTo.GetChunkCount());
-        //    pnc_assert(firstNodeIndexFrom < chunkFrom.GetNodeCount());
-        //    pnc_assert(firstNodeIndexFrom + nodeCount <= chunkFrom.GetNodeCount());
-        //    pnc_assert(firstChunkIndexFrom < chunkFrom.GetChunkCount());
-        //    pnc_assert(firstChunkIndexFrom + chunkCount <= chunkFrom.GetChunkCount());
-
-        //    const ChunkStructure_t& chunkStructure = chunkTo.GetStructure();
-        //    Size_t componentCount = chunkStructure.GetComponentCount();
-        //    for (Size_t i = 0; i < componentCount; ++i)
-        //    {
-        //        const ComponentType_t* componentType = chunkStructure.Components[i];
-        //        componentType->SwapComponentForwardUnsafe(chunkTo.GetComponentData(i), chunkFrom.GetComponentData(i),
-        //            firstNodeIndexTo, firstNodeIndexFrom, nodeCount,
-        //            firstChunkIndexTo, firstChunkIndexFrom, chunkCount);
-        //    }
-        //}
-
         template<typename TChunkA, typename TChunkB>
         static bool IsSameStructure(const TChunkA& a, const TChunkB& b) { return a.GetStructure() == b.GetStructure(); }
         template<typename TChunkA, typename TChunkB>
         static bool IsSameData(const TChunkA& a, const TChunkB& b) { return TChunkA::IsSameData(a,b); }
         
-
-
-
-        //static void DestructComponentUnsafe(const ComponentType_t& componentType, void* const componentData, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
-        //{
-        //    pnc_assert(componentData);
-        //    pnc_assert(firstNodeIndex >= 0);
-        //    pnc_assert(nodeCount >= 0);
-        //    componentType.DestructNodesUnsafe(componentData, firstNodeIndex, nodeCount);
-        //}
-        //static void CopyComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
-        //{
-        //    pnc_assert(componentDataTo);
-        //    pnc_assert(componentDataFrom);
-        //    pnc_assert(firstNodeIndexTo >= 0);
-        //    pnc_assert(firstNodeIndexFrom >= 0);
-        //    pnc_assert(nodeCount >= 0);
-        //    componentType.CopyNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
-        //}
-        //static void MoveComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
-        //{
-        //    pnc_assert(componentDataTo);
-        //    pnc_assert(componentDataFrom);
-        //    pnc_assert(firstNodeIndexTo >= 0);
-        //    pnc_assert(firstNodeIndexFrom >= 0);
-        //    pnc_assert(nodeCount >= 0);
-        //    componentType.MoveNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
-        //}
-        //static void SwapComponentUnsafe(const ComponentType_t& componentType, void* const componentDataTo, void* const componentDataFrom, const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount)
-        //{
-        //    pnc_assert(componentDataTo);
-        //    pnc_assert(componentDataFrom);
-        //    pnc_assert(firstNodeIndexTo >= 0);
-        //    pnc_assert(firstNodeIndexFrom >= 0);
-        //    pnc_assert(nodeCount >= 0);
-        //    componentType.SwapNodesUnsafe(componentDataTo, componentDataFrom, firstNodeIndexTo, firstNodeIndexFrom, nodeCount);
-        //}
-
-        //template<typename TChunk>
-        //static void ConstructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
-        //{
-        //    pnc_assert(!chunk.IsNull());
-        //    pnc_assert(firstNodeIndex >= 0);
-        //    pnc_assert(nodeCount >= 0);
-
-        //    const ChunkStructure_t& chunkStructure = chunk.GetStructure();
-        //    Size_t countDefaultConstructible = chunkStructure.DefaultConstructibleIndex.size();
-        //    for (Size_t i = 0; i < countDefaultConstructible; ++i)
-        //    {
-        //        Size_t index = chunkStructure.DefaultConstructibleIndex[i];
-        //        void* componentData = chunk->GetComponentData(index);
-        //        chunkStructure.Components[index]->ConstructNodesUnsafe(componentData, firstNodeIndex, nodeCount);
-        //    }
-        //}
-
-        //template<typename TChunk>
-        //static void DestructNodesUnsafe(TChunk& chunk, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
-        //{
-        //    pnc_assert(!chunk.IsNull());
-        //    pnc_assert(firstNodeIndex >= 0);
-        //    pnc_assert(nodeCount >= 0);
-
-        //    const ChunkStructure_t& chunkStructure = chunk.GetStructure();
-        //    Size_t countDestructible = chunkStructure.DestructibleIndex.size();
-        //    for (Size_t i = 0; i < countDestructible; ++i)
-        //    {
-        //        Size_t index = chunkStructure.DestructibleIndex[i];
-        //        void* componentData = chunk->GetComponentData(index);
-        //        chunkStructure.Components[index]->DestructNodesUnsafe(componentData, firstNodeIndex, nodeCount);
-        //    }
-        //}
 
     };
 }
