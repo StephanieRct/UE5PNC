@@ -25,32 +25,37 @@
 #include "ComponentTypeSet.h"
 #include "ChunkStructure.h"
 
-
 #include "DChunkPointer.h"
-#include "DBucketPointer.h"
-#include "DBarrelPointer.h"
-#include "DArrayPointer.h"
-
-#include "DOwn.h"
-#include "DGrow.h"
-
 #include "DChunk.h"
+#include "DBucketPointer.h"
 #include "DBucket.h"
+#include "DBunchPointer.h"
 #include "DBunch.h"
-#include "DUniformChunkArray.h"
-#include "DChunkArray.h"
-#include "DChunkBarrel.h"
-#include "DChunkBunch.h"
-#include "DBucketBarrel.h"
-#include "DBucketBunch.h"
 
-#include "ChunkArrayExtension.h"
+#include "DArrayPointer.h"
+#include "DArray.h"
+#include "DUniformArray.h"
+#include "DBarrelPointer.h"
+#include "DBarrel.h"
+#include "DCarryPointer.h"
+#include "DCarry.h"
+
+#include "DBucketArray.h"
+#include "DBucketBarrel.h"
+#include "DBucketCarry.h"
 
 #include "ChunkPointerInternal.h"
+#include "ChunkArrayExtension.h"
+
+#include "DOwn.h"
 
 namespace PNC
 {
-
+    /// <summary>
+    /// Container is the base of all containers.
+    /// All container types are sequences of decorators over the Container struct.
+    /// </summary>
+    /// <typeparam name="TChunkStructure"></typeparam>
     template<typename TChunkStructure>
     struct Container
     {
@@ -60,205 +65,204 @@ namespace PNC
         using Size_t = typename TChunkStructure::Size_t;
         using ChunkStructure_t = TChunkStructure;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
+        using ComponentTypeSet_t = typename ChunkStructure_t::ComponentTypeSet_t;
 
         Container() = default;
+
         template<typename TProps>
         Container(const DPropsTag& tag, const TProps& props)
         {
         }
     };
 
-
-    template<typename TChunkStructure>
-    using ChunkPointerT = DChunkPointer< ChunkPointerInternalT<TChunkStructure>, Container<TChunkStructure>>;
-
-    //template<typename TChunkStructure>
-    //using BucketChunk = ChunkCapacityAllocationT<BucketChunkPointerT<ChunkPointerT<TChunkStructure>>>;
-
-    //template<typename TChunkStructure, typename TChunkPointerElement>
-    //using BucketChunkArray = ChunkArrayCapacityAllocationT<BucketChunkArrayPointerT<ChunkArrayPointerT<ChunkStructure, TChunkPointerElement>>>;
-
-    //ChunkPointerT
-    //ChunkT
-    // -----------------
+    // Chunk
+    //  ---------------
     // |#|#|#|#|#|#|#|#|
-    // -----------------
+    //  ---------------
     template<typename TChunkStructure>
-    using ChunkT = DChunk<DOwn<ChunkPointerT<TChunkStructure>>>;
+    using ChunkPointerT = 
+              DChunkPointer< ChunkPointerInternalT<TChunkStructure>, 
+              Container<TChunkStructure>>;
+    template<typename TChunkStructure>
+    using ChunkT = 
+              DChunk<
+              DOwn<
+              ChunkPointerT<TChunkStructure>>>;
 
-    //template<typename TChunkStructure>
-    //using KChunkTreePointerT = DChunkPointer<ChunkPointerT<TChunkStructure>, KTreePointerT<TChunkStructure>>;
-    //template<typename TChunkStructure>
-    //using KChunkTreeT = DOwnT<DBucketPointerT<KChunkTreePointerT<TChunkStructure>>>;
-
-    //BucketPointerT
-    //BucketT
-    // -----------------
+    // Bucket
+    //  ---------------
     // |#|#|#|#|#| | | |
-    // -----------------
+    //  ---------------
     template<typename TChunkStructure>
-    using BucketPointerT = DBucketPointer<ChunkPointerT<TChunkStructure>>;
-
+    using BucketPointerT = 
+              DBucketPointer<
+              ChunkPointerT<TChunkStructure>>;
     template<typename TChunkStructure>
-    using BucketT = DBucket<DOwn<BucketPointerT<TChunkStructure>>>;
+    using BucketT = 
+              DBucket<
+              DOwn<
+              BucketPointerT<TChunkStructure>>>;
 
-
-    //BunchPointerT
-    //BunchT
-    // -----------------
-    // |#|#|#|#|#| | | | ...
-    // -----------------
+    // Bunch
+    //  -----------------
+    // |#|#|#|#|#| | | | |...
+    //  -----------------
     template<typename TChunkStructure>
-    using BunchPointerT = DGrow<DBucketPointer<ChunkPointerT<TChunkStructure>>>;
-
+    using BunchPointerT = 
+              DBunchPointer<
+              BucketPointerT<TChunkStructure>>;
     template<typename TChunkStructure>
-    using BunchT = DBunch<DOwn<BunchPointerT<TChunkStructure>>>;
+    using BunchT = 
+              DBunch<
+              DOwn<
+              BunchPointerT<TChunkStructure>>>;
 
-
-
-
-
+    // Array
+    //  -----------------------------------
+    // |-----------|-----------------|-----|
+    // |#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|
+    // |-----------|-----------------|-----|
+    //  -----------------------------------
     template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
-    using ChunkArrayPointerT = DArrayPointerT<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
-        ChunkPointerT<TChunkStructure>>;
-
+    using ArrayPointerT = 
+              DArrayPointer<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
+              ChunkPointerT<TChunkStructure>>;
     template<typename TChunkStructure, typename TChunkPointerElement>
-    using ChunkArrayT = DChunkArray<DOwn<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
+    using ArrayT = 
+              DArray<
+              DOwn<
+              ArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
 
-
-
-
-    //ChunkArrayPointerT
-    //UniformChunkArrayPointerT
-    //UniformChunkArray
-    // -------------------------------------------------------
+    // UniformArray
+    //  -----------------------------------------------------
     // |-----------------|-----------------|-----------------|
-    // ||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#||
+    // |#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|
     // |-----------------|-----------------|-----------------|
-    // -------------------------------------------------------
+    //  -----------------------------------------------------
     template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
-    using UniformChunkArrayPointerT = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
+    using UniformArrayPointerT = 
+              ArrayPointerT<TChunkStructure, TChunkPointerElement>;
     template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
-    using UniformChunkArrayT = DUniformChunkArray<DOwn<UniformChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
+    using UniformArrayT = 
+              DUniformArray<
+              DOwn<
+              UniformArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
+
+    // Barrel
+    //  ------------------------------------------------
+    // |-----------|-----------------|-----|------------|
+    // |#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#| | | | | |  |
+    // |-----------|-----------------|-----|------------|
+    //  ------------------------------------------------
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using BarrelPointerT =
+            DBarrelPointer<ArrayPointerT<TChunkStructure, TChunkPointerElement>>;
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using ChunkBarrelT =
+              DBarrel<
+              DOwn<
+              BarrelPointerT<TChunkStructure, TChunkPointerElement>>>;
+
+    // Carry
+    //  ------------------------------------------------
+    // |-----------|-----------------|-----|------------|
+    // |#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#|#| | | | | |  |...
+    // |-----------|-----------------|-----|------------|
+    //  ------------------------------------------------
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using CarryPointerT =
+              DCarryPointer<BarrelPointerT<TChunkStructure, TChunkPointerElement>>;
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using ChunkCarryT =
+              DCarry<
+              DOwn<
+              CarryPointerT<TChunkStructure, TChunkPointerElement>>>;
+
+    // TODO BucketArray
+    //  -----------------------------------
+    // |-----------|-----------------|-----|
+    // |#|#|#|#| | |#| | | | | | | | |#|#|#|
+    // |-----------|-----------------|-----|
+    //  -----------------------------------
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using BucketArrayPointerT =
+              DArrayPointer<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
+              BucketPointerT<TChunkStructure>>;
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using BucketArrayT =
+              DBucketArray<
+              DOwn<
+              BucketArrayPointerT<TChunkStructure, TChunkPointerElement>>>;
+
+    // TODO BucketBarrel
+    //  ------------------------------------------------
+    // |-----------|-----------------|-----|------------|
+    // |#|#|#|#| | |#| | | | | | | | |#|#|#| | | | | |  |
+    // |-----------|-----------------|-----|------------|
+    //  ------------------------------------------------
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using BucketBarrelPointerT =
+              DBarrelPointer<
+              BucketPointerT<TChunkStructure>>;
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using BucketBarrelT =
+              DBucketBarrel<
+              DOwn<
+              BucketBarrelPointerT<TChunkStructure, TChunkPointerElement>>>;
+
+    // TODO BucketCarry
+    //  ------------------------------------------------
+    // |-----------|-----------------|-----|------------|
+    // |#|#|#|#| | |#| | | | | | | | |#|#|#| | | | | |  |...
+    // |-----------|-----------------|-----|------------|
+    //  ------------------------------------------------
+    template<typename TChunkStructure, typename TChunkPointerElement = ChunkPointerT<TChunkStructure>>
+    using BucketCarryPointerT =
+              DCarryPointer<
+              BucketBarrelPointerT<TChunkStructure, TChunkPointerElement>>;
+    template<typename TChunkStructure, typename TChunkPointerElement>
+    using BucketCarryT =
+              DBucketCarry<
+              DOwn<
+              BucketCarryPointerT<TChunkStructure, TChunkPointerElement>>>;
 
 
-    //UniformBucketArray
-    // -------------------------------------------------------
-    // |-----------------|-----------------|-----------------|
-    // ||#|#|#| | | | | |||#|#|#|#|#|#| | |||#| | | | | | | ||
-    // |-----------------|-----------------|-----------------|
-    // -------------------------------------------------------
-    //
-    //UniformChunkBarrel
-    // -------------------------------------------------------
-    // |-----------------|-----------------|                 |
-    // ||#|#|#|#|#|#|#|#|||#|#|#|#|#|#|#|#||                 |
-    // |-----------------|-----------------|                 |
-    // -------------------------------------------------------
-    //
-    //UniformBucketBarrel
-    // -------------------------------------------------------
-    // |-----------------|-----------------|                 |
-    // ||#|#|#|#|#| | | |||#|#| | | | | | ||                 |
-    // |-----------------|-----------------|                 |
-    // -------------------------------------------------------
-
-
-
-    //ChunkArray
-    // -------------------------------------------------------
-    // |------|-----------------|--------|-------------------|
-    // ||#|#|#||#|#|#|#|#|#|#|#|||#|#|#|#||#|#|#|#|#|#|#|#|#||
-    // |------|-----------------|--------|-------------------|
-    // -------------------------------------------------------
-
-    //ChunkBarrel
-    // -------------------------------------------------------
-    // |------|-----------------|                            |
-    // ||#|#|#||#|#|#|#|#|#|#|#||                            |
-    // |------|-----------------|                            |
-    // -------------------------------------------------------
-
-
-    //BucketBarrel
-    // -------------------------------------------------------
-    // |------|-----------------|--------|                   |
-    // ||#|#| ||#|#|#| | | | | |||#|#|#|#|                   |
-    // |------|-----------------|--------|                   |
-    // -------------------------------------------------------
-
-
-    //template<typename TChunkStructure, typename TChunkPointerElement>
-    //using ArrayChunkPointerT = ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>;
-    //
-    //template<typename TChunkStructure, typename TChunkPointerElement>
-    //using ArrayChunkT = ChunkArrayCapacityAllocationT<ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>;
-    //template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
-    //struct AlgorithmRunner< TChunkStructure, TAlgorithm, ArrayChunkT<TChunkStructure, TChunkPointerElement>> : public AlgorithmRunnerChunkArray<TAlgorithm, ArrayChunkPointerT<TChunkStructure, TChunkPointerElement>>{};
-
-
-
-    ///////////////////////////////////////////////////////////////////
-
-
-    template<template<typename> typename TDecorator0>
-    struct ContainerHasDecorator0T
+    namespace 
     {
+        template<template<typename> typename TDecorator0>
+        struct ContainerHasDecorator0T
+        {
 
-        template<typename TContainer, typename TBase>
-        consteval static bool Select(const TContainer* c, const TDecorator0<TBase>* d)
+            template<typename TContainer, typename TBase>
+            consteval static bool Select(const TContainer* c, const TDecorator0<TBase>* d) { return true; }
+            template<typename TContainer, typename TChunkStructure>
+            consteval static bool Select(const TContainer* c, const Container<TChunkStructure>* d) { return false; }
+        };
+        template<template<typename, typename > typename TDecorator1, typename TValue>
+        struct ContainerHasDecorator1T
         {
-            //return TContainer::nothing;
-            //static_assert(false);
-            return true;
-        }
-        template<typename TContainer, typename TChunkStructure>
-        consteval static bool Select(const TContainer* c, const Container<TChunkStructure>* d)
-        {
-            //return TContainer::nothing;
-            return false;
-        }
-        //template<typename TContainer, typename TBase, template<typename> typename TDecoratorOther>
-        //consteval static bool Select(const TContainer* c, const TDecoratorOther<TBase>* d)
-        //{
-        //    return TContainer::nothing;
-        //    return false;
-        //}
-        //template<typename TContainer, typename TBase, typename TValueOther, template<typename, typename> typename TDecoratorOther>
-        //consteval static bool Select(const TContainer* c, const TDecoratorOther<TValueOther, TBase>* d)
-        //{
-        //    return TContainer::nothing;
-        //    return false;
-        //}
-    };
-    template<template<typename, typename > typename TDecorator1, typename TValue>
-    struct ContainerHasDecorator1T
-    {
-        template<typename TContainer, typename TBase>
-        consteval static bool Select(const TContainer* c, const TDecorator1<TValue, TBase>* d)
-        {
-            //return TContainer::nothing;
-            return true;
-        }
-        template<typename TContainer, typename TChunkStructurer>
-        consteval static bool Select(const TContainer* c, const Container<TChunkStructurer>* d)
-        {
-            //return TContainer::nothing;
-            return false;
-        }
-    };
+            template<typename TContainer, typename TBase>
+            consteval static bool Select(const TContainer* c, const TDecorator1<TValue, TBase>* d) { return true; }
+            template<typename TContainer, typename TChunkStructurer>
+            consteval static bool Select(const TContainer* c, const Container<TChunkStructurer>* d) { return false; }
+        };
+    }
 
+    /// <summary>
+    /// Evaluates to true if the container type has a decorator type as one of its bases
+    /// </summary>
     template<typename TContainer, template<typename> typename TDecorator>
     consteval bool ContainerHasDecorator()
     {
         return ContainerHasDecorator0T< TDecorator>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
     }
+
+    /// <summary>
+    /// Evaluates to true if the container type has a decorator type as one of its bases
+    /// </summary>
     template<typename TContainer, template<typename, typename> typename TDecorator, typename TValue >
     consteval bool ContainerHasDecorator()
     {
         return ContainerHasDecorator1T< TDecorator, TValue>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
     }
-
-
-
 }

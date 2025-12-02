@@ -36,20 +36,18 @@ namespace PNC
     using KChunkPointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>, KKindPointerT<TChunkStructure>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayPointerT = DArrayPointerT<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
+    using KChunkArrayPointerT = DArrayPointer<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
         KChunkPointerT<TChunkStructure> >;
 
 
-    // TODO Remove bucket part
     template<typename TChunkStructure>
-    using KChunkT = DChunk<DOwn<DBucketPointer<KChunkPointerT<TChunkStructure>>>>;
+    using KChunkT = DChunk<DOwn<KChunkPointerT<TChunkStructure>>>;
 
     template<typename TChunkStructure>
     using KBucketT = DBucket<DOwn<DBucketPointer<KChunkPointerT<TChunkStructure>>>>;
 
-    // TODO replace DBucket with DBunch
     template<typename TChunkStructure>
-    using KBunchT = DBucket<DOwn<DGrow<DBucketPointer<KChunkPointerT<TChunkStructure>>>>>;
+    using KBunchT = DBunch<DOwn<DBunchPointer<DBucketPointer<KChunkPointerT<TChunkStructure>>>>>;
 
 
 
@@ -59,33 +57,38 @@ namespace PNC
 
 
     template<typename TChunkStructure>
-    using KChunkTreePointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
-        DOfKind<ChunkKind::ChunkTree,
+    using KChunkTreePointerT = 
+        DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
+        DOfKind<ContainerKind::ChunkTree,
         DTreePointer<
         DKind<
         Container<TChunkStructure>>>>>;
-
     template<typename TChunkStructure>
-    // TODO replace DChunk with a DChunkTree decorator
+    // TODO replace DChunk with a DChunkTree decorator and add them to AlgorithmRunner
     using KChunkTreeT = DChunk<DOwn<KChunkTreePointerT<TChunkStructure>>>;
 
-    // TODO replace DBucket with a DBucketTree decorator
     template<typename TChunkStructure>
-    using KBucketTreeT = DBucket<DOwn<DBucketPointer<KChunkTreePointerT<TChunkStructure>>>>;
-
-    // TODO replace DBucket with a DBunchTree decorator
+    using KBucketTreePointerT = DBucketPointer<KChunkTreePointerT<TChunkStructure>>;
+    // TODO replace DBucket with a DBucketTree decorator and add them to AlgorithmRunner
     template<typename TChunkStructure>
-    using KBunchTreeT = DBucket<DOwn<DBucketPointer<KChunkTreePointerT<TChunkStructure>>>>;
+    using KBucketTreeT = DBucket<DOwn<KBucketTreePointerT<TChunkStructure>>>;
 
-
+    template<typename TChunkStructure>
+    using KBunchTreePointerT = DBunchPointer<KBucketTreePointerT<TChunkStructure>>;
+    // TODO replace DBucket with a DBunchTree decorator and add them to AlgorithmRunner
+    template<typename TChunkStructure>
+    using KBunchTreeT = DBucket<DOwn<KBunchTreePointerT<TChunkStructure>>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayTreePointerT = DArrayPointerT<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
-        DOfKind<ChunkKind::ChunkArrayTree,
+    using KChunkArrayTreePointerT = 
+        DArrayPointer<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
+        DOfKind<ContainerKind::ChunkArrayTree,
         KChunkTreePointerT<TChunkStructure>>>;
 
+    // TODO replace DChunkArray with a DChunkArrayTree decorator and add them to AlgorithmRunner
     template<typename TChunkStructure, typename TChunkPointerElement>
-    using KChunkArrayTreeT = DChunkArray<DOwn<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
+    using KChunkArrayTreeT = DArray<DOwn<KChunkArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
+
 
 
     template<typename TChunkStructure, typename TChunkPointerElement>

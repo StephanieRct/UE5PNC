@@ -6,6 +6,14 @@
 
 namespace PNC
 {
+    /// <summary>
+    /// Container of Node and their component data.
+    /// 
+    /// Container with a fixed NodeCount of allocated and constructed nodes and their components.
+    /// A Chunk is a fixed number of constructed nodes.
+    /// 
+    /// Each Component data is allocated sequentially in memory with the same NodeCount
+    /// </summary>
     template<typename TBase>
     struct DChunk : public TBase
     {
@@ -19,7 +27,22 @@ namespace PNC
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointer_t;
 
+        /// <summary>
+        /// Create a VoidNull Container.
+        /// </summary>
         DChunk() = default;
+
+        /// <summary>
+        /// Create a StructNull Container
+        /// </summary>
+        DChunk(const StructurePtr<ChunkStructure_t>& chunkStructure)
+            : Base_t(chunkStructure)
+        {
+        }
+
+        /// <summary>
+        /// Create a StructData Container with (NodeCount) allocated and constructed nodes.
+        /// </summary>
         DChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, 
                const NodeCountT<Size_t> nodeCount)
             : Base_t(chunkStructure, 

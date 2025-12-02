@@ -8,11 +8,11 @@
 namespace PNC
 {
     template<typename TArrayExtension, typename TBase>
-    struct DArrayPointerT : public TBase
+    struct DArrayPointer : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DArrayPointerT<TArrayExtension, TBase>;
+        using Self_t = DArrayPointer<TArrayExtension, TBase>;
         using ArrayExtension_t = TArrayExtension;
         using ChunkPointerElement_t = ArrayExtension_t::ChunkPointerElement_t;
         using typename Base_t::Size_t;
@@ -32,18 +32,18 @@ namespace PNC
         ArrayExtension_t Array;
 
     public:
-        DArrayPointerT() = default;
+        DArrayPointer() = default;
 
         template<typename TProps>
-        DArrayPointerT(const DPropsTag& tag, const TProps& props)
+        DArrayPointer(const DPropsTag& tag, const TProps& props)
             : Base_t(tag, props)
             , Array(tag, props)
         {
         }
 
-        DArrayPointerT(const Self_t& o) = default;
+        DArrayPointer(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
-        DArrayPointerT(Self_t&& o) = default;
+        DArrayPointer(Self_t&& o) = default;
         Self_t& operator=(Self_t&& o) = default;
 
         ///// <summary>

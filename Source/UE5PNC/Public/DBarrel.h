@@ -7,11 +7,11 @@
 namespace PNC
 {
     template<typename TBase>
-    struct DChunkArray : public TBase
+    struct DBarrel : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DChunkArray<TBase>;
+        using Self_t = DBarrel<TBase>;
 
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
@@ -24,15 +24,15 @@ namespace PNC
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointerElementInternal_t;
 
-        DChunkArray() = default;
-        DChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DBarrel() = default;
+        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure)
             : Base_t(chunkStructure)
         {
         }
 
 
-        // Uniform Array
-        DChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
+        // Full Uniform Barrel
+        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
             const ChunkCountT<Size_t> chunkCount,
             const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
             : Base_t(chunkStructure,
@@ -44,22 +44,40 @@ namespace PNC
         {
         }
 
-        // Uniform Array with additional node capacity.
+        // Empty, Partial or Full Uniform array
+        // nodeCountPerChunk may be 0.
+        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
+            const ChunkCapacityT<Size_t> chunkCapacity,
+            const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
+            const ChunkCountT<Size_t> chunkCount)
+            : Base_t(chunkStructure,
+                chunkCount,
+                chunkCapacity,
+                NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
+                NodeCapacityT<Size_t>(chunkCapacity * nodeCountPerChunk),
+                nodeCountPerChunk)
+        {
+            pnc_assert(chunkCapacity >= 0);
+            pnc_assert(nodeCountPerChunk >= 0);
+            pnc_assert(chunkCount >= 0);
+            pnc_assert(chunkCount <= chunkCapacity);
+        }
+
+        // Empty, Partial or Full Uniform array with additional node capacity.
         // nodeCountPerChunk may be 0.
         // Chunk elements can increade/decrease node count up to the total node capacity.
-        DChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCountT<Size_t> chunkCount,
+        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
+            const ChunkCapacityT<Size_t> chunkCapacity,
             const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
+            const ChunkCountT<Size_t> chunkCount,
             const NodeCapacityT<Size_t> nodeCapacity)
             : Base_t(chunkStructure,
                 chunkCount,
-                ChunkCapacityT<Size_t>(chunkCount),
+                chunkCapacity,
                 NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
-                NodeCapacityT<Size_t>(nodeCapacity),
+                nodeCapacity,
                 nodeCountPerChunk)
         {
-            pnc_assert(nodeCapacity >= PropCountToCapacity(chunkCount * nodeCountPerChunk));
         }
-
     };
 }

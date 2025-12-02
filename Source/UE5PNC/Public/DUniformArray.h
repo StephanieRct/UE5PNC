@@ -8,11 +8,11 @@ namespace PNC
 {
 
     template<typename TBase>
-    struct DBucketBunch : public TBase
+    struct DUniformArray : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DBucketBunch<TBase>;
+        using Self_t = DUniformArray<TBase>;
 
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
@@ -25,17 +25,21 @@ namespace PNC
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointerElementInternal_t;
 
-        DBucketBunch() = default;
-        DBucketBunch(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DUniformArray() = default;
+        DUniformArray(const StructurePtr<ChunkStructure_t>& chunkStructure)
             : Base_t(chunkStructure)
         {
         }
-        DBucketBunch(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCapacityT<Size_t> chunkCapacity,
+
+        DUniformArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
             const ChunkCountT<Size_t> chunkCount,
-            const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk,
             const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
-            : Base_t(chunkStructure, chunkCapacity, chunkCount, nodeCapacityPerChunk, nodeCountPerChunk)
+            : Base_t(chunkStructure, 
+                     chunkCount, 
+                     ChunkCapacityT<Size_t>(chunkCount),
+                     NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
+                     NodeCapacityT<Size_t>(chunkCount* nodeCountPerChunk),
+                     nodeCountPerChunk)
         {
         }
     };

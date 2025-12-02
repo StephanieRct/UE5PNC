@@ -6,14 +6,12 @@
 
 namespace PNC
 {
-
     template<typename TBase>
     struct DBucketBarrel : public TBase
     {
     public:
         using Base_t = TBase;
         using Self_t = DBucketBarrel<TBase>;
-
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
         using typename Base_t::ChunkStructure_t;
@@ -31,17 +29,17 @@ namespace PNC
         {
         }
         DBucketBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
-                      const ChunkCapacityT<Size_t> chunkCapacity,
+                      const ChunkCapacityT       <Size_t> chunkCapacity,
+                      const ChunkCountT          <Size_t> chunkCount,
                       const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk,
-                      const ChunkCountT<Size_t> chunkCount,
-                      const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+                      const NodeCountPerChunkT   <Size_t> nodeCountPerChunk)
             : Base_t(chunkStructure, 
-                chunkCapacity, 
-                chunkCount, 
-                nodeCapacityPerChunk, 
-                nodeCountPerChunk,
-                NodeCountT<Size_t>(chunkCount * nodeCapacityPerChunk),
-                NodeCapacityT<Size_t>(chunkCapacity* nodeCapacityPerChunk))
+                     chunkCapacity, 
+                     chunkCount, 
+                     nodeCapacityPerChunk, 
+                     nodeCountPerChunk,
+                     PropNodeCount   (chunkCount    * nodeCapacityPerChunk),
+                     PropNodeCapacity(chunkCapacity * nodeCapacityPerChunk))
         {
         }
     };

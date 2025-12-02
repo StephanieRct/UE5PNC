@@ -7,45 +7,29 @@
 
 namespace PNC
 {
-    enum class ChunkKind 
+    enum class ContainerKind 
     {
         None,
-        /// <summary>
-        /// The Chunk is a ChunkPointer
-        /// </summary>
         Chunk,
         Bucket,
         Bunch,
-
-        /// <summary>
-        /// The Chunk is a ChunkArrayPointer
-        /// </summary>
         ChunkArray,
-
-        /// <summary>
-        /// The Chunk is a KChunkTreePointer
-        /// </summary>
         ChunkTree,
         BucketTree,
         BunchTree,
-
-        /// <summary>
-        /// The Chunk is a KChunkArrayTreePointer
-        /// </summary>
         ChunkArrayTree,
     };
 
-    //using PropChunkKind = Prop<ChunkKind, PropId::ChunkKind>;
-
+    // TODO add template parameter for TKind (ContainerKind)
     template<typename TProps>
-    struct DPropChunkKind : public TProps
+    struct DPropKind : public TProps
     {
-        using Value_t = ChunkKind;
+        using Value_t = ContainerKind;
         
-        ChunkKind Kind;
-        ChunkKind GetChunkKind() const { return Kind; }
+        ContainerKind Kind;
+        ContainerKind GetChunkKind() const { return Kind; }
 
-        DPropChunkKind(const TProps& props, const ChunkKind kind)
+        DPropKind(const TProps& props, const ContainerKind kind)
             : TProps(props)
             , Kind(kind)
         {
@@ -53,11 +37,11 @@ namespace PNC
     };
 
     template<>
-    struct PropTraits<ChunkKind> : public PropTraitsDefault<DPropChunkKind> { };
+    struct PropTraits<ContainerKind> : public PropTraitsDefault<DPropKind> { };
 
-    // TODO add template parameter for TKind (ChunkKind)
+    // TODO add template parameter for TKind (ContainerKind)
     /// <summary>
-    /// A KindPointer is an abstract Pointer with a differnt implementation according to the Chunk's kind.
+    /// A DKind provides a way to identify the type of container and extract the ChunkPointer using GetChunkPointer.
     /// </summary>
     template<typename TBase>
     struct DKind : public TBase
@@ -68,25 +52,21 @@ namespace PNC
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
 
-        using Chunk_t = ChunkPointerT<ChunkStructure_t>;
+        using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
         using ChunkPointerElement_t = ChunkPointerT<ChunkStructure_t>;
-        using ChunkArray_t = ChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;
+        using ArrayPointer_t = ArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;
 
     protected:
         /// <summary>
         /// The kind of the Chunk being pointed at.
         /// </summary>
-        ChunkKind Kind;
+        ContainerKind Kind;
 
     protected:
         DKind()
-            :Kind(ChunkKind::None)
+            :Kind(ContainerKind::None)
         {
         }
-        //KindPointerT(ChunkKind kind)
-        //    :Kind(kind)
-        //{
-        //}
 
         template<typename TProps>
         PNC_DEBUG_NOINLINE DKind(const DPropsTag& tag, const TProps& props)
@@ -105,7 +85,7 @@ namespace PNC
         // TODO: GetStructure
         // TODO: GetComponentData
         // TODO: GetNodeCount
-        ChunkKind GetKind()const 
+        ContainerKind GetKind()const 
         {
             return Kind;
         }
@@ -114,13 +94,13 @@ namespace PNC
         {
             switch (Kind)
             {
-            case ChunkKind::Chunk:
+            case ContainerKind::Chunk:
                 return false;
-            case ChunkKind::ChunkArray:
+            case ContainerKind::ChunkArray:
                 return false;
-            case ChunkKind::ChunkTree:
+            case ContainerKind::ChunkTree:
                 return true;
-            case ChunkKind::ChunkArrayTree:
+            case ContainerKind::ChunkArrayTree:
                 return true;
             }
         }
@@ -129,32 +109,27 @@ namespace PNC
         {
             switch (Kind)
             {
-            case ChunkKind::Chunk:
+            case ContainerKind::Chunk:
                 return false;
-            case ChunkKind::ChunkArray:
+            case ContainerKind::ChunkArray:
                 return true;
-            case ChunkKind::ChunkTree:
+            case ContainerKind::ChunkTree:
                 return false;
-            case ChunkKind::ChunkArrayTree:
+            case ContainerKind::ChunkArrayTree:
                 return true;
             }
         }
-        //const Chunk_t& operator*()const { return GetChunk(); }
-        //Chunk_t& operator*() { return GetChunk(); }
-        //const Chunk_t* operator->()const { return &GetChunk(); }
-        //Chunk_t* operator->() { return &GetChunk(); }
-        const Chunk_t& GetChunk()const;
-        Chunk_t& GetChunk();
-        const ChunkArray_t& GetChunkArray()const;
-        ChunkArray_t& GetChunkArray();
+        const ChunkPointer_t& GetChunk()const;
+        ChunkPointer_t& GetChunk();
+        const ArrayPointer_t& GetChunkArray()const;
+        ArrayPointer_t& GetChunkArray();
     };
 
-    // TODO Remove To DOfKind
     /// <summary>
-    /// Force a compile-time ChunkKind value.
+    /// Force a compile-time ContainerKind value.
     /// The most derived decorator of the same type will take precedence
     /// </summary>
-    template<ChunkKind TKind, typename TBase>
+    template<ContainerKind TKind, typename TBase>
     struct DOfKind : public TBase
     {
     public:
@@ -173,42 +148,5 @@ namespace PNC
             : Base_t(tag, AppendPropSingle(props, TKind))
         {
         }
-    public:
-
     };
-
-
-
-
-    //template<template<typename> typename TDecorator0>
-    //struct ContainerHasKindT
-    //{
-    //    template<typename TContainer>
-    //    consteval static auto HasDecorator()
-    //    {
-    //        return Select((TContainer*)nullptr);
-    //    }
-
-    //    template<typename TBase>
-    //    consteval static bool Select(const TDecorator0<TBase>* d)
-    //    {
-    //        return true;
-    //    }
-    //    template<typename TBase, template<typename> typename TDecoratorOther>
-    //    consteval static bool Select(TDecoratorOther<TBase>* d)
-    //    {
-    //        return false;
-    //    }
-    //    template<typename TBase, typename TValueOther, template<typename, typename> typename TDecoratorOther>
-    //    consteval static bool Select(TDecoratorOther<TValueOther, TBase>* d)
-    //    {
-    //        return false;
-    //    }
-    //};
-
-    //template<typename TContainer>
-    //consteval bool ContainerHasKind()
-    //{
-    //    return ContainerHasDecorator0T< TDecorator>::HasDecorator<TContainer>();
-    //}
 }

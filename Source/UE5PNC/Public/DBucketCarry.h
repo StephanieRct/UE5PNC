@@ -8,11 +8,11 @@ namespace PNC
 {
 
     template<typename TBase>
-    struct DUniformChunkArray : public TBase
+    struct DBucketCarry : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DUniformChunkArray<TBase>;
+        using Self_t = DBucketCarry<TBase>;
 
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
@@ -25,21 +25,17 @@ namespace PNC
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointerElementInternal_t;
 
-        DUniformChunkArray() = default;
-        DUniformChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DBucketCarry() = default;
+        DBucketCarry(const StructurePtr<ChunkStructure_t>& chunkStructure)
             : Base_t(chunkStructure)
         {
         }
-
-        DUniformChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
+        DBucketCarry(const StructurePtr<ChunkStructure_t>& chunkStructure,
+            const ChunkCapacityT<Size_t> chunkCapacity,
             const ChunkCountT<Size_t> chunkCount,
+            const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk,
             const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
-            : Base_t(chunkStructure, 
-                     chunkCount, 
-                     ChunkCapacityT<Size_t>(chunkCount),
-                     NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
-                     NodeCapacityT<Size_t>(chunkCount* nodeCountPerChunk),
-                     nodeCountPerChunk)
+            : Base_t(chunkStructure, chunkCapacity, chunkCount, nodeCapacityPerChunk, nodeCountPerChunk)
         {
         }
     };

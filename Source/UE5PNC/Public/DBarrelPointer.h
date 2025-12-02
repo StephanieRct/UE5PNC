@@ -21,23 +21,23 @@ namespace PNC
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
 
     protected:
-        /// <summary>
-        /// Maximum number of Nodes each Chunk can grow to.
-        /// </summary>
-        NodeCapacityPerChunkT<Size_t> NodeCapacityPerChunk;
 
         /// <summary>
         /// Maximum number of Chunks this Array can grow to.
         /// </summary>
         ChunkCapacityT<Size_t> ChunkCapacity;
 
+        /// <summary>
+        /// Maximum number of Nodes each Chunk can grow to.
+        /// </summary>
+        NodeCapacityPerChunkT<Size_t> NodeCapacityPerChunk;
 
     public:
         template<typename TProps>
         DBarrelPointer(const DPropsTag& tag, const TProps& props)
-            : Base_t(tag, props)
-            , NodeCapacityPerChunk(props.GetNodeCapacityPerChunk())
-            , ChunkCapacity(props.GetChunkCapacity())
+            : Base_t(tag, props),
+              ChunkCapacity(props.GetChunkCapacity()),
+              NodeCapacityPerChunk(props.GetNodeCapacityPerChunk())
         {
         }
 
@@ -45,8 +45,8 @@ namespace PNC
         /// Create a Null Chunk
         /// </summary>
         DBarrelPointer()
-            : NodeCapacityPerChunk(0)
-            , ChunkCapacity(0)
+            : ChunkCapacity(0),
+              NodeCapacityPerChunk(0)
         {
         }
 
@@ -54,9 +54,9 @@ namespace PNC
 
     protected:
         DBarrelPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount, const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
-            : Base_t(chunkStructure, chunkCount, chunkCapacity * nodeCapacityPerChunk)
-            , NodeCapacityPerChunk(nodeCapacityPerChunk)
-            , ChunkCapacity(chunkCapacity)
+            : Base_t(chunkStructure, chunkCount, chunkCapacity * nodeCapacityPerChunk),
+              ChunkCapacity(chunkCapacity),
+              NodeCapacityPerChunk(nodeCapacityPerChunk)
         {
         }
 
@@ -69,13 +69,13 @@ namespace PNC
         using Base_t::IsSameStructure;
         
         Size_t AvailableChunks()const { return ChunkCapacity - GetChunkCount(); }
-        
-        void NewChunk() 
-        {
 
-        }
+        // TODO 
+        void AddChunks() {}
         // TODO
-        void Clear() {}
+        void RemoveChunks() {}
+        // TODO
+        void ClearChunks() {}
 
         /// <summary>
         /// The total maximum number of Nodes the Array can grow to.
@@ -99,47 +99,6 @@ namespace PNC
         using Base_t::GetInternalChunkElement;
 
     protected:
-
-        ///// <summary>
-        ///// Notes:
-        /////     Called by derived structs
-        ///// </summary>
-        //template<typename TChunk, typename TProps>
-        //static void AllocateConstruct(TChunk& chunk, const TProps& props)
-        //{
-        //    Base_t::AllocateConstruct(chunk, props);
-        //    const auto nodeCapacity = props.GetNodeCapacity();
-        //    const auto chunkCapacity = props.GetChunkCapacity();
-        //    const auto chunkCount = props.GetChunkCount();
-
-        //    chunk.Array.Allocate(chunk, nodeCapacity, chunkCapacity);
-        //    if (chunkCount > 0)
-        //    {
-        //        const auto nodeCountPerChunk = props.GetNodeCountPerChunk();
-        //        for (Size_t i = 0; i < chunkCount; ++i)
-        //            chunk.Array.ConstructElement(chunk,
-        //                /*elementIndex:*/i,
-        //                /*firstNodeInArray:*/i * nodeCountPerChunk,
-        //                /*nodeCount:*/ChunkCountT<Size_t>(1) * nodeCountPerChunk);
-        //    }
-
-        //}
-
-        ///// <summary>
-        ///// Notes:
-        /////     Called by derived structs
-        ///// </summary>
-        //template<typename TChunk>
-        //static void FreeDestruct(TChunk& chunk)
-        //{
-        //    chunk.Array.Destruct(chunk);
-        //    chunk.Array.Deallocate(chunk);
-        //    const auto nodeCapacity = chunk.GetNodeCapacity();
-        //    const auto nodeCount = chunk.GetNodeCount();
-        //    const auto chunkCapacity = chunk.GetChunkCapacity();
-        //    const auto chunkCount = chunk.GetChunkCount();
-        //    Base_t::FreeDestruct(chunk, nodeCapacity, nodeCount, chunkCapacity, chunkCount);
-        //}
 
         static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const NodeCountT<Size_t> nodeCount, void** const componentDataArray)
         {

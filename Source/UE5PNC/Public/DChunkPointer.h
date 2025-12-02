@@ -28,15 +28,26 @@ namespace PNC
     public:
         using Base_t::Base_t;
 
+        /// <summary>
+        /// Create a VoidNull Container.
+        /// </summary>
+        DChunkPointer() = default;
+
+        /// <summary>
+        /// Create a StructNull Container
+        /// </summary>
         DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure)
             : Base_t()
             , Chunk(chunkStructure)
         {
         }
 
-        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, void**const componentData)
+        /// <summary>
+        /// Create a StructData from a ComponentDataArray with a NodeCount
+        /// </summary>
+        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, const PropComponentDataArray& componentDataArray)
             : Base_t()
-            , Chunk(chunkStructure, nodeCount, componentData)
+            , Chunk(chunkStructure, nodeCount, componentDataArray)
         {
         }
 
@@ -237,10 +248,10 @@ namespace PNC
         {
             pnc_assert(newNodeCount >= containerFrom.GetNodeCount());
             pnc_assert(!IsSameData(containerToReallocate, containerFrom));
-            Node_t::ReallocateCopyConstructAllComponentsForwardUnsafe(containerToReallocate, 0, 0, 
-                                                                      containerFrom,         0, 0, 
-                                                                      newNodeCount,                      ChunkCountT<Size_t>(1),
-                                                                      PropCountToCapacity(newNodeCount), ChunkCapacityT<Size_t>(1));
+            Node_t::ReallocateCopyAllComponentsForwardUnsafe(containerToReallocate, 0/*:firstNodeIndexTo*/,            0/*:firstChunkIndexTo*/,
+                                                             containerFrom,         0/*:firstNodeIndexFrom*/,          0/*:firstChunkIndexFrom*/,
+                                                                                    newNodeCount,                      ChunkCountT<Size_t>(1),
+                                                                                    PropCountToCapacity(newNodeCount), ChunkCapacityT<Size_t>(1));
         }
         template<typename TContainer>
         static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom)
@@ -264,41 +275,11 @@ namespace PNC
             pnc_assert(!containerFrom.IsNull());
             pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
             pnc_assert(newNodeCount >= containerFrom.GetNodeCount());
-
-            const ChunkStructure_t& structure = containerToReallocate.GetStructure();
-            const auto componentCount = structure.GetComponentCount();
-            const auto nodeCountFrom = containerFrom.GetNodeCount();
-            const auto nodeCountTo = containerToReallocate.GetNodeCount();
-
-            typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(containerToReallocate);
-            void**const componentDataArrayTo = internalChunk.ComponentData;
-            for (Size_t i = 0; i < componentCount; ++i)
-            {
-                const ComponentType_t& componentType = *structure.Components[i];
-                void* const dataFrom = containerFrom.GetComponentData(i);
-                switch(componentType.GetOwner())
-                {
-                case ComponentOwner_Chunk:
-                    if (componentDataArrayTo[i] != dataFrom)
-                        componentType.MoveAssignDataForwardUnsafe(/*baseTo:  */componentDataArrayTo[i], /*firstTo:  */0,
-                                                                  /*baseFrom:*/dataFrom,                /*firstFrom:*/0, 
-                                                                  /*count:   */1);
-                    break;
-                case ComponentOwner_Node:
-                    void* const dataNew = (void*)pnc_alloc(componentType.GetSize(newNodeCount), componentType.GetAlignment());
-                    componentType.MoveConstructDataForwardUnsafe(/*baseTo:  */dataNew , /*firstTo:  */0,
-                                                                 /*baseFrom:*/dataFrom, /*firstFrom:*/0, 
-                                                                 /*count:   */nodeCountFrom);
-
-                    componentType.DestructDataUnsafe(/*base: */componentDataArrayTo[i], /*firstIndex:*/0, 
-                                                     /*count:*/nodeCountTo);
-                    pnc_free_dirty(componentDataArrayTo[i], componentType.GetSize(nodeCountTo), componentType.GetAlignment());
-
-                    componentDataArrayTo[i] = dataNew;
-                    break;
-                pnc_assert_switch_default_no_entry();
-                }
-            }
+            
+            Node_t::ReallocateMoveAllComponentsForwardUnsafe(containerToReallocate, 0/*:firstNodeIndexTo*/,            0/*:firstChunkIndexTo*/,
+                                                             containerFrom,         0/*:firstNodeIndexFrom*/,          0/*:firstChunkIndexFrom*/,
+                                                                                    newNodeCount,                      ChunkCountT<Size_t>(1),
+                                                                                    PropCountToCapacity(newNodeCount), ChunkCapacityT<Size_t>(1));
         }
         template<typename TContainer>
         static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom)

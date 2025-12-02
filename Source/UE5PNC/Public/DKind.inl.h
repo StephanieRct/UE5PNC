@@ -14,66 +14,66 @@
 namespace PNC
 {
     template<typename TBase>
-    const typename DKind<TBase>::Chunk_t& DKind<TBase>::GetChunk()const
+    const typename DKind<TBase>::ChunkPointer_t& DKind<TBase>::GetChunk()const
     {
         switch (this->Kind)
         {
-        case ChunkKind::Chunk:
-        case ChunkKind::ChunkArray:
-            return reinterpret_cast<Chunk_t&>(reinterpret_cast<KChunkPointerT<TBase>*>(this)->GetChunk());
-        case ChunkKind::ChunkTree:
-        case ChunkKind::ChunkArrayTree:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkTreePointerT<TBase>*>(this)->GetChunk());
+        case ContainerKind::Chunk:
+        case ContainerKind::ChunkArray:
+            return reinterpret_cast<ChunkPointer_t&>(reinterpret_cast<KChunkPointerT<TBase>*>(this)->GetChunk());
+        case ContainerKind::ChunkTree:
+        case ContainerKind::ChunkArrayTree:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkTreePointerT<TBase>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(Chunk_t*)nullptr);
+        pnc_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
     }
 
     template<typename TBase>
-    typename DKind<TBase>::Chunk_t& DKind<TBase>::GetChunk()
+    typename DKind<TBase>::ChunkPointer_t& DKind<TBase>::GetChunk()
     {
         switch (this->Kind)
         {
-        case ChunkKind::Chunk:
-        case ChunkKind::ChunkArray:
-            return reinterpret_cast<Chunk_t&>(reinterpret_cast<KChunkPointerT<TBase>*>(this)->GetChunk());
-        case ChunkKind::ChunkTree:
-        case ChunkKind::ChunkArrayTree:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkTreePointerT<TBase>*>(this)->GetChunk());
+        case ContainerKind::Chunk:
+        case ContainerKind::ChunkArray:
+            return reinterpret_cast<ChunkPointer_t&>(reinterpret_cast<KChunkPointerT<TBase>*>(this)->GetChunk());
+        case ContainerKind::ChunkTree:
+        case ContainerKind::ChunkArrayTree:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkTreePointerT<TBase>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(Chunk_t*)nullptr);
+        pnc_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
     }
 
     template<typename TBase>
-    const typename DKind<TBase>::ChunkArray_t& DKind<TBase>::GetChunkArray()const
+    const typename DKind<TBase>::ArrayPointer_t& DKind<TBase>::GetChunkArray()const
     {
         switch (this->Kind)
         {
-        case ChunkKind::Chunk:
-            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind::ChunkTree:
-            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind::ChunkArray:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayPointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
-        case ChunkKind::ChunkArrayTree:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayTreePointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::Chunk:
+            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+        case ContainerKind::ChunkTree:
+            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+        case ContainerKind::ChunkArray:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayPointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::ChunkArrayTree:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayTreePointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
+        pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
     }
 
     template<typename TBase>
-    typename DKind<TBase>::ChunkArray_t& DKind<TBase>::GetChunkArray()
+    typename DKind<TBase>::ArrayPointer_t& DKind<TBase>::GetChunkArray()
     {
         switch (this->Kind)
         {
-        case ChunkKind::Chunk:
-            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind::ChunkTree:
-            pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
-        case ChunkKind::ChunkArray:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayPointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
-        case ChunkKind::ChunkArrayTree:
-            return reinterpret_cast<ChunkArray_t&>(reinterpret_cast<KChunkArrayTreePointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::Chunk:
+            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+        case ContainerKind::ChunkTree:
+            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+        case ContainerKind::ChunkArray:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayPointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::ChunkArrayTree:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayTreePointerT<TBase, ChunkPointerElement_t>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(ChunkArray_t*)nullptr);
+        pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
     }
 }
