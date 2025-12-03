@@ -55,6 +55,12 @@ namespace PNC
     using KChunkArrayT = DBucketBarrel<DOwn<DBarrelPointer<KChunkArrayPointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>>;
 
 
+//    template<typename TChunkStructure>
+//    using KChunkTreePointer2T =
+//        DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
+//        DTreePointer<
+//        DKind<
+//        Container<TChunkStructure>>>>>;
 
     template<typename TChunkStructure>
     using KChunkTreePointerT = 

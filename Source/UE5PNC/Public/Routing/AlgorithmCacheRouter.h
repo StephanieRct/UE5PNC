@@ -147,6 +147,8 @@ namespace PNC::Routing
         AlgorithmCacheRouterT(const AlgorithmCacheRouterT&) = delete;
         AlgorithmCacheRouterT& operator=(const AlgorithmCacheRouterT&) = delete;
 
+        AlgorithmCacheRouterT(AlgorithmCacheRouterT&&) = default;
+        AlgorithmCacheRouterT& operator=(AlgorithmCacheRouterT&&) = default;
         /// <summary>
         /// A AlgorithmCacheRouterT can be passed as an Algorithm inside a Pipeline so it must
         /// passthrough the algorithm requirements.

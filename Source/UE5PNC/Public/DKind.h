@@ -25,10 +25,8 @@ namespace PNC
     struct DPropKind : public TProps
     {
         using Value_t = ContainerKind;
-        
         ContainerKind Kind;
         ContainerKind GetChunkKind() const { return Kind; }
-
         DPropKind(const TProps& props, const ContainerKind kind)
             : TProps(props)
             , Kind(kind)
@@ -89,6 +87,7 @@ namespace PNC
         {
             return Kind;
         }
+        const ChunkStructure_t& GetStructure()const;
 
         bool IsTree()const
         {
