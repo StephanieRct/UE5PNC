@@ -20,7 +20,7 @@ namespace PNC
 
         using Node_t = typename ChunkPointer_t::Node_t;
 
-        using ChunkPointerInternal_t = ChunkPointer_t;
+        using ChunkPointerInternal_t = typename ChunkPointer_t::ChunkPointerInternal_t;
 
     protected:
         ChunkPointer_t Chunk;
@@ -166,8 +166,8 @@ namespace PNC
         }
 
 
-        static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return a.Chunk; }
-        static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return a.Chunk; }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return ChunkPointer_t::GetInternalChunk(a.Chunk); }
+        static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return ChunkPointer_t::GetInternalChunk(a.Chunk); }
 
     protected:
 

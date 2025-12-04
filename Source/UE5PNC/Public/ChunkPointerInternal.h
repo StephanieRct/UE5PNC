@@ -202,4 +202,43 @@ namespace PNC
         }
 
     };
+
+    template<typename TChunkStructure>
+    struct ChunkPointerProtectedT : protected ChunkPointerInternalT<TChunkStructure>
+    {
+    public:
+
+        using Base_t = ChunkPointerInternalT<TChunkStructure>;
+        using Self_t = ChunkPointerProtectedT<TChunkStructure>;
+        using typename Base_t::ChunkStructure_t;
+        using typename Base_t::Size_t;
+        using typename Base_t::ComponentType_t;
+        using typename Base_t::Node_t;
+        using ChunkPointerInternal_t = typename Base_t::ChunkPointerInternal_t;
+
+        using Base_t::Base_t;
+
+        using Base_t::IsVoid;
+        using Base_t::IsStruct;
+        using Base_t::IsNull;
+        using Base_t::IsData;
+        using Base_t::IsVoidNull;
+        using Base_t::IsVoidData;
+        using Base_t::IsStructNull;
+        using Base_t::IsStructData;
+        using Base_t::IsSameStructure;
+        using Base_t::IsSameData;
+        using Base_t::GetInternalChunk;
+        using Base_t::GetStructure;
+        using Base_t::GetNodeCount;
+        using Base_t::GetNodeCapacity;
+        using Base_t::GetChunkCount;
+        using Base_t::GetChunkCapacity;
+        using Base_t::GetComponentData;
+
+        static bool IsSameStructure(const Self_t& a, const Self_t& b) { return Base_t::IsSameStructure(a, b); }
+        static bool IsSameData(const Self_t& a, const Self_t& b) { return Base_t::IsSameData(a, b); }
+        static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return Base_t::GetInternalChunk(a); }
+        static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return Base_t::GetInternalChunk(a); }
+    };
 }

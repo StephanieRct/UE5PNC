@@ -3,8 +3,6 @@
 
 #pragma once
 #include "common.h"
-#include "Components.h"
-#include "DKind.h"
 #include "ChunkTreeNode.h"
 
 namespace PNC

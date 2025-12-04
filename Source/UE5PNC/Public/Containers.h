@@ -81,7 +81,7 @@ namespace PNC
     //  ---------------
     template<typename TChunkStructure>
     using ChunkPointerT = 
-              DChunkPointer< ChunkPointerInternalT<TChunkStructure>, 
+              DChunkPointer< ChunkPointerProtectedT<TChunkStructure>,
               Container<TChunkStructure>>;
     template<typename TChunkStructure>
     using ChunkT = 

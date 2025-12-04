@@ -22,7 +22,8 @@
 #pragma once
 #include "common.h"
 #include "Containers.h"
-
+#include "DKind.h"
+#include "DOfKind.h"
 #include "DTreePointer.h"
 
 
