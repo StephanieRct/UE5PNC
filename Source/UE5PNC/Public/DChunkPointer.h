@@ -183,10 +183,11 @@ namespace PNC
         {
             pnc_assert(container.IsStruct());
             typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(container);
-            internalChunk.ComponentData = (void**)pnc_alloc(internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            internalChunk.ComponentDataArray = (void**)pnc_alloc(internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
+        /// Free a container's ComponentDataArray
         /// Notes:
         ///     Called by derived structs
         /// </summary>
@@ -195,13 +196,14 @@ namespace PNC
         {
             pnc_assert(container.IsStruct());
             typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(container);
-            pnc_free_clean(internalChunk.ComponentData, internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            pnc_free_clean(internalChunk.ComponentDataArray, internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
+        /// Allocate and contruct all components in the chunk for props.GetNodeCount() nodes
         /// Notes:
         ///     Called by derived structs
-        ///     Does not set the NodeCapacity nor NodeCount on container. It only allocate, construct and set componentData
+        ///     Does not set the NodeCapacity nor NodeCount on container. It only allocate, construct and set componentDataArray
         /// </summary>
         template<typename TContainer, typename TProps>
         static void AllocateConstruct(TContainer& container, const TProps& props)
@@ -298,7 +300,7 @@ namespace PNC
         static void FreeDestruct(TContainer& container, const NodeCapacityT<Size_t> nodeCapacity,   const NodeCountT<Size_t> nodeCount,  
                                                         const ChunkCapacityT<Size_t> chunkCapacity, const ChunkCountT<Size_t> chunkCount)
         {
-            void** const componentDataArrayTo = TContainer::GetInternalChunk(container).ComponentData;
+            void** const componentDataArrayTo = TContainer::GetInternalChunk(container).ComponentDataArray;
             const ChunkStructure_t& structure = container.GetStructure();
             auto componentCount = structure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)

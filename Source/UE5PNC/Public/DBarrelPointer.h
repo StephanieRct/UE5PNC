@@ -133,7 +133,7 @@ namespace PNC
         //void** GetComponentDataArrayForChunk(Size_t chunkIndex)
         //{
         //    auto& chunk = GetInternalChunk(*this);
-        //    return &chunk.ComponentData[chunkIndex * chunk.Structure->Components.GetSize()];
+        //    return &chunk.ComponentDataArray[chunkIndex * chunk.Structure->Components.GetSize()];
         //}
 
     };

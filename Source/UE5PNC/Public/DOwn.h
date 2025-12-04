@@ -89,9 +89,9 @@ namespace PNC
                 if (chunkFrom.IsData() && IsSameStructure(*this, chunkFrom))
                 {
                     ReallocateCopy(*this, chunkFrom);
-                    void** const keepComponentDataArray = GetInternalChunk(*this).ComponentData;
+                    void** const keepComponentDataArray = GetInternalChunk(*this).ComponentDataArray;
                     Base_t::operator=(chunkFrom);
-                    GetInternalChunk(*this).ComponentData = keepComponentDataArray;
+                    GetInternalChunk(*this).ComponentDataArray = keepComponentDataArray;
                     return *this;
                 }
                 else

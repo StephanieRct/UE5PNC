@@ -94,7 +94,7 @@ namespace PNC
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
             pnc_assert(!internalChunk.IsNull());
-            return &internalChunk.ComponentData[chunkIndex * internalChunk.Structure->GetComponentCount()];
+            return &internalChunk.ComponentDataArray[chunkIndex * internalChunk.Structure->GetComponentCount()];
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace PNC
         //    for (Size_t i = 0; i < chunkCapacity; ++i)
         //    {
         //        typename TChunk::ChunkPointerElementInternal_t& internalChunkElement = TChunk::GetInternalChunkElement(chunks[i]);
-        //        internalChunkElement.ComponentData = &internalChunk.ComponentData[i * componentCount];
+        //        internalChunkElement.ComponentDataArray = &internalChunk.ComponentDataArray[i * componentCount];
         //    }
 
         //}
@@ -148,7 +148,7 @@ namespace PNC
         {
             typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
             typename TChunk::ChunkPointerElementInternal_t& internalChunkElement = TChunk::GetInternalChunkElement(chunks[chunkIndex]);
-            internalChunkElement.ComponentData = &internalChunk.ComponentData[chunkIndex * componentCount];
+            internalChunkElement.ComponentDataArray = &internalChunk.ComponentDataArray[chunkIndex * componentCount];
         }
 
     public:
@@ -183,11 +183,11 @@ namespace PNC
             typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
             const ChunkStructure_t& structure = chunk.GetStructure();
             const Size_t componentCount = structure.GetComponentCount();
-            SetComponentDataArrayValues(structure, internalChunk.ComponentData, componentCount,
+            SetComponentDataArrayValues(structure, internalChunk.ComponentDataArray, componentCount,
                 /*elementIndex*/elementIndex, 
                 /*firstNodeIndex*/ firstNodeInArray, 
                 /*firstChunkIndex*/elementIndex);
-            void** elementComponentData = &internalChunk.ComponentData[elementIndex * componentCount];
+            void** elementComponentData = &internalChunk.ComponentDataArray[elementIndex * componentCount];
             new(&Chunks[elementIndex]) ChunkPointerElement_t(&structure, nodeCount, elementComponentData);
         }
 
@@ -207,7 +207,7 @@ namespace PNC
             const ChunkStructure_t* structure = &chunk.GetStructure();
             const Size_t componentCount = structure->GetComponentCount();
 
-            MatchComponentDataArrayValues(internalChunkTo.ComponentData, internalChunkFrom.ComponentData, chunkCountFrom, componentCount);
+            MatchComponentDataArrayValues(internalChunkTo.ComponentDataArray, internalChunkFrom.ComponentDataArray, chunkCountFrom, componentCount);
 
             for (Size_t iChunk = 0; iChunk < chunkCountFrom; ++iChunk)
             {
@@ -261,7 +261,7 @@ namespace PNC
 
                 Chunks = chunks;
             }
-            MatchComponentDataArrayValues(internalChunkTo.ComponentData, internalChunkFrom.ComponentData, chunkCountFrom, componentCount);
+            MatchComponentDataArrayValues(internalChunkTo.ComponentDataArray, internalChunkFrom.ComponentDataArray, chunkCountFrom, componentCount);
         }
 
 

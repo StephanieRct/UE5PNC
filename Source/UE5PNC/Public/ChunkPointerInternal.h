@@ -25,14 +25,14 @@ namespace PNC
 
     public:
         /// <summary>
-        /// ChunkStructure used to create the structure of what ComponentData points to.
+        /// ChunkStructure used to create the structure of what ComponentDataArray points to.
         /// </summary>
         const ChunkStructure_t* Structure;
 
         /// <summary>
         /// Points to an array of component data pointers.
         /// </summary>
-        void** ComponentData;
+        void** ComponentDataArray;
 
         /// <summary>
         /// Number of nodes (and not in bytes) all component data array contains
@@ -45,7 +45,7 @@ namespace PNC
         /// </summary>
         ChunkPointerInternalT()
             : Structure(nullptr)
-            , ComponentData(nullptr)
+            , ComponentDataArray(nullptr)
             , NodeCount(0)
         {
         }
@@ -53,7 +53,7 @@ namespace PNC
         template<typename TProps>
         ChunkPointerInternalT(const DPropsTag& tag, const TProps& props)
             : Structure(props.GetStructurePtr())
-            , ComponentData(props.GetComponentDataArray())
+            , ComponentDataArray(props.GetComponentDataArray())
             , NodeCount(props.GetNodeCount())
         {
         }
@@ -63,7 +63,7 @@ namespace PNC
         /// </summary>
         ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure)
             : Structure(chunkStructure)
-            , ComponentData(nullptr)
+            , ComponentDataArray(nullptr)
             , NodeCount(0)
         {
         }
@@ -73,7 +73,7 @@ namespace PNC
         /// </summary>
         ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
             : Structure(chunkStructure)
-            , ComponentData(nullptr)
+            , ComponentDataArray(nullptr)
             , NodeCount(nodeCount)
         {
         }
@@ -83,7 +83,7 @@ namespace PNC
         /// </summary>
         ChunkPointerInternalT(const NodeCountT<Size_t> nodeCount, void** const componentData)
             : Structure(nullptr)
-            , ComponentData(componentData)
+            , ComponentDataArray(componentData)
             , NodeCount(nodeCount)
         {
         }
@@ -96,31 +96,31 @@ namespace PNC
         /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
         ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, void** const componentData)
             : Structure(chunkStructure)
-            , ComponentData(componentData)
+            , ComponentDataArray(componentData)
             , NodeCount(nodeCount)
         {
         }
 
         ChunkPointerInternalT(Self_t&& o)
             : Structure(o.Structure)
-            , ComponentData(o.ComponentData)
+            , ComponentDataArray(o.ComponentDataArray)
             , NodeCount(o.NodeCount)
         {
             o.Structure = nullptr;
-            o.ComponentData = nullptr;
+            o.ComponentDataArray = nullptr;
             o.NodeCount = 0;
         }
 
         Self_t& operator=(Self_t&& o)
         {
             auto tmpStructure = o.Structure;
-            auto tmpComponentData = o.ComponentData;
+            auto tmpComponentData = o.ComponentDataArray;
             auto tmpNodeCount = o.NodeCount;
             o.Structure = nullptr;
-            o.ComponentData = nullptr;
+            o.ComponentDataArray = nullptr;
             o.NodeCount = 0;
             Structure = tmpStructure;
-            ComponentData = tmpComponentData;
+            ComponentDataArray = tmpComponentData;
             NodeCount = tmpNodeCount;
             return *this;
         }
@@ -132,19 +132,19 @@ namespace PNC
         ~ChunkPointerInternalT()
         {
             pnc_clean(Structure);
-            pnc_clean(ComponentData);
+            pnc_clean(ComponentDataArray);
             pnc_clean(NodeCount);
         }
 #endif
     public:
         bool IsVoid()const { return Structure == nullptr; }
         bool IsStruct()const { return Structure != nullptr; }
-        bool IsNull()const { return ComponentData == nullptr; }
-        bool IsData()const { return ComponentData != nullptr; }
-        bool IsVoidNull()const { return Structure == nullptr && ComponentData == nullptr; }
-        bool IsVoidData()const { return Structure == nullptr && ComponentData != nullptr; }
-        bool IsStructNull()const { return Structure != nullptr && ComponentData == nullptr; }
-        bool IsStructData()const { return Structure != nullptr && ComponentData != nullptr; }
+        bool IsNull()const { return ComponentDataArray == nullptr; }
+        bool IsData()const { return ComponentDataArray != nullptr; }
+        bool IsVoidNull()const { return Structure == nullptr && ComponentDataArray == nullptr; }
+        bool IsVoidData()const { return Structure == nullptr && ComponentDataArray != nullptr; }
+        bool IsStructNull()const { return Structure != nullptr && ComponentDataArray == nullptr; }
+        bool IsStructData()const { return Structure != nullptr && ComponentDataArray != nullptr; }
 
         /// <summary>
         /// Test if 2 chunk have the same ChunkStructure
@@ -153,7 +153,7 @@ namespace PNC
         /// <param name="b"></param>
         /// <returns></returns>
         static bool IsSameStructure(const Self_t& a, const Self_t& b) { return a.Structure == b.Structure; }
-        static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentData == b.ComponentData; }
+        static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentDataArray == b.ComponentDataArray; }
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return a; }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return a; }
         /// <summary>
@@ -184,7 +184,7 @@ namespace PNC
         void* GetComponentData(const Size_t componentTypeIndexInChunk)
         {
             pnc_assert(!IsNull());
-            return this->ComponentData[componentTypeIndexInChunk];
+            return this->ComponentDataArray[componentTypeIndexInChunk];
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace PNC
         const void* GetComponentData(const Size_t componentTypeIndexInChunk)const
         {
             pnc_assert(!IsNull());
-            return this->ComponentData[componentTypeIndexInChunk];
+            return this->ComponentDataArray[componentTypeIndexInChunk];
         }
 
     };

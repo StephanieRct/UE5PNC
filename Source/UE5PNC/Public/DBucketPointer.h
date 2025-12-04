@@ -294,7 +294,7 @@ namespace PNC
             const auto nodeCapacity = container.GetNodeCapacity();
             const auto chunkCount = container.GetChunkCount();
             const auto chunkCapacity = container.GetChunkCapacity();
-            void** const componentDataArrayTo = TContainer::GetInternalChunk(container).ComponentData;
+            void** const componentDataArrayTo = TContainer::GetInternalChunk(container).ComponentDataArray;
             const ChunkStructure_t& structure = container.GetStructure();
             auto componentCount = structure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)

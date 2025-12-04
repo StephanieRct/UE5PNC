@@ -111,7 +111,7 @@ namespace PNC
             pnc_assert(chunk.IsStruct());
             typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
             const ChunkCapacityT<Size_t> chunkCapacity = chunk.GetChunkCapacity();
-            internalChunk.ComponentData = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            internalChunk.ComponentDataArray = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace PNC
             pnc_assert(chunk.IsStruct());
             typename TChunk::ChunkPointerInternal_t& internalChunk = TChunk::GetInternalChunk(chunk);
             ChunkCapacityT<Size_t> chunkCapacity = chunk.GetChunkCapacity();
-            pnc_free_clean(internalChunk.ComponentData, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            pnc_free_clean(internalChunk.ComponentDataArray, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
 
@@ -240,7 +240,7 @@ namespace PNC
             for (Size_t i = 0; i < componentCount; ++i)
             {
                 const ComponentType_t& componentType = *internalChunkArray.Structure->Components[i];
-                internalChunkElement.ComponentData[i] = componentType.Forward(internalChunkArray.ComponentData[i], nodeFirstIndex, chunkIndex);
+                internalChunkElement.ComponentDataArray[i] = componentType.Forward(internalChunkArray.ComponentDataArray[i], nodeFirstIndex, chunkIndex);
             }
             
             if(nodeCount > 0)
@@ -294,7 +294,7 @@ namespace PNC
                 // Copy chunk pointer element using copy asignment, will point to the data in the chunkArrayFrom
                 elementTo = elementFrom;
                 // point back to data owned by chunkArrayTo 
-                internalElementTo.ComponentData = GetComponentDataArrayForChunk(elementIndexTo);
+                internalElementTo.ComponentDataArray = GetComponentDataArrayForChunk(elementIndexTo);
 
                 // Copy Nodes
                 if (nodeCountFrom > 0)
@@ -325,7 +325,7 @@ namespace PNC
 
         //    // Move Chunk
         //    chunkElementTo = std::move(chunkElementFrom);
-        //    internalChunkElementTo.ComponentData = GetComponentDataArrayForChunk(chunkIndexTo);
+        //    internalChunkElementTo.ComponentDataArray = GetComponentDataArrayForChunk(chunkIndexTo);
 
         //    // Move Nodes
         //    if (nodeCountFrom > 0)

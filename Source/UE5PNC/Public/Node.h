@@ -387,7 +387,7 @@ namespace PNC
             pnc_assert(firstChunkIndex >= 0);
             pnc_assert(chunkCount >= 0);
 
-            void** const componentDataArrayTo = TContainer::GetInternalChunk(container).ComponentData;
+            void** const componentDataArrayTo = TContainer::GetInternalChunk(container).ComponentDataArray;
 
             if (nodeCount == 0)
             {
@@ -425,7 +425,7 @@ namespace PNC
             pnc_assert(nodeCapacity >= nodeCount);
             pnc_assert(chunkCapacity >= chunkCount);
 
-            void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerTo).ComponentData;
+            void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerTo).ComponentDataArray;
 
             const ChunkStructure_t& chunkStructure = containerTo.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
@@ -475,7 +475,7 @@ namespace PNC
             const auto chunkCountTo      = containerToReallocate.GetChunkCount();
             const auto chunkCapacityTo   = containerToReallocate.GetChunkCapacity();
             const auto chunkCapacityFrom = containerToReallocate.GetChunkCapacity();
-            void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerToReallocate).ComponentData;
+            void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerToReallocate).ComponentDataArray;
             const ChunkStructure_t& structure = containerToReallocate.GetStructure();
             const auto componentCount = structure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)
@@ -539,7 +539,7 @@ namespace PNC
             const auto chunkCountTo      = containerToReallocate.GetChunkCount();
             const auto chunkCapacityTo   = containerToReallocate.GetChunkCapacity();
             const auto chunkCapacityFrom = containerToReallocate.GetChunkCapacity();
-            void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerToReallocate).ComponentData;
+            void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerToReallocate).ComponentDataArray;
             const ChunkStructure_t& structure = containerToReallocate.GetStructure();
             const auto componentCount = structure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)
