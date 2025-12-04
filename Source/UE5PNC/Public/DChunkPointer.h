@@ -174,7 +174,7 @@ namespace PNC
         }
 
         /// <summary>
-        /// Allocate and contruct all components in the chunk for props.GetNodeCount() nodes
+        /// Allocate and contruct all components in the chunk for props.GetNodeCount() nodes.
         /// Notes:
         ///     container must be StructData.
         ///     Does not set the NodeCapacity nor NodeCount on container. 
@@ -200,21 +200,28 @@ namespace PNC
         ///     containerTo and containerFrom CANNOT be the same container
         /// </summary>
         template<typename TContainer>
-        static void AllocateCopy(TContainer& containerTo, const TContainer& containerFrom, const NodeCountT<Size_t> nodeCount)
+        static void AllocateCopy(TContainer& containerTo, const TContainer& containerFrom, 
+                                 const NodeCapacityT <Size_t> nodeCapacity, 
+                                 const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(containerTo.IsStructData());
             pnc_assert(containerFrom.IsStructData());
             pnc_assert(!IsSameData(containerTo, containerFrom));
+            const auto nodeCount = containerFrom.GetNodeCount();
+            const auto chunkCount = containerFrom.GetChunkCount();
             Node_t::AllocateCopyConstructAllComponentsForwardUnsafe(
-                        containerTo,   0/*:firstNodeIndexTo*/,         0/*:firstChunkIndexTo*/, 
-                        containerFrom, 0/*:firstNodeIndexFrom*/,       0/*:firstChunkIndexFrom*/,
-                                       nodeCount,                      PropChunkCount   <Size_t>(1),
-                                       PropCountToCapacity(nodeCount), PropChunkCapacity<Size_t>(1));
+                        containerTo,   0/*:firstNodeIndexTo*/,   0/*:firstChunkIndexTo*/, 
+                        containerFrom, 0/*:firstNodeIndexFrom*/, 0/*:firstChunkIndexFrom*/,
+                                       nodeCount,                chunkCount,
+                                       nodeCapacity,             chunkCapacity);
         }
+
         template<typename TContainer>
         static void AllocateCopy(TContainer& containerTo, const TContainer& containerFrom)
         {
-            AllocateCopy(containerTo, containerFrom, containerFrom.GetNodeCount());
+            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto chunkCapacity = containerFrom.GetChunkCapacity();
+            AllocateCopy(containerTo, containerFrom, nodeCapacity, chunkCapacity);
         }
 
         /// <summary>

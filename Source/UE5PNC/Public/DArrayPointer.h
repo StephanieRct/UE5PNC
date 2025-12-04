@@ -106,95 +106,102 @@ namespace PNC
         }
 
         /// <summary>
+        /// Allocate all components in the array for props.GetNodeCapacity() nodes and props.GetChunkCapacity() chunks.
+        /// Contruct all components in the array for props.GetNodeCount() nodes and props.GetChunkCount() chunks.
         /// Notes:
-        ///     Called by derived structs
+        ///     container must be StructData.
+        ///     Does not set the NodeCapacity, NodeCount, ChunkCapacity nor ChunkCount in the container. 
+        ///     Will Set the chunk's ComponentDataArray values to the newly allocated component data.
         /// </summary>
         template<typename TContainer, typename TProps>
         static void AllocateConstruct(TContainer& container, const TProps& props)
         {
-            const auto nodeCapacity = props.GetNodeCapacity();
-            const auto nodeCount = props.GetNodeCount();
+            const auto nodeCapacity  = props.GetNodeCapacity();
+            const auto nodeCount     = props.GetNodeCount();
             const auto chunkCapacity = props.GetChunkCapacity();
-            const auto chunkCount = props.GetChunkCount();
-            Node_t::AllocateConstructAllComponentsUnsafe(container, 0, 0, nodeCount, chunkCount, nodeCapacity, chunkCapacity);
-            container.Array.Allocate (container, chunkCapacity, nodeCapacity);
+            const auto chunkCount    = props.GetChunkCount();
+            Node_t::AllocateConstructAllComponentsUnsafe(
+                        container, 0/*:firstNodeIndex*/, 0/*:firstChunkIndex*/, 
+                                   nodeCount,            chunkCount, 
+                                   nodeCapacity,         chunkCapacity);
+            container.Array.Allocate(container, chunkCapacity, nodeCapacity);
             if (chunkCount > 0)
             {
                 const NodeCountPerChunkT<Size_t> nodeCountPerChunk = props.GetNodeCountPerChunk();
                 for (Size_t i = 0; i < chunkCount; ++i)
                     container.Array.ConstructElement(container, 
-                        /*elementIndex:*/i,
-                        /*firstNodeInArray:*/i * nodeCountPerChunk,
-                        /*nodeCount:*/ChunkCountT<Size_t>(1) * nodeCountPerChunk);
+                                        /*elementIndex:*/    i,
+                                        /*firstNodeInArray:*/i * nodeCountPerChunk,
+                                        /*nodeCount:*/       ChunkCountT<Size_t>(1) * nodeCountPerChunk);
             }
-
         }
 
         /// <summary>
-        /// Notes:
-        ///     Called by derived structs
+        /// Destruct all components and free their memory.
         /// </summary>
         template<typename TContainer>
         static void FreeDestruct(TContainer& container)
         {
             container.Array.Destruct(container);
             container.Array.Deallocate(container);
-            const auto nodeCapacity = container.GetNodeCapacity();
-            const auto nodeCount = container.GetNodeCount();
+            const auto nodeCapacity  = container.GetNodeCapacity();
+            const auto nodeCount     = container.GetNodeCount();
             const auto chunkCapacity = container.GetChunkCapacity();
-            const auto chunkCount = container.GetChunkCount();
+            const auto chunkCount    = container.GetChunkCount();
             Base_t::FreeDestruct(container, nodeCapacity, nodeCount, chunkCapacity, chunkCount);
         }
 
         /// <summary>
+        /// Allocate all components in the array and copy components' data from a different array container with the same structure.
         /// Notes:
-        ///     Called by derived structs
-        ///     container and chunkFrom CANNOT be the same
+        ///     containerTo and containerFrom must be StructData of the same structure.
+        ///     containerTo and containerFrom CANNOT be the same container
+        ///     Does not set the NodeCapacity, NodeCount, ChunkCapacity, ChunkCount on container.
+        ///     Will Set the chunk's ComponentDataArray values to the newly allocated component data.
         /// </summary>
         template<typename TContainer>
-        static void AllocateCopy(TContainer& container, const TContainer& chunkFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
+        static void AllocateCopy(TContainer& containerTo, const TContainer& containerFrom)
         {
-            pnc_assert(!IsSameData(container, chunkFrom));
-            Base_t::AllocateCopy(container, chunkFrom,                  newNodeCapacity, newChunkCapacity);
-            container.Array.Allocate      (container,                             newNodeCapacity, newChunkCapacity);
-            container.Array.ConstructCopy (container, chunkFrom, chunkFrom.Array, newNodeCapacity, newChunkCapacity);
+            pnc_assert(!IsSameData(containerTo, containerFrom));
+            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto chunkCapacity = containerFrom.GetChunkCapacity();
+            Base_t::AllocateCopy           (containerTo, containerFrom,                      nodeCapacity, chunkCapacity);
+            containerTo.Array.Allocate     (containerTo,                                     nodeCapacity, chunkCapacity);
+            containerTo.Array.ConstructCopy(containerTo, containerFrom, containerFrom.Array, nodeCapacity, chunkCapacity);
         }
-        template<typename TContainer>
-        static void AllocateCopy(TContainer& container, const TContainer& chunkFrom)
-            { AllocateCopy(container, chunkFrom, chunkFrom.GetNodeCapacity(), chunkFrom.GetChunkCapacity()); }
 
 
         /// <summary>
         /// Notes:
         ///     Called by derived structs
-        ///     chunkToReallocate and chunkFrom CANNOT be the same
+        ///     containerToReallocate and containerFrom CANNOT be the same
         /// </summary>
         template<typename TContainer>
-        static void ReallocateCopy(TContainer& chunkToReallocate, const TContainer& chunkFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
+        static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
         {
-            pnc_assert(!IsSameData(chunkToReallocate, chunkFrom));
-            Base_t::ReallocateCopy(chunkToReallocate, chunkFrom, newNodeCapacity, newChunkCapacity);
-            chunkToReallocate.Array.ReallocateCopy(chunkToReallocate, chunkFrom, chunkFrom.Array, newNodeCapacity, newChunkCapacity);
+            pnc_assert(!IsSameData(containerToReallocate, containerFrom));
+            Base_t::ReallocateCopy(containerToReallocate, containerFrom, newNodeCapacity, newChunkCapacity);
+            containerToReallocate.Array.ReallocateCopy(containerToReallocate, containerFrom, containerFrom.Array, newNodeCapacity, newChunkCapacity);
         }
         template<typename TContainer>
-        static void ReallocateCopy(TContainer& chunkToReallocate, const TContainer& chunkFrom)
-            { return ReallocateCopy(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity(), chunkFrom.GetChunkCapacity()); }
+        static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom)
+            { return ReallocateCopy(containerToReallocate, containerFrom, containerFrom.GetNodeCapacity(), containerFrom.GetChunkCapacity()); }
 
 
         /// <summary>
         /// Notes:
         ///     Called by derived structs
-        ///     chunkToReallocate and chunkFrom CAN be the same
+        ///     containerToReallocate and containerFrom CAN be the same
         /// </summary>
         template<typename TContainer>
-        static void ReallocateMove(TContainer& chunkToReallocate, TContainer& chunkFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
+        static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
         {
-            Base_t::ReallocateMove(chunkToReallocate, chunkFrom, newNodeCapacity, newChunkCapacity);
-            chunkToReallocate.Array.ReallocateMove(chunkToReallocate, chunkFrom, chunkFrom.Array, newNodeCapacity, newChunkCapacity);
+            Base_t::ReallocateMove(containerToReallocate, containerFrom, newNodeCapacity, newChunkCapacity);
+            containerToReallocate.Array.ReallocateMove(containerToReallocate, containerFrom, containerFrom.Array, newNodeCapacity, newChunkCapacity);
         }
         template<typename TContainer>
-        static void ReallocateMove(TContainer& chunkToReallocate, TContainer& chunkFrom)
-            { return ReallocateMove(chunkToReallocate, chunkFrom, chunkFrom.GetNodeCapacity(), chunkFrom.GetChunkCapacity()); }
+        static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom)
+            { return ReallocateMove(containerToReallocate, containerFrom, containerFrom.GetNodeCapacity(), containerFrom.GetChunkCapacity()); }
 
 
     public:

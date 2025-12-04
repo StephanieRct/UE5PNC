@@ -399,6 +399,7 @@ namespace PNC
             }
         }
 
+        // TODO capacity parameters before counts
         /// <summary>
         /// Allocate all components in the chunk and copy components' data from a different container with the same structure.
         /// </summary>
