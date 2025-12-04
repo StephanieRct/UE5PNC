@@ -366,20 +366,15 @@ namespace PNC
 
 
 
-
-
-
-
-
-
-
-
         
+        /// <summary>
+        /// Allocate and construct all components in a chunk.
+        /// </summary>
         template<typename TContainer>
-        static void AllocateConstructAllComponentsUnsafe(TContainer& container,
-                                                    const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                    const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount,
-                                                    const NodeCapacityT<Size_t> nodeCapacity,   const ChunkCapacityT<Size_t> chunkCapacity)
+        static void AllocateConstructAllComponentsUnsafe(
+                        TContainer& container, const               Size_t  firstNodeIndex, const                Size_t  firstChunkIndex,
+                                               const NodeCountT   <Size_t> nodeCount,      const ChunkCountT   <Size_t> chunkCount,
+                                               const NodeCapacityT<Size_t> nodeCapacity,   const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -404,13 +399,15 @@ namespace PNC
             }
         }
 
-
-
+        /// <summary>
+        /// Allocate all components in the chunk and copy components' data from a different container with the same structure.
+        /// </summary>
         template<typename TContainerTo, typename TContainerFrom>
-        static void AllocateCopyConstructAllComponentsForwardUnsafe(TContainerTo&   containerTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                                              const TContainerFrom& containerFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                              const NodeCountT<Size_t> nodeCount,    const ChunkCountT<Size_t> chunkCount, 
-                                                              const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity)
+        static void AllocateCopyConstructAllComponentsForwardUnsafe(
+                              TContainerTo&   containerTo,   const               Size_t  firstNodeIndexTo,   const                Size_t  firstChunkIndexTo,
+                        const TContainerFrom& containerFrom, const               Size_t  firstNodeIndexFrom, const                Size_t  firstChunkIndexFrom,
+                                                             const NodeCountT   <Size_t> nodeCount,          const ChunkCountT   <Size_t> chunkCount, 
+                                                             const NodeCapacityT<Size_t> nodeCapacity,       const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!containerTo.IsNull());
             pnc_assert(!containerFrom.IsNull());
@@ -424,9 +421,7 @@ namespace PNC
             pnc_assert(chunkCount >= 0);
             pnc_assert(nodeCapacity >= nodeCount);
             pnc_assert(chunkCapacity >= chunkCount);
-
             void** const componentDataArrayTo = TContainerTo::GetInternalChunk(containerTo).ComponentDataArray;
-
             const ChunkStructure_t& chunkStructure = containerTo.GetStructure();
             Size_t componentCount = chunkStructure.GetComponentCount();
             for (Size_t i = 0; i < componentCount; ++i)
@@ -434,9 +429,9 @@ namespace PNC
                 const ComponentType_t& componentType = chunkStructure.GetComponentType(i);
                 componentDataArrayTo[i] = (void*)pnc_alloc(componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
                 componentType.CopyConstructComponentForwardUnsafe(
-                    componentDataArrayTo[i],       firstNodeIndexTo,   firstChunkIndexTo,
+                    componentDataArrayTo[i],           firstNodeIndexTo,   firstChunkIndexTo,
                     containerFrom.GetComponentData(i), firstNodeIndexFrom, firstChunkIndexFrom, 
-                    nodeCount, chunkCount);
+                                                       nodeCount,          chunkCount);
             }
         }
 
@@ -450,10 +445,10 @@ namespace PNC
         /// </summary>
         template<typename TContainerTo, typename TContainerFrom>
         static void ReallocateCopyAllComponentsForwardUnsafe(
-                     TContainerTo&   containerToReallocate, const Size_t firstNodeIndexTo,            const Size_t firstChunkIndexTo,
-               const TContainerFrom& containerFrom,         const Size_t firstNodeIndexFrom,          const Size_t firstChunkIndexFrom,
-                                                            const NodeCountT<Size_t> nodeCountToCopy, const ChunkCountT<Size_t> chunkCountToCopy, 
-                                                            const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity)
+                              TContainerTo&   containerToReallocate, const               Size_t firstNodeIndexTo,   const                Size_t firstChunkIndexTo,
+                        const TContainerFrom& containerFrom,         const               Size_t firstNodeIndexFrom, const                Size_t firstChunkIndexFrom,
+                                                                     const NodeCountT   <Size_t> nodeCountToCopy,   const ChunkCountT   <Size_t> chunkCountToCopy, 
+                                                                     const NodeCapacityT<Size_t> nodeCapacity,      const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!containerToReallocate.IsNull());
             pnc_assert(!containerFrom.IsNull());
@@ -508,17 +503,20 @@ namespace PNC
         /// <summary>
         /// Reallocate containerToReallocate to fit the nodes moved from containerFrom
         /// Notes:
+        ///     containerToReallocate and containerFrom must have the same structure
         ///     containerToReallocate CAN be the same as containerFrom 
         ///     Will destruct and free (or reuse) data from containerToReallocate.
         ///     Does not set NodeCapacity nor NodeCount on containerToReallocate.
-        ///     newNodeCapacity must be greater or equal to containerFrom.GetNodeCapacity()
+        ///     nodeCountToMove must be less or equal to nodeCapacity.
+        ///     chunkCountToMove must be less or equal to chunkCapacity.
+        ///     firstNodeIndexFrom + nodeCountToMove must be less or equal to containerFrom.GetNodeCount()
         /// </summary>
         template<typename TContainerTo, typename TContainerFrom>
         static void ReallocateMoveAllComponentsForwardUnsafe(
-                        TContainerTo&   containerToReallocate, const Size_t firstNodeIndexTo,            const Size_t firstChunkIndexTo,
-                        TContainerFrom& containerFrom,         const Size_t firstNodeIndexFrom,          const Size_t firstChunkIndexFrom,
-                                                               const NodeCountT<Size_t> nodeCountToMove, const ChunkCountT<Size_t> chunkCountToMove,                                                              
-                                                               const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity)
+                        TContainerTo&   containerToReallocate, const               Size_t  firstNodeIndexTo,   const                Size_t firstChunkIndexTo,
+                        TContainerFrom& containerFrom,         const               Size_t  firstNodeIndexFrom, const                Size_t firstChunkIndexFrom,
+                                                               const NodeCountT   <Size_t> nodeCountToMove,    const ChunkCountT   <Size_t> chunkCountToMove,                                                              
+                                                               const NodeCapacityT<Size_t> nodeCapacity,       const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(!containerToReallocate.IsNull());
             pnc_assert(!containerFrom.IsNull());

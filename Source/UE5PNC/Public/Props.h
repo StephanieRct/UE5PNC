@@ -93,7 +93,7 @@ namespace PNC
         using Self_t = IntProp<TValue, TId>;
 
         TValue Value;
-        IntProp(const TValue value)
+        IntProp(const TValue& value)
             :Value(value)
         {
         }
@@ -233,6 +233,11 @@ namespace PNC
     template<typename TSize> NodeCapacityT<TSize> PropNodeCapacity(const NodeCapacityT<TSize> a) { return a; }
     template<typename TSize> ChunkCountT<TSize> PropChunkCount(const ChunkCountT<TSize> a) { return a; }
     template<typename TSize> ChunkCapacityT<TSize> PropChunkCapacity(const ChunkCapacityT<TSize> a) { return a; }
+
+    template<typename TSize> NodeCountT<TSize> PropNodeCount(const int a) { return NodeCountT<TSize>(a); }
+    template<typename TSize> NodeCapacityT<TSize> PropNodeCapacity(const int a) { return NodeCapacityT<TSize>(a); }
+    template<typename TSize> ChunkCountT<TSize> PropChunkCount(const int a) { return ChunkCountT<TSize>(a); }
+    template<typename TSize> ChunkCapacityT<TSize> PropChunkCapacity(const int a) { return ChunkCapacityT<TSize>(a); }
     //template<typename TSize>
     //NodeCapacityT<TSize> PropArrayToChunk(const ArrayNodeCapacityT<TSize> arrayNodeCapacity)
     //{

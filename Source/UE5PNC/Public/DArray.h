@@ -26,7 +26,6 @@ namespace PNC
         using typename Base_t::Node_t;
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointer_t;
-        using typename Base_t::Chunk_t;
         using typename Base_t::ArrayExtension_t;
         using typename Base_t::ChunkPointerInternal_t;
         using typename Base_t::ChunkPointerElementInternal_t;

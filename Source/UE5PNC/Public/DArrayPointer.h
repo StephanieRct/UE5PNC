@@ -14,16 +14,17 @@ namespace PNC
         using Base_t = TBase;
         using Self_t = DArrayPointer<TArrayExtension, TBase>;
         using ArrayExtension_t = TArrayExtension;
-        using ChunkPointerElement_t = ArrayExtension_t::ChunkPointerElement_t;
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Node_t;
-        using Chunk_t = Self_t;
+
+        using ChunkPointer_t = Self_t;
+        using ChunkPointerElement_t = ArrayExtension_t::ChunkPointerElement_t;
+        using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
 
         // ChunkPointerInternal_t must be the same memory layout as this struct
         using ChunkPointerInternal_t = DArrayPointerInternalT<ArrayExtension_t, typename Base_t::ChunkPointerInternal_t>;
-        using ChunkPointerElementInternal_t = typename ChunkPointerElement_t::ChunkPointerInternal_t;
 
     protected:
         /// <summary>
@@ -34,6 +35,7 @@ namespace PNC
     public:
         DArrayPointer() = default;
 
+    protected:
         template<typename TProps>
         DArrayPointer(const DPropsTag& tag, const TProps& props)
             : Base_t(tag, props)
@@ -62,11 +64,6 @@ namespace PNC
         //}
 
     protected:
-        //DArrayPointerT(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountT<Size_t> nodeCount)
-        //    : Base_t(chunkStructure, nodeCount)
-        //    , Array(chunkCount)
-        //{
-        //}
         //DArrayPointerT(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
         //    : Base_t(chunkStructure, chunkCount * nodeCountPerChunk)
         //    , Array(chunkCount)
@@ -78,17 +75,18 @@ namespace PNC
         /// Number of elements in the array
         /// </summary>
         /// <returns></returns>
-        ChunkCountT<Size_t> GetChunkCount()const { return Array.GetChunkCount(); }
+        ChunkCountT   <Size_t> GetChunkCount   ()const { return Array.GetChunkCount(); }
         ChunkCapacityT<Size_t> GetChunkCapacity()const { return PropCountToCapacity(GetChunkCount()); }
 
 
-        const Chunk_t& GetChunk()const { return *this; }
-        Chunk_t& GetChunk() { return *this; }
+        const ChunkPointer_t& GetChunk()const { return *this; }
+              ChunkPointer_t& GetChunk()      { return *this; }
+
         const ChunkPointerElement_t& GetChunk(const Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
-        ChunkPointerElement_t& GetChunk(const Size_t index) { return Array.GetChunk(GetInternalChunk(*this), index); }
+              ChunkPointerElement_t& GetChunk(const Size_t index)      { return Array.GetChunk(GetInternalChunk(*this), index); }
 
         const ChunkPointerElement_t& operator[](const Size_t index)const { return Array.GetChunk(GetInternalChunk(*this), index); }
-        ChunkPointerElement_t& operator[](const Size_t index) { return Array.GetChunk(GetInternalChunk(*this), index); }
+              ChunkPointerElement_t& operator[](const Size_t index)      { return Array.GetChunk(GetInternalChunk(*this), index); }
         // TODO operator -> and * should return first chunk
 
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& container) { return reinterpret_cast<const ChunkPointerInternal_t&>(Base_t::GetInternalChunk(container)); }
@@ -101,9 +99,8 @@ namespace PNC
         ArrayExtension_t& GetArrayExtension() { return Array; }
 
         /// <summary>
-        /// Notes:
-        ///     Allocates a set of ComponentDataArray (for each component type) for each chunk element in the array.
-        ///     The base chunk array shares the same set of ComponentDataArray as the first chunk element in the array.
+        /// Set a container's ComponentDataArray to an allocated array of void* large enough to fit one per component per chunk (ChunkCapacity) in the container.
+        /// This array is used to store the nodes and chunks component data pointer as void*.
         /// </summary>
         template<typename TChunk>
         static void AllocateComponentDataArray(TChunk& chunk)
@@ -115,8 +112,7 @@ namespace PNC
         }
 
         /// <summary>
-        /// Notes:
-        ///     Called by derived structs
+        /// Free a container's ComponentDataArray
         /// </summary>
         template<typename TChunk>
         static void FreeComponentDataArray(TChunk& chunk)
