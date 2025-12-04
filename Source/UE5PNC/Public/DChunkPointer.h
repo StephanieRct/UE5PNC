@@ -206,6 +206,8 @@ namespace PNC
         {
             pnc_assert(containerTo.IsStructData());
             pnc_assert(containerFrom.IsStructData());
+            pnc_assert(nodeCapacity >= containerFrom.GetNodeCount());
+            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
             pnc_assert(!IsSameData(containerTo, containerFrom));
             const auto nodeCount = containerFrom.GetNodeCount();
             const auto chunkCount = containerFrom.GetChunkCount();
@@ -236,22 +238,31 @@ namespace PNC
         ///     copyNodeCount must be less or equal to containerFrom.GetNodeCount()
         /// </summary>
         template<typename TContainer>
-        static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom, const NodeCountT<Size_t> copyNodeCount)
+        static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom,
+                                   const NodeCapacityT <Size_t> nodeCapacity,
+                                   const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(containerToReallocate.IsStructData());
-            pnc_assert(containerFrom.IsStructData());
-            pnc_assert(copyNodeCount <= containerFrom.GetNodeCount());
-            pnc_assert(!IsSameData(containerToReallocate, containerFrom));
+            pnc_assert(containerFrom        .IsStructData());
+            pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
+            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
+            pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
+            pnc_assert(!IsSameData    (containerToReallocate, containerFrom));
+
+            const auto nodeCount  = containerFrom.GetNodeCount();
+            const auto chunkCount = containerFrom.GetChunkCount();
             Node_t::ReallocateCopyAllComponentsForwardUnsafe(
-                        containerToReallocate, 0/*:firstNodeIndexTo*/,             0/*:firstChunkIndexTo*/,
-                        containerFrom,         0/*:firstNodeIndexFrom*/,           0/*:firstChunkIndexFrom*/,
-                                               copyNodeCount,                      ChunkCountT   <Size_t>(1),
-                                               PropCountToCapacity(copyNodeCount), ChunkCapacityT<Size_t>(1));
+                        containerToReallocate, 0/*:firstNodeIndexTo*/,   0/*:firstChunkIndexTo*/,
+                        containerFrom,         0/*:firstNodeIndexFrom*/, 0/*:firstChunkIndexFrom*/,
+                                               nodeCount,                chunkCount,
+                                               nodeCapacity,             chunkCapacity);
         }
         template<typename TContainer>
         static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom)
         {
-            return ReallocateCopy(containerToReallocate, containerFrom, containerFrom.GetNodeCount());
+            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto chunkCapacity = containerFrom.GetChunkCapacity();
+            return ReallocateCopy(containerToReallocate, containerFrom, nodeCapacity, chunkCapacity);
         }
         
         /// <summary>
@@ -263,23 +274,30 @@ namespace PNC
         ///     containerToReallocate and containerFrom CAN be the same.
         /// </summary>
         template<typename TContainer>
-        static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom, const NodeCountT<Size_t> moveNodeCount)
+        static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom,
+                                   const NodeCapacityT <Size_t> nodeCapacity,
+                                   const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(containerToReallocate.IsStructData());
-            pnc_assert(containerFrom.IsStructData());
+            pnc_assert(containerFrom        .IsStructData());
+            pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
+            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
             pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
-            pnc_assert(moveNodeCount <= containerFrom.GetNodeCount());
-            
+
+            const auto nodeCount  = containerFrom.GetNodeCount();
+            const auto chunkCount = containerFrom.GetChunkCount();
             Node_t::ReallocateMoveAllComponentsForwardUnsafe(
-                        containerToReallocate, 0/*:firstNodeIndexTo*/,             0/*:firstChunkIndexTo*/,
-                        containerFrom,         0/*:firstNodeIndexFrom*/,           0/*:firstChunkIndexFrom*/,
-                                               moveNodeCount,                      ChunkCountT   <Size_t>(1),
-                                               PropCountToCapacity(moveNodeCount), ChunkCapacityT<Size_t>(1));
+                        containerToReallocate, 0/*:firstNodeIndexTo*/,   0/*:firstChunkIndexTo*/,
+                        containerFrom,         0/*:firstNodeIndexFrom*/, 0/*:firstChunkIndexFrom*/,
+                                               nodeCount,                chunkCount,
+                                               nodeCapacity,             chunkCapacity);
         }
         template<typename TContainer>
         static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom)
         {
-            return ReallocateMove(containerToReallocate, containerFrom, containerFrom.GetNodeCount());
+            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto chunkCapacity = containerFrom.GetChunkCapacity();
+            return ReallocateMove(containerToReallocate, containerFrom, nodeCapacity, chunkCapacity);
         }
 
         /// <summary>
