@@ -34,10 +34,6 @@ namespace PNC
         Vector<Size_t> ChunkComponentIndex;
     public:
 
-        //ChunkStructureT(const ComponentType_t* component) :Components(component) 
-        //{
-        //    Update();
-        //}
         /// <summary>
         /// Create a ChunkStructure from a list of ComponentType
         /// </summary>
@@ -60,7 +56,6 @@ namespace PNC
         {
             Update();
         }
-
 
         bool operator==(const Self_t& other)const { return IsSame(other); }
         bool operator!=(const Self_t& other)const { return !IsSame(other); }

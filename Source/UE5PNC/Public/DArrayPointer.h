@@ -74,7 +74,6 @@ namespace PNC
         //}
 
     public:
-        PNC_USING_CHUNKPOINTER_INTERFACE();
         /// <summary>
         /// Number of elements in the array
         /// </summary>

@@ -7,19 +7,22 @@
 
 namespace PNC
 {
+    /// <summary>
+    /// Adds a ChunkPointer member to the base container.
+    /// Provides a user friendly way to get component data by types.
+    /// Provides derived containers with methods to allocate/free/construct and destruct components
+    /// </summary>
     template<typename TChunkPointer, typename TBase>
     struct DChunkPointer : public TBase
     {
     public:
         using Base_t = TBase;
         using Self_t = DChunkPointer<TChunkPointer, TBase>;
+        using ChunkPointer_t = TChunkPointer;
         using typename Base_t::Size_t;
         using typename Base_t::ComponentType_t;
         using typename Base_t::ChunkStructure_t;
-        using ChunkPointer_t = TChunkPointer;
-
         using Node_t = typename ChunkPointer_t::Node_t;
-
         using ChunkPointerInternal_t = typename ChunkPointer_t::ChunkPointerInternal_t;
 
     protected:
@@ -94,7 +97,6 @@ namespace PNC
         static bool IsSameStructure(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameStructure(a.Chunk, b.Chunk); }
         static bool IsSameData(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameData(a.Chunk, b.Chunk); }
 
-
     public:
         /// <summary>
         /// Get the pointer to a component's memory array using the component's type const type_info* from &typeid(ComponentTypename).
@@ -165,13 +167,14 @@ namespace PNC
             return (TComponent*)GetComponentData(&typeid(TComponent));
         }
 
-
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return ChunkPointer_t::GetInternalChunk(a.Chunk); }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return ChunkPointer_t::GetInternalChunk(a.Chunk); }
 
     protected:
 
         /// <summary>
+        /// Set a container's ComponentDataArray to an allocated array of void* large enough to fit one per component in the container.
+        /// This array is used to store the nodes and chunks component data.
         /// Notes:
         ///     Called by derived structs
         /// </summary>

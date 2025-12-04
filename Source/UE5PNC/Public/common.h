@@ -31,7 +31,7 @@
 #   define PNC_MEMORY_NODE_DESTRUCTZERO
 // Clean up data fields on destruction (ex.: set pointers to null after freeing them)
 #   define PNC_MEMORYCLEANUP
-#   define PNC_MEMORY_ALLOC_LOG
+//#   define PNC_MEMORY_ALLOC_LOG
 #   define PNC_DEBUG_NOINLINE __declspec(noinline)
 #else
 #   define PNC_DEBUG_NOINLINE
@@ -71,25 +71,3 @@
 #include "Cleaner.h"
 #include "MemoryTracker.h"
 #include "Props.h"
-
-
-
-#define PNC_USING_CHUNKPOINTERINTERNAL_INTERFACE()\
-    using Base_t::IsVoid;\
-    using Base_t::IsStruct;\
-    using Base_t::IsNull;\
-    using Base_t::IsData;\
-    using Base_t::IsVoidNull;\
-    using Base_t::IsVoidData;\
-    using Base_t::IsStructNull;\
-    using Base_t::IsStructData;\
-    using Base_t::GetStructure;\
-    using Base_t::GetNodeCount;\
-    using Base_t::IsSameStructure;\
-    using Base_t::IsSameData;\
-    static_assert(true)
-
-#define PNC_USING_CHUNKPOINTER_INTERFACE()\
-    PNC_USING_CHUNKPOINTERINTERNAL_INTERFACE();\
-    using Base_t::GetInternalChunk;\
-    static_assert(true)

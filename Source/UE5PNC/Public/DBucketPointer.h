@@ -97,8 +97,11 @@ namespace PNC
 
 
     public:
-        PNC_USING_CHUNKPOINTER_INTERFACE();
         using Base_t::GetChunk;
+        using Base_t::GetNodeCount;
+        using Base_t::GetInternalChunk;
+        using Base_t::IsSameData;
+        using Base_t::IsSameStructure;
 
         /// <summary>
         /// Get the maximum number of Nodes the Chunk can grow to.

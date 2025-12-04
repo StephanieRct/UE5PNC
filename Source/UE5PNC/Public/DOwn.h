@@ -115,7 +115,7 @@ namespace PNC
         /// </summary>
         ~DOwn() noexcept(false)
         {
-            pnc_assertf(!this->IsVoidData(), TEXT("A VoidData Chunk is being destructed. Data cannot be destructed and freed without a structure. Use force_structure."));
+            pnc_assertf(!IsVoidData(), TEXT("A VoidData Chunk is being destructed. Data cannot be destructed and freed without a structure. Use force_structure."));
             if (IsData())
             {
                 FreeDestruct(*this);
@@ -124,9 +124,12 @@ namespace PNC
         }
 
     public:
-        PNC_USING_CHUNKPOINTER_INTERFACE();
         using Base_t::GetNodeCapacity;
         using Base_t::GetChunk;
+        using Base_t::IsVoidData;
+        using Base_t::IsData;
+        using Base_t::IsSameStructure;
+        using Base_t::GetInternalChunk;
 
     protected:
         using Base_t::AllocateComponentDataArray;

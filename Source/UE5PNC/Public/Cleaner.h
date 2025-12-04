@@ -3,9 +3,6 @@
 
 #pragma once
 
-#ifdef PNC_MEMORYCLEANUP
-#   define pnc_clean(x) ::PNC::Cleaner<decltype(x)>::Clean(x)
-
 namespace PNC
 {
     template<typename T, bool isEnum = std::is_enum_v<T>>
@@ -15,10 +12,16 @@ namespace PNC
         {
 
         };
-        static void Clean(MissingCleanerForType a)
+        static void Clean(MissingCleanerForType a, T type)
         {
         }
     };
+}
+#ifdef PNC_MEMORYCLEANUP
+#   define pnc_clean(x) ::PNC::Cleaner<decltype(x)>::Clean(x)
+
+namespace PNC
+{
 
     template<typename T>
     struct Cleaner<T&, false>

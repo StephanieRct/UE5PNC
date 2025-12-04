@@ -12,13 +12,22 @@ namespace PNC
     public:
         using Self_t = NodeT<TChunkStructure>;
         using ChunkStructure_t = TChunkStructure;
-        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
         using Size_t = typename ChunkStructure_t::Size_t;
+        using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
 
     public:
         
-        // can be called before index at (firstChunkIndex + chunkCount) is included by the container ChunkCount, 
-        // making this function unsafe.
+        /// <summary>
+        /// Construct only the ChunkComponents in a container.
+        /// Notes:
+        ///     It can be called before index at (firstChunkIndex + chunkCount) is included by 
+        ///     the container ChunkCount, making this function unsafe.
+        ///
+        /// </summary>
+        /// <typeparam name="TContainer"></typeparam>
+        /// <param name="container"></param>
+        /// <param name="firstChunkIndex"></param>
+        /// <param name="chunkCount"></param>
         template<typename TContainer>
         static void ConstructAllChunkComponentsUnsafe(TContainer& container, const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
         {
@@ -50,8 +59,13 @@ namespace PNC
 #endif
         }
 
-        // can be called before index at (firstNodeIndex + nodeCount) is included by the container NodeCount, 
-        // making this function unsafe.
+        /// <summary>
+        /// Construct only the NodeComponents in a container.
+        /// Notes:
+        ///     It can be called before index at (firstNodeIndex + nodeCount) is included by 
+        ///     the container NodeCount, making this function unsafe.
+        ///
+        /// </summary>
         template<typename TContainer>
         static void ConstructAllNodeComponentsUnsafe(TContainer& container, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
         {
@@ -83,6 +97,13 @@ namespace PNC
 #endif
         }
 
+        /// <summary>
+        /// Construct all components in a container.
+        /// Notes:
+        ///     It can be called before index at (firstNodeIndex + nodeCount) is included by 
+        ///     the container NodeCount, making this function unsafe. 
+        ///     Same for chunk index firstChunkIndex + chunkCount.
+        /// </summary>
         template<typename TContainer>
         static void ConstructAllComponentsUnsafe(TContainer& container,
                                                  const Size_t firstNodeIndex,      const NodeCountT<Size_t> nodeCount,
