@@ -23,6 +23,7 @@ namespace PNC
         using typename Base_t::ComponentType_t;
         using typename Base_t::ChunkStructure_t;
         using Node_t = typename ChunkPointer_t::Node_t;
+
         using ChunkPointerInternal_t = typename ChunkPointer_t::ChunkPointerInternal_t;
 
     protected:
@@ -48,28 +49,14 @@ namespace PNC
         /// <summary>
         /// Create a StructData from a ComponentDataArray with a NodeCount
         /// </summary>
-        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, const PropComponentDataArray& componentDataArray)
+        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, 
+                      const NodeCountT<Size_t> nodeCount, 
+                      const PropComponentDataArray& componentDataArray)
             : Base_t()
             , Chunk(chunkStructure, nodeCount, componentDataArray)
         {
         }
 
-    protected:
-        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
-            : Base_t()
-            , Chunk(chunkStructure, nodeCount)
-        {
-        }
-
-    protected:
-        template<typename TProps>
-        DChunkPointer(const DPropsTag& tag, const TProps& props)
-            : Base_t(tag, props)
-            , Chunk(tag, props)
-        {
-        }
-
-    public:
         DChunkPointer(Self_t&& o) = default;
         Self_t& operator=(Self_t&& o) = default;
         DChunkPointer(const Self_t& o) = default;
@@ -77,8 +64,10 @@ namespace PNC
         
         const ChunkPointer_t& GetChunk()const { return Chunk; }
               ChunkPointer_t& GetChunk()      { return Chunk; }
+              
+        const ChunkPointer_t& GetChunkPointerExtension()const { return Chunk; }
+              ChunkPointer_t& GetChunkPointerExtension()      { return Chunk; }
 
-    public:
         bool IsVoid      ()const { return Chunk.IsVoid(); }
         bool IsStruct    ()const { return Chunk.IsStruct(); }
         bool IsNull      ()const { return Chunk.IsNull(); }
@@ -101,7 +90,6 @@ namespace PNC
         static bool IsSameStructure(const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameStructure(a.Chunk, b.Chunk); }
         static bool IsSameData     (const Self_t& a, const Self_t& b) { return ChunkPointer_t::IsSameData     (a.Chunk, b.Chunk); }
 
-    public:
         /// <summary>
         /// Get the pointer to a component's memory array using the component's type const type_info* from &typeid(ComponentTypename).
         /// For components with ComponentOwner_Node, the array will be at least the length of the size of the container.
@@ -111,14 +99,7 @@ namespace PNC
         /// </summary>
         /// <param name="componentType">const type_info* pointer obtained from &typeid(ComponentTypename)</param>
         /// <returns>Pointer to the component memory array</returns>
-        void* GetComponentData(const type_info* const componentType)
-        {
-            pnc_assert(!IsNull());
-            auto index = GetStructure().Components.GetComponentTypeIndexInChunk(componentType);
-            if (index < 0)
-                return nullptr;
-            return Chunk.GetComponentData(index);
-        }
+        void* GetComponentData(const type_info* const componentType) { return Chunk.GetComponentData(componentType); }
 
         /// <summary>
         /// Get the const pointer to a component's memory array using the component's type const type_info* from &typeid(ComponentTypename).
@@ -129,15 +110,7 @@ namespace PNC
         /// </summary>
         /// <param name="componentType">const type_info* pointer obtained from &typeid(ComponentTypename)</param>
         /// <returns>Const pointer to the component memory array</returns>
-        const void* GetComponentData(const type_info* const componentType)const
-        {
-            pnc_assert(!IsNull());
-            auto index = GetStructure().Components.GetComponentTypeIndexInChunk(componentType);
-            if (index < 0)
-                return nullptr;
-            return Chunk.GetComponentData(index);
-        }
-
+        const void* GetComponentData(const type_info* const componentType)const { return Chunk.GetComponentData(componentType); }
 
         /// <summary>
         /// Get the pointer to a component's memory array using the component's typename.
@@ -149,11 +122,7 @@ namespace PNC
         /// <typeparam name="TComponent">Component typename for the desired component's memory array</typeparam>
         /// <returns>Pointer to the component memory array</returns>
         template<typename TComponent>
-        TComponent* GetComponentData()
-        {
-            pnc_assert(!IsNull());
-            return (TComponent*)GetComponentData(&typeid(TComponent));
-        }
+        TComponent* GetComponentData() { return Chunk.template GetComponentData<TComponent>(); }
 
         /// <summary>
         /// Get the const pointer to a component's memory array using the component's typename.
@@ -165,16 +134,21 @@ namespace PNC
         /// <typeparam name="TComponent">Component typename for the desired component's memory array</typeparam>
         /// <returns>Const Pointer to the component memory array</returns>
         template<typename TComponent>
-        const TComponent* GetComponentData()const
-        {
-            pnc_assert(!IsNull());
-            return (TComponent*)GetComponentData(&typeid(TComponent));
-        }
+        const TComponent* GetComponentData()const { return Chunk.template GetComponentData<TComponent>(); }
 
         static       ChunkPointerInternal_t& GetInternalChunk(      Self_t& a) { return ChunkPointer_t::GetInternalChunk(a.Chunk); }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return ChunkPointer_t::GetInternalChunk(a.Chunk); }
 
     protected:
+        /// <summary>
+        /// Construct from a Props type
+        /// </summary>
+        template<typename TProps>
+        DChunkPointer(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, props)
+            , Chunk(tag, props)
+        {
+        }
 
         /// <summary>
         /// Set a container's ComponentDataArray to an allocated array of void* large enough to fit one per component in the container.

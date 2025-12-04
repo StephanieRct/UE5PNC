@@ -34,7 +34,7 @@ namespace PNC
     using KKindPointerT = DKind<Container<TChunkStructure>>;
 
     template<typename TChunkStructure>
-    using KChunkPointerT = DChunkPointer<ChunkPointerInternalT<TChunkStructure>, KKindPointerT<TChunkStructure>>;
+    using KChunkPointerT = DChunkPointer<ChunkPointerProtectedT<TChunkStructure>, KKindPointerT<TChunkStructure>>;
 
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KChunkArrayPointerT = DArrayPointer<ChunkArrayExtensionT<TChunkStructure, TChunkPointerElement>,
@@ -56,16 +56,10 @@ namespace PNC
     using KChunkArrayT = DBucketBarrel<DOwn<DBarrelPointer<KChunkArrayPointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>>;
 
 
-//    template<typename TChunkStructure>
-//    using KChunkTreePointer2T =
-//        DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
-//        DTreePointer<
-//        DKind<
-//        Container<TChunkStructure>>>>>;
 
     template<typename TChunkStructure>
     using KChunkTreePointerT = 
-        DChunkPointer<ChunkPointerInternalT<TChunkStructure>,
+        DChunkPointer<ChunkPointerProtectedT<TChunkStructure>,
         DOfKind<ContainerKind::ChunkTree,
         DTreePointer<
         DKind<

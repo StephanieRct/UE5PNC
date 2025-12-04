@@ -44,22 +44,6 @@ namespace PNC
         {
         }
 
-        //ChunkArrayExtensionT(const ChunkCountT<Size_t> chunkCount = 0)
-        //    : Chunks(nullptr)
-        //    , ChunkCount(chunkCount)
-        //{
-        //}
-
-        ///// <summary>
-        ///// Contructs from its member data fields.
-        ///// </summary>
-        ///// <param name="chunks">Array of ChunkPointerElement_t with at least chunkCount elements.</param>
-        ///// <param name="chunkCount">Number of chunk in chunks array</param>
-        //ChunkArrayExtensionT(ChunkPointerElement_t*const chunks, const ChunkCountT<Size_t> chunkCount)
-        //    : Chunks(chunks)
-        //    , ChunkCount(chunkCount)
-        //{
-        //}
 #ifdef PNC_MEMORYCLEANUP
         ~ChunkArrayExtensionT()
         {

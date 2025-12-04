@@ -240,5 +240,75 @@ namespace PNC
         static bool IsSameData(const Self_t& a, const Self_t& b) { return Base_t::IsSameData(a, b); }
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return Base_t::GetInternalChunk(a); }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return Base_t::GetInternalChunk(a); }
+
+        /// <summary>
+        /// Get the pointer to a component's memory array using the component's type const type_info* from &typeid(ComponentTypename).
+        /// For components with ComponentOwner_Node, the array will be at least the length of the size of the container.
+        /// For components with ComponentOwner_Chunk, the array will be of length 1.
+        /// This is a slow way to access the container's component data as it require to do a map lookup of the 
+        /// component's const type_info* pointer to the component type index in the container's ChunkStructure ComponentTypeSet.
+        /// </summary>
+        /// <param name="componentType">const type_info* pointer obtained from &typeid(ComponentTypename)</param>
+        /// <returns>Pointer to the component memory array</returns>
+        void* GetComponentData(const type_info* const componentType)
+        {
+            pnc_assert(!IsNull());
+            auto index = GetStructure().Components.GetComponentTypeIndexInChunk(componentType);
+            if (index < 0)
+                return nullptr;
+            return GetComponentData(index);
+        }
+
+        /// <summary>
+        /// Get the const pointer to a component's memory array using the component's type const type_info* from &typeid(ComponentTypename).
+        /// For components with ComponentOwner_Node, the array will be at least the length of the size of the container.
+        /// For components with ComponentOwner_Chunk, the array will be of length 1.
+        /// This is a slow way to access the container's component data as it require to do a map lookup of the 
+        /// component's const type_info* pointer to the component type index in the container's ChunkStructure ComponentTypeSet.
+        /// </summary>
+        /// <param name="componentType">const type_info* pointer obtained from &typeid(ComponentTypename)</param>
+        /// <returns>Const pointer to the component memory array</returns>
+        const void* GetComponentData(const type_info* const componentType)const
+        {
+            pnc_assert(!IsNull());
+            auto index = GetStructure().Components.GetComponentTypeIndexInChunk(componentType);
+            if (index < 0)
+                return nullptr;
+            return GetComponentData(index);
+        }
+
+
+        /// <summary>
+        /// Get the pointer to a component's memory array using the component's typename.
+        /// For components with ComponentOwner_Node, the array will be at least the length of the size of the container.
+        /// For components with ComponentOwner_Chunk, the array will be of length 1.
+        /// This is a slow way to access the container's component data as it require to do a map lookup of the associated
+        /// component typename const type_info* pointer to the component type index in the container's ChunkStructure ComponentTypeSet.
+        /// </summary>
+        /// <typeparam name="TComponent">Component typename for the desired component's memory array</typeparam>
+        /// <returns>Pointer to the component memory array</returns>
+        template<typename TComponent>
+        TComponent* GetComponentData()
+        {
+            pnc_assert(!IsNull());
+            return (TComponent*)GetComponentData(&typeid(TComponent));
+        }
+
+        /// <summary>
+        /// Get the const pointer to a component's memory array using the component's typename.
+        /// For components with ComponentOwner_Node, the array will be at least the length of the size of the container.
+        /// For components with ComponentOwner_Chunk, the array will be of length 1.
+        /// This is a slow way to access the container's component data as it require to do a map lookup of the associated
+        /// component typename const type_info* pointer to the component type index in the container's ChunkStructure ComponentTypeSet.
+        /// </summary>
+        /// <typeparam name="TComponent">Component typename for the desired component's memory array</typeparam>
+        /// <returns>Const Pointer to the component memory array</returns>
+        template<typename TComponent>
+        const TComponent* GetComponentData()const
+        {
+            pnc_assert(!IsNull());
+            return (TComponent*)GetComponentData(&typeid(TComponent));
+        }
+
     };
 }
