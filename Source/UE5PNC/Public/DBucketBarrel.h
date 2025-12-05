@@ -25,11 +25,11 @@ namespace PNC
         using typename Base_t::ChunkPointerElementInternal_t;
 
         DBucketBarrel() = default;
-        DBucketBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DBucketBarrel(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
-        DBucketBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
+        DBucketBarrel(const ChunkStructure_t* const chunkStructure,
                       const ChunkCapacityT       <Size_t> chunkCapacity,
                       const ChunkCountT          <Size_t> chunkCount,
                       const NodeCapacityPerChunkT<Size_t> nodeCapacityPerChunk,

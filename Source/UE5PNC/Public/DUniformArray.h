@@ -26,12 +26,12 @@ namespace PNC
         using typename Base_t::ChunkPointerElementInternal_t;
 
         DUniformArray() = default;
-        DUniformArray(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DUniformArray(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
 
-        DUniformArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
+        DUniformArray(const ChunkStructure_t* const chunkStructure,
             const ChunkCountT<Size_t> chunkCount,
             const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
             : Base_t(chunkStructure, 

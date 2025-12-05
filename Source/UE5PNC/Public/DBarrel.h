@@ -6,6 +6,7 @@
 
 namespace PNC
 {
+    //TODO complete
     template<typename TBase>
     struct DBarrel : public TBase
     {
@@ -25,35 +26,35 @@ namespace PNC
         using typename Base_t::ChunkPointerElementInternal_t;
 
         DBarrel() = default;
-        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DBarrel(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
 
 
         // Full Uniform Barrel
-        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCountT<Size_t> chunkCount,
-            const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        DBarrel(const ChunkStructure_t* const chunkStructure,
+                const ChunkCountT<       Size_t> chunkCount,
+                const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
             : Base_t(chunkStructure,
                 chunkCount,
                 ChunkCapacityT<Size_t>(chunkCount),
-                NodeCountT<Size_t>(chunkCount* nodeCountPerChunk),
-                NodeCapacityT<Size_t>(chunkCount* nodeCountPerChunk),
+                NodeCountT<    Size_t>(chunkCount * nodeCountPerChunk),
+                NodeCapacityT< Size_t>(chunkCount * nodeCountPerChunk),
                 nodeCountPerChunk)
         {
         }
 
         // Empty, Partial or Full Uniform array
         // nodeCountPerChunk may be 0.
-        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCapacityT<Size_t> chunkCapacity,
-            const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
-            const ChunkCountT<Size_t> chunkCount)
+        DBarrel(const ChunkStructure_t* const chunkStructure,
+                const ChunkCapacityT<    Size_t> chunkCapacity,
+                const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
+                const ChunkCountT<       Size_t> chunkCount)
             : Base_t(chunkStructure,
                 chunkCount,
                 chunkCapacity,
-                NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
+                NodeCountT<   Size_t>(chunkCount *    nodeCountPerChunk),
                 NodeCapacityT<Size_t>(chunkCapacity * nodeCountPerChunk),
                 nodeCountPerChunk)
         {
@@ -66,11 +67,11 @@ namespace PNC
         // Empty, Partial or Full Uniform array with additional node capacity.
         // nodeCountPerChunk may be 0.
         // Chunk elements can increade/decrease node count up to the total node capacity.
-        DBarrel(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCapacityT<Size_t> chunkCapacity,
-            const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
-            const ChunkCountT<Size_t> chunkCount,
-            const NodeCapacityT<Size_t> nodeCapacity)
+        DBarrel(const ChunkStructure_t* const chunkStructure,
+                const ChunkCapacityT<    Size_t> chunkCapacity,
+                const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
+                const ChunkCountT<       Size_t> chunkCount,
+                const NodeCapacityT<     Size_t> nodeCapacity)
             : Base_t(chunkStructure,
                 chunkCount,
                 chunkCapacity,

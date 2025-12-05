@@ -6,6 +6,7 @@
 
 namespace PNC
 {
+    //TODO complete
     template<typename TBase>
     struct DCarry : public TBase
     {
@@ -25,34 +26,34 @@ namespace PNC
         using typename Base_t::ChunkPointerElementInternal_t;
 
         DCarry() = default;
-        DCarry(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DCarry(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
 
         // At capacity Uniform ChunkBunch
-        DCarry(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCountT<Size_t> chunkCount,
-            const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        DCarry(const ChunkStructure_t* const chunkStructure,
+               const ChunkCountT<       Size_t> chunkCount,
+               const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
             : Base_t(chunkStructure,
                 chunkCount,
                 ChunkCapacityT<Size_t>(chunkCount),
-                NodeCountT<Size_t>(chunkCount* nodeCountPerChunk),
-                NodeCapacityT<Size_t>(chunkCount* nodeCountPerChunk),
+                NodeCountT<    Size_t>(chunkCount* nodeCountPerChunk),
+                NodeCapacityT< Size_t>(chunkCount* nodeCountPerChunk),
                 nodeCountPerChunk)
         {
         }
 
         // Empty, Partial or Full Uniform array
         // nodeCountPerChunk may be 0.
-        DCarry(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCapacityT<Size_t> chunkCapacity,
-            const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
-            const ChunkCountT<Size_t> chunkCount)
+        DCarry(const ChunkStructure_t* const chunkStructure,
+               const ChunkCapacityT<    Size_t> chunkCapacity,
+               const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
+               const ChunkCountT<       Size_t> chunkCount)
             : Base_t(chunkStructure,
                 chunkCount,
                 chunkCapacity,
-                NodeCountT<Size_t>(chunkCount * nodeCountPerChunk),
+                NodeCountT<   Size_t>(chunkCount *    nodeCountPerChunk),
                 NodeCapacityT<Size_t>(chunkCapacity * nodeCountPerChunk),
                 nodeCountPerChunk)
         {
@@ -64,11 +65,11 @@ namespace PNC
 
         // Empty, Partial or Full Uniform array with additional node capacity.
         // nodeCountPerChunk may be 0.
-        DCarry(const StructurePtr<ChunkStructure_t>& chunkStructure,
-            const ChunkCapacityT<Size_t> chunkCapacity,
+        DCarry(const ChunkStructure_t* const chunkStructure,
+            const ChunkCapacityT<    Size_t> chunkCapacity,
             const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
-            const ChunkCountT<Size_t> chunkCount,
-            const NodeCapacityT<Size_t> nodeCapacity)
+            const ChunkCountT<       Size_t> chunkCount,
+            const NodeCapacityT<     Size_t> nodeCapacity)
             : Base_t(chunkStructure,
                 chunkCount,
                 chunkCapacity,

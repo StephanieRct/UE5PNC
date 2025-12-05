@@ -60,7 +60,7 @@ namespace PNC
     }
 
     template<typename TBase>
-    const typename DKind<TBase>::ArrayPointer_t& DKind<TBase>::GetChunkArray()const
+    const typename DKind<TBase>::ArrayPointer_t& DKind<TBase>::GetArray()const
     {
         switch (this->Kind)
         {
@@ -77,7 +77,7 @@ namespace PNC
     }
 
     template<typename TBase>
-    typename DKind<TBase>::ArrayPointer_t& DKind<TBase>::GetChunkArray()
+    typename DKind<TBase>::ArrayPointer_t& DKind<TBase>::GetArray()
     {
         switch (this->Kind)
         {

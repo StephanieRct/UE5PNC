@@ -35,7 +35,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Container
         /// </summary>
-        DChunk(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DChunk(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
@@ -43,12 +43,22 @@ namespace PNC
         /// <summary>
         /// Create a StructData Container with (NodeCount) allocated and constructed nodes.
         /// </summary>
-        DChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, 
+        DChunk(const ChunkStructure_t*const chunkStructure, 
                const NodeCountT<Size_t> nodeCount)
             : Base_t(chunkStructure, 
                      nodeCount,
                      PropCountToCapacity(nodeCount))
         {
         }
+#ifndef PNC_PROPS_STRICT
+        /// <summary>
+        /// Create a StructData Container with (NodeCount) allocated and constructed nodes.
+        /// </summary>
+        DChunk(const ChunkStructure_t*const chunkStructure, 
+               const Size_t nodeCount)
+            : DChunk(chunkStructure, PropNodeCountT<Size_t>(nodeCount))
+        {
+        }
+#endif
     };
 }

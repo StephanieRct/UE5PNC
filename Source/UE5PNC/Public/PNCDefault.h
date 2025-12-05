@@ -37,6 +37,7 @@ namespace PNC
     using ComponentType = ComponentTypeT<Size_t>;
     using ComponentTypeSet = ComponentTypeSetT<Size_t>;
     using ChunkStructure = ChunkStructureT<Size_t>;
+    template<> struct PropTraits<const ChunkStructure*> : public PropTraitsDefault2<ChunkStructure, const ChunkStructure*, DStructurePtr> { };
 
     using ChunkPointer = ChunkPointerT<ChunkStructure>;
     using Chunk = ChunkT<ChunkStructure>;
@@ -85,6 +86,15 @@ namespace PNC
     using CoParentInChunk = CoParentInChunkT<Size_t>;
     using CoSingleParentOutsideChunk = CoSingleParentOutsideChunkT<Size_t>;
     using CoChildrenInChunk = CoChildrenInChunkT<Size_t>;
+
+
+
+    template<typename TIn> NodeCapacityT        <Size_t> PropNodeCapacity        (const TIn& value) { return PropNodeCapacityT        <Size_t, TIn>(value); }
+    template<typename TIn> NodeCountT           <Size_t> PropNodeCount           (const TIn& value) { return PropNodeCountT           <Size_t, TIn>(value); }
+    template<typename TIn> ChunkCapacityT       <Size_t> PropChunkCapacity       (const TIn& value) { return PropChunkCapacityT       <Size_t, TIn>(value); }
+    template<typename TIn> ChunkCountT          <Size_t> PropChunkCount          (const TIn& value) { return PropChunkCountT          <Size_t, TIn>(value); }
+    template<typename TIn> NodeCapacityPerChunkT<Size_t> PropNodeCapacityPerChunk(const TIn& value) { return PropNodeCapacityPerChunkT<Size_t, TIn>(value); }
+    template<typename TIn> NodeCountPerChunkT   <Size_t> PropNodeCountPerChunk   (const TIn& value) { return PropNodeCountPerChunkT   <Size_t, TIn>(value); }
 }
 
 

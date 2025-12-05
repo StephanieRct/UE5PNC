@@ -40,7 +40,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Container
         /// </summary>
-        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DChunkPointer(const ChunkStructure_t* const chunkStructure)
             : Base_t()
             , Chunk(chunkStructure)
         {
@@ -49,7 +49,7 @@ namespace PNC
         /// <summary>
         /// Create a StructData from a ComponentDataArray with a NodeCount
         /// </summary>
-        DChunkPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, 
+        DChunkPointer(const ChunkStructure_t* const chunkStructure,
                       const NodeCountT<Size_t> nodeCount, 
                       const PropComponentDataArray& componentDataArray)
             : Base_t()

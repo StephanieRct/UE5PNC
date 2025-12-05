@@ -144,7 +144,7 @@ namespace PNC
 
     public:
         // Add a chunk with a given chunk structure and capacity.
-        Chunk_t* NewChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
+        Chunk_t* NewChunk(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount)
         {
             Chunk_t* const chunk = pnc_new(Chunk_t)(chunkStructure, nodeCount);
             Chunks.insert(chunk);
@@ -152,7 +152,7 @@ namespace PNC
         }
 
         // Add a chunk with a given chunk structure and capacity.
-        ChunkArray_t* NewChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        ChunkArray_t* NewChunkArray(const ChunkStructure_t* const chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
         {
             ChunkArray_t* const chunk = pnc_new(ChunkArray_t)(chunkStructure, chunkCount, nodeCountPerChunk);
             ChunkArrays.insert(chunk);
@@ -260,32 +260,32 @@ namespace PNC
             return ChunkStructureRegistry.GetOrAddChunkStructure<TComponentTypes...>(ComponentTypeRegistry);
         }
 
-        Chunk_t* NewChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
+        Chunk_t* NewChunk(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount)
         {
             return ChunkRegistry.NewChunk(chunkStructure, nodeCount);
         }
 
-        ChunkArray_t* NewChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        ChunkArray_t* NewChunkArray(const ChunkStructure_t* const chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
         {
             return ChunkRegistry.NewChunkArray(chunkStructure, chunkCount, nodeCountPerChunk);
         }
 
-        KChunk_t* AddKChunk(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
+        KChunk_t* AddKChunk(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount)
         {
             return KChunkRegistry.NewChunk(chunkStructure, nodeCount);
         }
 
-        KChunkArray_t* AddKChunkArray(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        KChunkArray_t* AddKChunkArray(const ChunkStructure_t* const chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
         {
             return KChunkRegistry.NewChunkArray(chunkStructure, chunkCount, nodeCountPerChunk);
         }
 
-        KChunkTree_t* AddKChunkTree(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
+        KChunkTree_t* AddKChunkTree(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount)
         {
             return KChunkTreeRegistry.NewChunk(chunkStructure, nodeCount);
         }
 
-        KChunkArrayTree_t* AddKChunkArrayTree(const StructurePtr<ChunkStructure_t>& chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        KChunkArrayTree_t* AddKChunkArrayTree(const ChunkStructure_t* const chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
         {
             return KChunkTreeRegistry.NewChunkArray(chunkStructure, chunkCount, nodeCountPerChunk);
         }

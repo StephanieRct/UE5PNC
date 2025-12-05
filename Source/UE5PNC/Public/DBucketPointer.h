@@ -42,7 +42,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Container
         /// </summary>
-        DBucketPointer(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DBucketPointer(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
             , NodeCapacity(0)
         {
@@ -51,7 +51,9 @@ namespace PNC
         /// <summary>
         /// Create a StructData from a ComponentDataArray with a NodeCount equal to its NodeCapacity
         /// </summary>
-        DBucketPointer(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, const PropComponentDataArray& componentDataArray)
+        DBucketPointer(const ChunkStructure_t* const chunkStructure, 
+                       const NodeCountT<Size_t> nodeCount, 
+                       const PropComponentDataArray& componentDataArray)
             : Base_t(chunkStructure, nodeCount, componentDataArray)
             , NodeCapacity(PropCountToCapacity(nodeCount))
         {
@@ -61,14 +63,14 @@ namespace PNC
             : Base_t(std::forward<Self_t>(o))
             , NodeCapacity(o.NodeCapacity)
         {
-            o.NodeCapacity = 0;
+            o.NodeCapacity = NodeCapacityT<Size_t>::V_0();
         }
 
         Self_t& operator=(Self_t&& o)
         {
             Base_t::operator=(std::move(o));
             auto tmpNodeCapacity = o.NodeCapacity;
-            o.NodeCapacity = 0;
+            o.NodeCapacity = NodeCapacityT<Size_t>::V_0();
             NodeCapacity = tmpNodeCapacity;
             return *this;
         }
@@ -105,7 +107,7 @@ namespace PNC
         /// Add a multiple sequential nodes at index NodeCount and return the index of the first node added.
         /// If NodeCount + count >= NodeCapacity, return -1 without adding any new nodes.
         /// </summary>
-        Size_t AddNodes(const Size_t count)
+        Size_t AddNodes(const NodeCountT<Size_t> count)
         {
             auto& internalChunk = GetInternalChunk(*this);
             pnc_assert(!internalChunk.IsNull());
@@ -118,12 +120,18 @@ namespace PNC
             }
             return -1;
         }
+#ifndef PNC_PROPS_STRICT
+        Size_t AddNodes(const Size_t count) 
+        { 
+            return AddNodes(PropNodeCountT<Size_t>(count)); 
+        }
+#endif
         
         /// <summary>
         /// Remove a range of nodes and close the gap by moving the higher nodes after 
         /// the lower nodes, preserving the order of nodes.
         /// </summary>
-        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const NodeCountT<Size_t> nodeCount = 1)
+        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const NodeCountT<Size_t> nodeCount = NodeCountT<Size_t>::V_1())
         {
             pnc_assert(firstNodexIndex >= 0);
             pnc_assert(nodeCount >= 0);
@@ -134,25 +142,31 @@ namespace PNC
 
             Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodexIndex, nodeCount);
 
-            const Size_t firstMovingNodeIndex = internalChunk.NodeCount - nodeCount;
-            const Size_t firstFollowingNodeIndex = firstNodexIndex + nodeCount;
+            const auto firstMovingNodeIndex = internalChunk.NodeCount - nodeCount;
+            const auto firstFollowingNodeIndex = firstNodexIndex + nodeCount;
             if(firstFollowingNodeIndex < internalChunk.NodeCount)
             {
-                const Size_t followingNodeCount = internalChunk.NodeCount - firstFollowingNodeIndex;
+                const auto followingNodeCount = internalChunk.NodeCount - firstFollowingNodeIndex;
                 Node_t::MoveAllNodeComponentsForwardUnsafe(internalChunk, firstNodexIndex,
                                                            internalChunk, firstFollowingNodeIndex,
                                                                           followingNodeCount);
-                internalChunk.NodeCount = firstNodexIndex + followingNodeCount;
+                internalChunk.NodeCount = PropNodeCountT<Size_t>(firstNodexIndex + followingNodeCount);
             }
             else
-                internalChunk.NodeCount = firstNodexIndex;
+                internalChunk.NodeCount = PropNodeCountT<Size_t>(firstNodexIndex);
         }
+#ifndef PNC_PROPS_STRICT
+        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const Size_t nodeCount = (Size_t)0)
+        {
+            RemoveNodeKeepOrder(firstNodexIndex, PropNodeCountT<Size_t>(nodeCount));
+        }
+#endif
 
         /// <summary>
         /// Remove a range of nodes and close the gap by moving the trailing nodes in 
         /// the gap, which will break the previous ordering of nodes.
         /// </summary>
-        void RemoveNode(const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount = 1)
+        void RemoveNode(const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount = NodeCountT<Size_t>::V_1())
         {
             pnc_assert(firstNodeIndex >= 0);
             pnc_assert(nodeCount >= 0);
@@ -162,9 +176,9 @@ namespace PNC
             auto& internalChunk = GetInternalChunk(*this);
 
             Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodeIndex, nodeCount);
-            const Size_t lastNodexIndex = firstNodeIndex + nodeCount;
-            const Size_t movingFirstNodeIndex = std::max(Size_t(lastNodexIndex), Size_t(internalChunk.NodeCount - nodeCount));
-            const Size_t movingNodeCount = internalChunk.NodeCount - movingFirstNodeIndex;
+            const auto lastNodexIndex = firstNodeIndex + nodeCount;
+            const auto movingFirstNodeIndex = std::max<Size_t>(lastNodexIndex, internalChunk.NodeCount - nodeCount);
+            const auto movingNodeCount = internalChunk.NodeCount - movingFirstNodeIndex;
             if(movingNodeCount > 0)
             {
                 Node_t::MoveAllNodeComponentsForwardUnsafe(internalChunk, firstNodeIndex,
@@ -173,6 +187,12 @@ namespace PNC
             }
             internalChunk.NodeCount -= nodeCount;
         }
+#ifndef PNC_PROPS_STRICT
+        void RemoveNode(const Size_t firstNodexIndex, const Size_t nodeCount = (Size_t)1)
+        {
+            RemoveNode(firstNodexIndex, PropNodeCountT<Size_t>(nodeCount));
+        }
+#endif
 
         //TODO Size_t RemoveNode(const Size_t count) // Remove from the end of the container
 
@@ -185,7 +205,7 @@ namespace PNC
             auto& container = GetInternalChunk(*this);
             if (container.IsNull()) return;
             Node_t::DestructAllNodeComponentsUnsafe(GetChunk(), 0, container.NodeCount);
-            container.NodeCount = 0;
+            container.NodeCount = NodeCountT<Size_t>::V_0();
         }
 
     protected:
@@ -199,7 +219,10 @@ namespace PNC
         {
         }
 
-        void SetNodeCapacity(const Size_t value) { NodeCapacity = value; }
+        void SetNodeCapacity(const NodeCapacityT<Size_t> nodeCapacity) { NodeCapacity = nodeCapacity; }
+#ifndef PNC_PROPS_STRICT
+        void SetNodeCapacity(const Size_t nodeCapacity) { NodeCapacity = PropNodeCapacityT<Size_t>(nodeCapacity); }
+#endif
 
         /// <summary>
         /// Allocate component memory for props.GetNodeCapacity() nodes and contruct all components for props.GetNodeCount() nodes.

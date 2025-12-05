@@ -102,7 +102,9 @@ namespace PNC
             for (Size_t iComp = 0; iComp < componentCount; ++iComp)
             {
                 const ComponentType_t& componentType = structure.GetComponentType(iComp);
-                elementComponentData[iComp] = componentType.Forward(baseComponentData[iComp], fistNodeIndex, fistChunkIndex);
+                elementComponentData[iComp] = componentType.Forward(baseComponentData[iComp], 
+                                                                    PropNodeCountT< Size_t>(fistNodeIndex), 
+                                                                    PropChunkCountT<Size_t>(fistChunkIndex));
             }
         }
 

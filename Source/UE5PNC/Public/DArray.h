@@ -38,7 +38,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Container
         /// </summary>
-        DArray(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DArray(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
@@ -49,18 +49,27 @@ namespace PNC
         ///     all chunk elements in the array have a NodeCount equal to NodeCountPerChunk;
         ///     totalling to the full array of allocated and constructed (NodeCount) nodes equal to ChunkCount * NodeCountPerChunk.
         /// </summary>
-        DArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
-                    const ChunkCountT       <Size_t> chunkCount,
-                    const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
+        DArray(const ChunkStructure_t* const chunkStructure,
+               const ChunkCountT<       Size_t> chunkCount,
+               const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
             : Base_t(chunkStructure,
                      chunkCount,
                      ChunkCapacityT<Size_t>(chunkCount),
-                     NodeCountT    <Size_t>(chunkCount * nodeCountPerChunk),
-                     NodeCapacityT <Size_t>(chunkCount * nodeCountPerChunk),
+                     NodeCountT<    Size_t>(chunkCount * nodeCountPerChunk),
+                     NodeCapacityT< Size_t>(chunkCount * nodeCountPerChunk),
                      nodeCountPerChunk)
         {
         }
-
+#ifndef PNC_PROPS_STRICT
+        DArray(const ChunkStructure_t*const chunkStructure,
+               const Size_t chunkCount,
+               const Size_t nodeCountPerChunk)
+            : DArray(chunkStructure,
+                     PropChunkCountT<      Size_t>(chunkCount),
+                     PropNodeCountPerChunk<Size_t>(nodeCountPerChunk))
+        {
+        }
+#endif
         /// <summary>
         /// Create a StructData Container with:
         ///     (ChunkCount) allocated and constructed chunks;
@@ -71,18 +80,30 @@ namespace PNC
         ///     Chunk elements can increase/decrease node count up to the total NodeCapacity.
         ///     NodeCountPerChunk can be 0.
         /// </summary>
-        DArray(const StructurePtr<ChunkStructure_t>& chunkStructure,
-                    const ChunkCountT       <Size_t> chunkCount,
-                    const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
-                    const NodeCapacityT     <Size_t> nodeCapacity)
+        DArray(const ChunkStructure_t* chunkStructure,
+               const ChunkCountT<       Size_t> chunkCount,
+               const NodeCountPerChunkT<Size_t> nodeCountPerChunk,
+               const NodeCapacityT<     Size_t> nodeCapacity)
             : Base_t(chunkStructure,
                      chunkCount,
-                     ChunkCapacityT<Size_t>(chunkCount),
-                     NodeCountT    <Size_t>(chunkCount * nodeCountPerChunk),
-                     NodeCapacityT <Size_t>(nodeCapacity),
+                     PropCountToCapacity(chunkCount),
+                     PropNodeCountT<    Size_t>(chunkCount * nodeCountPerChunk),
+                     PropNodeCapacityT< Size_t>(nodeCapacity),
                      nodeCountPerChunk)
         {
             pnc_assert(nodeCapacity >= PropCountToCapacity(chunkCount * nodeCountPerChunk));
         }
+#ifndef PNC_PROPS_STRICT
+        DArray(const ChunkStructure_t* chunkStructure,
+               const Size_t chunkCount,
+               const Size_t nodeCountPerChunk,
+               const Size_t nodeCapacity)
+            : DArray(chunkStructure,
+                     PropChunkCountT<       Size_t>(chunkCount),
+                     PropNodeCountPerChunkT<Size_t>(nodeCountPerChunk),
+                     PropNodeCapacityT<     Size_t>(nodeCapacity))
+        {
+        }
+#endif
     };
 }

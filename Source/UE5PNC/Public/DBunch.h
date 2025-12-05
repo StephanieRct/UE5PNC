@@ -35,7 +35,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Container
         /// </summary>
-        DBunch(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        DBunch(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
         {
         }
@@ -43,11 +43,21 @@ namespace PNC
         /// <summary>
         /// Create a StructData Container with (NodeCapacity) allocated nodes and a smaller or equal (NodeCount) number of constructed nodes.
         /// </summary>
-        DBunch(const StructurePtr<ChunkStructure_t>& chunkStructure, 
+        DBunch(const ChunkStructure_t* const chunkStructure, 
                const NodeCapacityT<Size_t> nodeCapacity, 
-               const NodeCountT   <Size_t> nodeCount = 0)
+               const NodeCountT<   Size_t> nodeCount = NodeCountT<Size_t>::V_0())
             : Base_t(chunkStructure, nodeCapacity, nodeCount)
         {
         }
+#ifndef PNC_PROPS_STRICT
+        DBunch(const ChunkStructure_t* const chunkStructure,
+               const Size_t nodeCapacity,
+               const Size_t nodeCount = (Size_t)0)
+            : DBunch(chunkStructure, 
+                     PropNodeCapacityT<Size_t>(nodeCapacity), 
+                     PropNodeCountT<   Size_t>(nodeCount))
+        {
+        }
+#endif
     };
 }

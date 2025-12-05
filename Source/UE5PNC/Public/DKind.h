@@ -20,26 +20,8 @@ namespace PNC
         ChunkArrayTree,
     };
 
-    // TODO add template parameter for TKind (ContainerKind)
-    template<typename TProps>
-    struct DPropKind : public TProps
-    {
-        using Value_t = ContainerKind;
-        ContainerKind Kind;
-        ContainerKind GetChunkKind() const { return Kind; }
-        DPropKind(const TProps& props, const ContainerKind kind)
-            : TProps(props)
-            , Kind(kind)
-        {
-        }
-    };
-
-    template<>
-    struct PropTraits<ContainerKind> : public PropTraitsDefault<DPropKind> { };
-
-    // TODO add template parameter for TKind (ContainerKind)
     /// <summary>
-    /// A DKind provides a way to identify the type of container and extract the ChunkPointer using GetChunkPointer.
+    /// A DKind provides a way to identify the type of container and extract the ChunkPointer using GetChunk() or GetArray().
     /// </summary>
     template<typename TBase>
     struct DKind : public TBase
@@ -47,28 +29,19 @@ namespace PNC
     public:
         using Base_t = TBase;
         using Self_t = DKind<TBase>;
-        using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
+        using typename Base_t::ChunkStructure_t;
 
         using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
         using ChunkPointerElement_t = ChunkPointerT<ChunkStructure_t>;
         using ArrayPointer_t = ArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>;
 
     protected:
-        /// <summary>
-        /// The kind of the Chunk being pointed at.
-        /// </summary>
         ContainerKind Kind;
 
-    protected:
+    public:
         DKind()
             :Kind(ContainerKind::None)
-        {
-        }
-
-        template<typename TProps>
-        PNC_DEBUG_NOINLINE DKind(const DPropsTag& tag, const TProps& props)
-            : Kind(props.GetChunkKind())
         {
         }
 
@@ -78,15 +51,11 @@ namespace PNC
             pnc_clean(Kind);
         }
 #endif
-    public:
-        // TODO: IsNull
-        // TODO: GetStructure
-        // TODO: GetComponentData
-        // TODO: GetNodeCount
         ContainerKind GetKind()const 
         {
             return Kind;
         }
+
         const ChunkStructure_t& GetStructure()const;
 
         bool IsTree()const
@@ -120,7 +89,30 @@ namespace PNC
         }
         const ChunkPointer_t& GetChunk()const;
         ChunkPointer_t& GetChunk();
-        const ArrayPointer_t& GetChunkArray()const;
-        ArrayPointer_t& GetChunkArray();
+        const ArrayPointer_t& GetArray()const;
+        ArrayPointer_t& GetArray();
+
+    protected:
+        template<typename TProps>
+        PNC_DEBUG_NOINLINE DKind(const DPropsTag& tag, const TProps& props)
+            : Kind(props.GetChunkKind())
+        {
+        }
     };
+
+    template<typename TProps>
+    struct DPropKind : public TProps
+    {
+        using Value_t = ContainerKind;
+        ContainerKind Kind;
+        ContainerKind GetChunkKind() const { return Kind; }
+        DPropKind(const TProps& props, const ContainerKind kind)
+            : TProps(props)
+            , Kind(kind)
+        {
+        }
+    };
+
+    template<>
+    struct PropTraits<ContainerKind> : public PropTraitsDefault<DPropKind> {};
 }

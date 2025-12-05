@@ -61,7 +61,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Chunk.
         /// </summary>
-        ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure)
+        ChunkPointerInternalT(const ChunkStructure_t* const chunkStructure)
             : Structure(chunkStructure)
             , ComponentDataArray(nullptr)
             , NodeCount(0)
@@ -71,7 +71,7 @@ namespace PNC
         /// <summary>
         /// Create a StructNull Chunk with a node count.
         /// </summary>
-        ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount)
+        ChunkPointerInternalT(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount)
             : Structure(chunkStructure)
             , ComponentDataArray(nullptr)
             , NodeCount(nodeCount)
@@ -94,7 +94,7 @@ namespace PNC
         /// <param name="chunkStructure">Structure of the Chunk's Component data.</param>
         /// <param name="nodeCount">Number of nodes are included by this pointer.</param>
         /// <param name="componentData">Points to an array of component data pointers created according to the chunk type.</param>
-        ChunkPointerInternalT(const StructurePtr<ChunkStructure_t>& chunkStructure, const NodeCountT<Size_t> nodeCount, void** const componentData)
+        ChunkPointerInternalT(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount, void** const componentData)
             : Structure(chunkStructure)
             , ComponentDataArray(componentData)
             , NodeCount(nodeCount)
@@ -108,7 +108,7 @@ namespace PNC
         {
             o.Structure = nullptr;
             o.ComponentDataArray = nullptr;
-            o.NodeCount = 0;
+            o.NodeCount = NodeCountT<Size_t>::V_0();
         }
 
         Self_t& operator=(Self_t&& o)
@@ -118,7 +118,7 @@ namespace PNC
             auto tmpNodeCount = o.NodeCount;
             o.Structure = nullptr;
             o.ComponentDataArray = nullptr;
-            o.NodeCount = 0;
+            o.NodeCount = NodeCountT<Size_t>::V_0();
             Structure = tmpStructure;
             ComponentDataArray = tmpComponentData;
             NodeCount = tmpNodeCount;
@@ -156,16 +156,11 @@ namespace PNC
         static bool IsSameData(const Self_t& a, const Self_t& b) { return a.ComponentDataArray == b.ComponentDataArray; }
         static ChunkPointerInternal_t& GetInternalChunk(Self_t& a) { return a; }
         static const ChunkPointerInternal_t& GetInternalChunk(const Self_t& a) { return a; }
-        /// <summary>
-        /// Get the size of the chunk.
-        /// The size is the number of valid nodes in the chunk that can be processed by algorithms.
-        /// The size can grow up to the capacity without having to reallocate the component's memory
-        /// </summary>
-        /// <returns>The capacity of the chunk</returns>
-        NodeCountT<Size_t> GetNodeCount()const { return NodeCount; }
-        NodeCapacityT<Size_t> GetNodeCapacity()const { return PropCountToCapacity(NodeCount); }
-        ChunkCountT<Size_t> GetChunkCount()const { return 1; }
-        ChunkCapacityT<Size_t> GetChunkCapacity()const { return 1; }
+
+        NodeCountT<    Size_t> GetNodeCount()    const { return NodeCount; }
+        NodeCapacityT< Size_t> GetNodeCapacity() const { return PropCountToCapacity(NodeCount); }
+        ChunkCountT<   Size_t> GetChunkCount()   const { return ChunkCountT<   Size_t>::V_1(); }
+        ChunkCapacityT<Size_t> GetChunkCapacity()const { return ChunkCapacityT<Size_t>::V_1(); }
         
         /// <summary>
         /// Get the ChunkStructure of this chunk

@@ -337,8 +337,8 @@ namespace PNC
 
     public:
         Size_t GetSize()const { return Size; }
-        Size_t GetSize(const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const { return Size * GetComponentCount(nodeCount, chunkCount); }
-        Size_t GetSize(const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity = 1)const { return Size * GetComponentCount(nodeCapacity, chunkCapacity); }
+        Size_t GetSize(const NodeCountT<   Size_t> nodeCount,    const ChunkCountT<   Size_t> chunkCount =    ChunkCountT<   Size_t>::V_1())const { return Size * GetComponentCount(nodeCount,    chunkCount); }
+        Size_t GetSize(const NodeCapacityT<Size_t> nodeCapacity, const ChunkCapacityT<Size_t> chunkCapacity = ChunkCapacityT<Size_t>::V_1())const { return Size * GetComponentCount(nodeCapacity, chunkCapacity); }
         Size_t GetAlignment()const { return Align; }
         ComponentOwner GetOwner()const { return Owner; }
         const type_info* GetTypeInfo()const { return TypeInfo; }
