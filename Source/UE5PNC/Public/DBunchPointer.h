@@ -6,6 +6,11 @@
 
 namespace PNC
 {
+    /// <summary>
+    /// Will reallocate with a greater NodeCapacity when adding nodes passed the current NodeCapacity.
+    /// It will not shrink NodeCapacity when nodes are removed.
+    /// </summary>
+    /// <typeparam name="TBase"></typeparam>
     template<typename TBase>
     struct DBunchPointer : public TBase
     {
@@ -25,11 +30,19 @@ namespace PNC
         using Base_t::GetChunkCapacity;
         using Base_t::AddNodes;
 
+        /// <summary>
+        /// Add a single node at NodeCount and return the index.
+        /// It will reallocate with a greater NodeCapacity if NodeCount == NodeCapacity.
+        /// </summary>
+        /// <returns></returns>
         Size_t AddNode() 
         { 
             return AddNodes(1); 
         }
-
+        /// <summary>
+        /// Add a multiple sequential nodes at NodeCount and return the index of the first node.
+        /// It will reallocate with a greater NodeCapacity if NodeCount + count >= NodeCapacity.
+        /// </summary>
         Size_t AddNodes(const Size_t count)
         {
             const NodeCountT<Size_t> nodeCount = GetNodeCount();
@@ -43,6 +56,7 @@ namespace PNC
             return Base_t::AddNodes(count);
         }
 
+        // TODO void ShrinkToFit()
     protected:
         using TBase::SetNodeCapacity;
         using TBase::ReallocateMove;

@@ -6,6 +6,7 @@
 
 namespace PNC
 {
+    // TODO complete
     template<typename TBase>
     struct DCarryPointer : public TBase
     {

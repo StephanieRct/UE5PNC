@@ -6,6 +6,7 @@
 
 namespace PNC
 {
+    // TODO complete
     template<typename TBase>
     struct DBarrelPointer : public TBase
     {
@@ -99,42 +100,6 @@ namespace PNC
         using Base_t::GetInternalChunkElement;
 
     protected:
-
-        static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const NodeCountT<Size_t> nodeCount, void** const componentDataArray)
-        {
-            pnc_assert(chunkIndex < chunkArray.ChunkCapacity);
-            pnc_assert(nodeCount <= chunkArray.NodeCapacityPerChunk);
-            Base_t::ConstructChunkElementAndNodes(chunkArray, chunkIndex, nodeFirstIndex, nodeCount, componentDataArray);
-        }
-
-        static void DestructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex)
-        {
-            pnc_assert(chunkIndex < chunkArray.ChunkCapacity);
-            Base_t::DestructChunkElementAndNodes(chunkArray, chunkIndex);
-        }
-
-        // Nodes must fit in target chunk.
-        static void CopyElementAndNodesForward(const Self_t& chunkArrayTo, const Size_t elementFirstIndexTo, const Self_t& chunkArrayFrom, const Size_t elementFirstIndexFrom, const Size_t elementCount)
-        {
-            pnc_assert(chunkArrayTo.NodeCapacityPerChunk >= chunkArrayFrom.NodeCapacityPerChunk);
-            pnc_assert(elementFirstIndexTo < chunkArrayTo.GetChunkCapacity());
-            pnc_assert(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCapacity());
-            pnc_assert(elementFirstIndexFrom < chunkArrayFrom.GetChunkCapacity());
-            pnc_assert(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCapacity());
-
-            Base_t::DestructChunkElementAndNodes(chunkArrayTo, elementFirstIndexTo, chunkArrayFrom, elementFirstIndexFrom, elementCount);
-        }
-
-        static void MoveElementAndNodesForward(Self_t& chunkArrayTo, const Size_t chunkIndexTo, Self_t& chunkArrayFrom, const Size_t chunkIndexFrom, const ChunkCountT<Size_t> chunkCount)
-        {
-            pnc_todo;
-            Base_t::MoveElementAndNodesForward(chunkArrayTo, chunkIndexTo, chunkArrayFrom, chunkIndexFrom, chunkCount);
-        }
-        //void** GetComponentDataArrayForChunk(Size_t chunkIndex)
-        //{
-        //    auto& chunk = GetInternalChunk(*this);
-        //    return &chunk.ComponentDataArray[chunkIndex * chunk.Structure->Components.GetSize()];
-        //}
 
     };
 }
