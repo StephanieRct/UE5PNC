@@ -64,7 +64,7 @@ public:
     }
 
     // Add a chunk with a given chunk structure and capacity.
-    PNC::KChunkArrayTree* NewChunkArray(const PNC::ChunkStructure* const chunkStructure, const PNC::Size_t chunkCount, const PNC::Size_t nodeCountPerChunk)
+    PNC::KArrayTree* NewChunkArray(const PNC::ChunkStructure* const chunkStructure, const PNC::Size_t chunkCount, const PNC::Size_t nodeCountPerChunk)
     {
         return ChunkRegistry.NewChunkArray(chunkStructure, PNC::PropChunkCount(chunkCount), PNC::PropNodeCountPerChunk(nodeCountPerChunk));
     }

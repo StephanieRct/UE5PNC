@@ -4,6 +4,9 @@
 #pragma once
 #include "PNCDefault.h"
 
+/// <summary>
+/// Registries are used to scope the creation of various data.
+/// </summary>
 namespace PNC
 {
     template<typename TComponentType>
@@ -14,15 +17,15 @@ namespace PNC
         using ComponentType_t = TComponentType;
 
     public:
-        Vector<Unique_Ptr<ComponentType_t>> ComponentTypes;
-        HashMap<const type_info*, Size_t> TypeToComponentTypeIndex;
+        std_vector<Unique_Ptr<ComponentType_t>> ComponentTypes;
+        std_unordered_map<const type_info*, Size_t> TypeToComponentTypeIndex;
 
     public:
         template<typename T>
         const ComponentType_t* AddComponentType()
         {
 
-            auto componentType = Make_Unique<ComponentType_t>((T*)nullptr, T::Owner);
+            auto componentType = std_make_unique<ComponentType_t>((T*)nullptr, T::Owner);
             auto* ptr = componentType.get();
             ComponentTypes.push_back(std::move(componentType));
             TypeToComponentTypeIndex.insert({ &typeid(T), ComponentTypes.size() - 1 });
@@ -61,12 +64,12 @@ namespace PNC
 
     public:
         // Keep an array of all our chunk structures
-        Vector<Unique_Ptr<ChunkStructure_t>> ChunkStructures;
-        HashMap< const ChunkStructure_t*, std::size_t, ChunkStructureHasher_t, ChunkStructureEqualler_t> ChunkStructureToIndex;
+        std_vector<Unique_Ptr<ChunkStructure_t>> ChunkStructures;
+        std_unordered_map< const ChunkStructure_t*, std::size_t, ChunkStructureHasher_t, ChunkStructureEqualler_t> ChunkStructureToIndex;
 
         const ChunkStructure_t* GetOrAddChunkStructure(const ComponentType_t* component)
         {
-            auto chunkStructure = Make_Unique<ChunkStructure_t>(component);
+            auto chunkStructure = std_make_unique<ChunkStructure_t>(component);
             auto ptr = chunkStructure.get();
             auto i = ChunkStructureToIndex.find(ptr);
             if (i != ChunkStructureToIndex.end())
@@ -78,7 +81,7 @@ namespace PNC
         // Add a chunk structure from a list of component type
         const ChunkStructure_t* GetOrAddChunkStructure(const std::initializer_list<const ComponentType_t*>& aComponents)
         {
-            auto chunkStructure = Make_Unique<ChunkStructure_t>(aComponents);
+            auto chunkStructure = std_make_unique<ChunkStructure_t>(aComponents);
             auto ptr = chunkStructure.get();
             auto i = ChunkStructureToIndex.find(ptr);
             if (i != ChunkStructureToIndex.end())
@@ -92,11 +95,11 @@ namespace PNC
         template<typename... TComponentTypes>
         const ChunkStructure* GetOrAddChunkStructure(ComponentTypeRegistry_t& componentTypeRegistry)
         {
-            Vector<const ComponentType_t*> componentTypes(sizeof...(TComponentTypes));
+            std_vector<const ComponentType_t*> componentTypes(sizeof...(TComponentTypes));
             Size_t c = 0;
             ((componentTypes[c++] = componentTypeRegistry.GetOrAddComponentType<TComponentTypes>()), ...);
 
-            auto chunkStructure = Make_Unique<ChunkStructure_t>(std::move(componentTypes));
+            auto chunkStructure = std_make_unique<ChunkStructure_t>(std::move(componentTypes));
             auto ptr = chunkStructure.get();
             auto i = ChunkStructureToIndex.find(ptr);
             if (i != ChunkStructureToIndex.end())
@@ -119,8 +122,8 @@ namespace PNC
         using Size_t = typename ChunkStructure_t::Size_t;
 
     public:
-        HashSet<Chunk_t*> Chunks;
-        HashSet<ChunkArray_t*> ChunkArrays;
+        std_unordered_set<Chunk_t*> Chunks;
+        std_unordered_set<ChunkArray_t*> ChunkArrays;
 
     public:
 
@@ -183,7 +186,7 @@ namespace PNC
 
     using ComponentTypeRegistry = ComponentTypeRegistryT<ComponentType>;
     using ChunkStructureRegistry = ChunkStructureRegistryT<ChunkStructure>;
-    using ChunkTreeRegistry = ChunkRegistryT<KChunkTree, KChunkArrayTree>;
+    using ChunkTreeRegistry = ChunkRegistryT<KChunkTree, KArrayTree>;
 
     template<typename TChunkStructure>
     struct PncRegistryT
@@ -200,20 +203,20 @@ namespace PNC
         using ChunkArrayPointer_t = ArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
 
         using KChunkPointer_t = KChunkPointerT<ChunkStructure_t>;
-        using KChunkArrayPointer_t = KChunkArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkArrayPointer_t = KArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
 
         using KChunkTreePointer_t = KChunkTreePointerT<ChunkStructure_t>;
-        using KChunkArrayTreePointer_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkArrayTreePointer_t = KArrayTreePointerT<ChunkStructure_t, ChunkPointer_t>;
 
 
         using Chunk_t = BunchT<ChunkStructure_t>;
         using ChunkArray_t = ArrayT<ChunkStructure_t, ChunkPointer_t>;
 
         using KChunk_t = KBunchT<ChunkStructure_t>;
-        using KChunkArray_t = KChunkArrayT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkArray_t = KArrayT<ChunkStructure_t, ChunkPointer_t>;
 
         using KChunkTree_t = KBunchTreeT<ChunkStructure_t>;
-        using KChunkArrayTree_t = KChunkArrayTreeT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkArrayTree_t = KArrayTreeT<ChunkStructure_t, ChunkPointer_t>;
 
         using ComponentTypeRegistry_t = ComponentTypeRegistryT<ComponentType_t>;
         using ChunkStructureRegistry_t = ChunkStructureRegistryT<ChunkStructure_t>;

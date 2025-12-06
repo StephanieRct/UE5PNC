@@ -13,11 +13,11 @@ namespace PNC
         Chunk,
         Bucket,
         Bunch,
-        ChunkArray,
+        Array,
         ChunkTree,
         BucketTree,
         BunchTree,
-        ChunkArrayTree,
+        ArrayTree,
     };
 
     /// <summary>
@@ -64,11 +64,11 @@ namespace PNC
             {
             case ContainerKind::Chunk:
                 return false;
-            case ContainerKind::ChunkArray:
+            case ContainerKind::Array:
                 return false;
             case ContainerKind::ChunkTree:
                 return true;
-            case ContainerKind::ChunkArrayTree:
+            case ContainerKind::ArrayTree:
                 return true;
             }
         }
@@ -79,11 +79,11 @@ namespace PNC
             {
             case ContainerKind::Chunk:
                 return false;
-            case ContainerKind::ChunkArray:
+            case ContainerKind::Array:
                 return true;
             case ContainerKind::ChunkTree:
                 return false;
-            case ContainerKind::ChunkArrayTree:
+            case ContainerKind::ArrayTree:
                 return true;
             }
         }
@@ -106,11 +106,7 @@ namespace PNC
         using Value_t = ContainerKind;
         ContainerKind Kind;
         ContainerKind GetChunkKind() const { return Kind; }
-        DPropKind(const TProps& props, const ContainerKind kind)
-            : TProps(props)
-            , Kind(kind)
-        {
-        }
+        DPropKind(const TProps& props, const ContainerKind kind) : TProps(props), Kind(kind) {}
     };
 
     template<>

@@ -60,7 +60,7 @@ namespace PNC
         }
 
         DBucketPointer(Self_t&& o)
-            : Base_t(std::forward<Self_t>(o))
+            : Base_t(std::move(o))
             , NodeCapacity(o.NodeCapacity)
         {
             o.NodeCapacity = NodeCapacityT<Size_t>::V_0();
@@ -238,8 +238,8 @@ namespace PNC
             const auto nodeCount = props.GetNodeCount();
             Node_t::AllocateConstructAllComponentsUnsafe(
                         container, 0/*:firstNodeIndex*/, 0/*:firstChunkIndex*/, 
-                                   nodeCount,            PropChunkCount   <Size_t>(1), 
-                                   nodeCapacity,         PropChunkCapacity<Size_t>(1));
+                                   nodeCapacity,         ChunkCapacityT<Size_t>::V_1(), 
+                                   nodeCount,            ChunkCountT<   Size_t>::V_1());
         }
     };
 }

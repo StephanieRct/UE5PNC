@@ -28,7 +28,6 @@ namespace PNC
     public:
         ArrayExtension_t Array;
 
-    public:
         template<typename TProps>
         DArrayPointerInternalT(const DPropsTag& tag, const TProps& props)
             : Base_t(tag, props)

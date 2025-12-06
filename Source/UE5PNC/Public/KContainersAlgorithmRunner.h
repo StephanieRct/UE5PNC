@@ -62,15 +62,15 @@ namespace PNC::Routing
     };
 
     template<typename TChunkStructure, typename TChunkPointerElement>
-    struct SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>> : public SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>
+    struct SetAlgorithmChunk<KArrayTreePointerT<TChunkStructure, TChunkPointerElement>> : public SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>
     {
     public:
         using Base_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
-        using Self_t = SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>>;
+        using Self_t = SetAlgorithmChunk<KArrayTreePointerT<TChunkStructure, TChunkPointerElement>>;
         using ChunkStructure_t = TChunkStructure;
         using ChunkPointerElement_t = TChunkPointerElement;
         using Size_t = typename TChunkStructure::Size_t;
-        using Container_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>;
+        using Container_t = KArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>;
 
         SetAlgorithmChunk(Container_t* container)
             :Base_t(container)

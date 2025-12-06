@@ -26,12 +26,12 @@ namespace PNC
         /// </summary>
         ComponentTypeSet_t Components;
 
-        Vector<Size_t> DefaultConstructibleNodeIndex;
-        Vector<Size_t> DefaultConstructibleChunkIndex;
-        Vector<Size_t> DestructibleNodeIndex;
-        Vector<Size_t> DestructibleChunkIndex;
-        Vector<Size_t> NodeComponentIndex;
-        Vector<Size_t> ChunkComponentIndex;
+        std_vector<Size_t> DefaultConstructibleNodeIndex;
+        std_vector<Size_t> DefaultConstructibleChunkIndex;
+        std_vector<Size_t> DestructibleNodeIndex;
+        std_vector<Size_t> DestructibleChunkIndex;
+        std_vector<Size_t> NodeComponentIndex;
+        std_vector<Size_t> ChunkComponentIndex;
     public:
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace PNC
             Update();
         }
 
-        ChunkStructureT(Vector<const ComponentType_t*>&& types)
+        ChunkStructureT(std_vector<const ComponentType_t*>&& types)
             :Components(std::move(types))
         {
             Update();

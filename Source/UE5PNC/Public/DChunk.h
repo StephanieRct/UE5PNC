@@ -28,12 +28,12 @@ namespace PNC
         using typename Base_t::ChunkPointer_t;
 
         /// <summary>
-        /// Create a VoidNull Container.
+        /// Create a VoidNull Chunk.
         /// </summary>
         DChunk() = default;
 
         /// <summary>
-        /// Create a StructNull Container
+        /// Create a StructNull Chunk
         /// </summary>
         DChunk(const ChunkStructure_t* const chunkStructure)
             : Base_t(chunkStructure)
@@ -41,7 +41,7 @@ namespace PNC
         }
 
         /// <summary>
-        /// Create a StructData Container with (NodeCount) allocated and constructed nodes.
+        /// Create a StructData Chunk with (NodeCount) allocated and constructed nodes.
         /// </summary>
         DChunk(const ChunkStructure_t*const chunkStructure, 
                const NodeCountT<Size_t> nodeCount)
@@ -52,7 +52,7 @@ namespace PNC
         }
 #ifndef PNC_PROPS_STRICT
         /// <summary>
-        /// Create a StructData Container with (NodeCount) allocated and constructed nodes.
+        /// Create a StructData Chunk with (NodeCount) allocated and constructed nodes.
         /// </summary>
         DChunk(const ChunkStructure_t*const chunkStructure, 
                const Size_t nodeCount)

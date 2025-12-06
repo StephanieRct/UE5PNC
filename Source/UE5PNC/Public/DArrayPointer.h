@@ -115,14 +115,14 @@ namespace PNC
         template<typename TContainer, typename TProps>
         static void AllocateConstruct(TContainer& container, const TProps& props)
         {
-            const auto nodeCapacity  = props.GetNodeCapacity();
-            const auto nodeCount     = props.GetNodeCount();
+            const auto nodeCapacity =  props.GetNodeCapacity();
+            const auto nodeCount =     props.GetNodeCount();
             const auto chunkCapacity = props.GetChunkCapacity();
-            const auto chunkCount    = props.GetChunkCount();
+            const auto chunkCount =    props.GetChunkCount();
             Node_t::AllocateConstructAllComponentsUnsafe(
                         container, 0/*:firstNodeIndex*/, 0/*:firstChunkIndex*/, 
-                                   nodeCount,            chunkCount, 
-                                   nodeCapacity,         chunkCapacity);
+                                   nodeCapacity,         chunkCapacity,
+                                   nodeCount,            chunkCount);
             container.Array.Allocate(container, chunkCapacity, nodeCapacity);
             if (chunkCount > 0)
             {
@@ -159,7 +159,7 @@ namespace PNC
         {
             pnc_assert(!IsSameData(containerTo, containerFrom));
 
-            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto nodeCapacity =  containerFrom.GetNodeCapacity();
             const auto chunkCapacity = containerFrom.GetChunkCapacity();
             Base_t::AllocateCopy           (containerTo, containerFrom);
             containerTo.Array.Allocate     (containerTo,                                     nodeCapacity, chunkCapacity);
@@ -180,15 +180,15 @@ namespace PNC
         /// </summary>
         template<typename TContainer>
         static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom, 
-                                   const NodeCapacityT<Size_t> nodeCapacity, 
+                                   const NodeCapacityT< Size_t> nodeCapacity, 
                                    const ChunkCapacityT<Size_t> chunkCapacity)
         {
             pnc_assert(containerToReallocate.IsStructData());
-            pnc_assert(containerFrom        .IsStructData());
+            pnc_assert(containerFrom.        IsStructData());
             pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
             pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
             pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
-            pnc_assert(!IsSameData    (containerToReallocate, containerFrom));
+            pnc_assert(!IsSameData(    containerToReallocate, containerFrom));
 
             Base_t::                    ReallocateCopy(containerToReallocate, containerFrom);
             containerToReallocate.Array.ReallocateCopy(containerToReallocate, containerFrom, containerFrom.Array, nodeCapacity, chunkCapacity);
@@ -196,7 +196,7 @@ namespace PNC
         template<typename TContainer>
         static void ReallocateCopy(TContainer& containerToReallocate, const TContainer& containerFrom)
         { 
-            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto nodeCapacity =  containerFrom.GetNodeCapacity();
             const auto chunkCapacity = containerFrom.GetChunkCapacity();
             return ReallocateCopy(containerToReallocate, containerFrom, nodeCapacity, chunkCapacity);
         }
@@ -214,7 +214,7 @@ namespace PNC
         /// </summary>
         template<typename TContainer>
         static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom, 
-                                   const NodeCapacityT<Size_t> nodeCapacity, 
+                                   const NodeCapacityT< Size_t> nodeCapacity, 
                                    const ChunkCapacityT<Size_t> chunkCapacity)
         {
             Base_t::                    ReallocateMove(containerToReallocate, containerFrom,                      nodeCapacity, chunkCapacity);
@@ -223,7 +223,7 @@ namespace PNC
         template<typename TContainer>
         static void ReallocateMove(TContainer& containerToReallocate, TContainer& containerFrom)
         { 
-            const auto nodeCapacity  = containerFrom.GetNodeCapacity();
+            const auto nodeCapacity =  containerFrom.GetNodeCapacity();
             const auto chunkCapacity = containerFrom.GetChunkCapacity();
             return ReallocateMove(containerToReallocate, containerFrom, nodeCapacity, chunkCapacity);
         }

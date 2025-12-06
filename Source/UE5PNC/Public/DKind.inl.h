@@ -8,8 +8,8 @@
 #include "KContainers.h"
 //#include "KChunkTreePointer.h"
 //#include "KChunkPointer.h"
-//#include "KChunkArrayPointer.h"
-//#include "KChunkArrayTreePointer.h"
+//#include "KArrayPointer.h"
+//#include "KArrayTreePointer.h"
 
 namespace PNC
 {
@@ -20,10 +20,10 @@ namespace PNC
         switch (this->Kind)
         {
         case ContainerKind::Chunk:
-        case ContainerKind::ChunkArray:
+        case ContainerKind::Array:
             return reinterpret_cast<const KChunkPointerT<ChunkStructure_t>*>(this)->GetStructure();
         case ContainerKind::ChunkTree:
-        case ContainerKind::ChunkArrayTree:
+        case ContainerKind::ArrayTree:
             return reinterpret_cast<const KChunkTreePointerT<ChunkStructure_t>*>(this)->GetStructure();
         }
         pnc_assert_no_entry_return(*(ChunkStructure_t*)nullptr);
@@ -35,10 +35,10 @@ namespace PNC
         switch (this->Kind)
         {
         case ContainerKind::Chunk:
-        case ContainerKind::ChunkArray:
+        case ContainerKind::Array:
             return reinterpret_cast<ChunkPointer_t&>(reinterpret_cast<KChunkPointerT<ChunkStructure_t>*>(this)->GetChunk());
         case ContainerKind::ChunkTree:
-        case ContainerKind::ChunkArrayTree:
+        case ContainerKind::ArrayTree:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkTreePointerT<ChunkStructure_t>*>(this)->GetChunk());
         }
         pnc_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
@@ -50,10 +50,10 @@ namespace PNC
         switch (this->Kind)
         {
         case ContainerKind::Chunk:
-        case ContainerKind::ChunkArray:
+        case ContainerKind::Array:
             return reinterpret_cast<ChunkPointer_t&>(reinterpret_cast<KChunkPointerT<ChunkStructure_t>*>(this)->GetChunk());
         case ContainerKind::ChunkTree:
-        case ContainerKind::ChunkArrayTree:
+        case ContainerKind::ArrayTree:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkTreePointerT<ChunkStructure_t>*>(this)->GetChunk());
         }
         pnc_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
@@ -68,10 +68,10 @@ namespace PNC
             pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
         case ContainerKind::ChunkTree:
             pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
-        case ContainerKind::ChunkArray:
-            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
-        case ContainerKind::ChunkArrayTree:
-            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::Array:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::ArrayTree:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
         }
         pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
     }
@@ -85,10 +85,10 @@ namespace PNC
             pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
         case ContainerKind::ChunkTree:
             pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
-        case ContainerKind::ChunkArray:
-            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
-        case ContainerKind::ChunkArrayTree:
-            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::Array:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
+        case ContainerKind::ArrayTree:
+            return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
         }
         pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
     }

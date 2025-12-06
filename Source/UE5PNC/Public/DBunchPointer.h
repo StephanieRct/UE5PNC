@@ -45,8 +45,8 @@ namespace PNC
         /// </summary>
         Size_t AddNodes(const Size_t count)
         {
-            const NodeCountT<Size_t> nodeCount = GetNodeCount();
-            const NodeCapacityT<Size_t> nodeCapacity = GetNodeCapacity();
+            const auto nodeCount =    GetNodeCount();
+            const auto nodeCapacity = GetNodeCapacity();
             if (nodeCount + count > nodeCapacity)
             {
                 const NodeCapacityT<Size_t> newNodeCapacity = std::max(nodeCapacity * 2, PropCountToCapacity(nodeCount + count));

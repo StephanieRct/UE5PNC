@@ -207,6 +207,18 @@ namespace PNC
     template<typename TSize> using NodeCountPerChunkT =    IntProp<TSize, PropId::NodeCountPerChunk>;
     template<typename TSize> using NodeCapacityPerChunkT = IntProp<TSize, PropId::NodeCapacityPerChunk>;
 
+    struct PropComponentDataArray
+    {
+        void** const ComponentDataArray;
+        void** GetComponentDataArray() const { return ComponentDataArray; }
+        PropComponentDataArray(void** value) : ComponentDataArray(value) { }
+        operator void** ()const { return ComponentDataArray; }
+        void* operator->()const { return *ComponentDataArray; }
+        void*& operator*()const { return *ComponentDataArray; }
+    };
+
+
+
     template<typename TSize>
     NodeCountT<TSize> operator-(const NodeCapacityT<TSize>& nodeCapacity, const NodeCountT<TSize>& nodeCount)
     {
@@ -302,25 +314,6 @@ namespace PNC
         NodeCountPerChunkT<Size_t> GetNodeCountPerChunk() const { return NodeCountPerChunk; }
         DNodeCountPerChunk(const TProps& props, const NodeCountPerChunkT<Size_t>& nodeCountPerChunk) : TProps(props), NodeCountPerChunk(nodeCountPerChunk) { }
     };
-    //template<typename TChunkStructure>
-    //struct StructurePtr
-    //{
-    //    using ChunkStructure_t = TChunkStructure;
-    //    const ChunkStructure_t* const StructurePtr;
-    //    const ChunkStructure_t* GetStructurePtr() const { return StructurePtr; }
-
-    //    StructurePtr(const ChunkStructure_t* const structurePtr)
-    //        : StructurePtr(structurePtr)
-    //    {
-    //    }
-    //    operator const ChunkStructure_t* ()const { return StructurePtr; }
-
-    //    const ChunkStructure_t* operator->()const { return StructurePtr; }
-    //    const ChunkStructure_t& operator*()const { return *StructurePtr; }
-    //};
-    //template<typename TStructure> StructurePtr<TStructure> PropStructurePtr(const StructurePtr<TStructure> a) { return a; }
-    //template<typename TStructure> StructurePtr<TStructure> PropStructurePtr(const TStructure*const a) { return StructurePtr<TStructure>(a); }
-
     template<typename TChunkStructure, typename TProps>
     struct DStructurePtr : public TProps
     {
@@ -329,38 +322,9 @@ namespace PNC
         using ChunkStructure_t = TChunkStructure;
         const ChunkStructure_t* const ChunkStructure;
         const ChunkStructure_t* GetStructurePtr() const { return ChunkStructure; }
-
-        //DStructurePtr(const TProps& props, const ChunkStructure_t* const chunkStructure)
-        //    : TProps(props)
-        //    , ChunkStructure(chunkStructure)
-        //{
-        //}
-        DStructurePtr(const TProps& props, const ChunkStructure_t* const chunkStructure)
-            : TProps(props)
-            , ChunkStructure(chunkStructure)
-        {
-        }
+        DStructurePtr(const TProps& props, const ChunkStructure_t* const chunkStructure) : TProps(props), ChunkStructure(chunkStructure) { }
     };
 
-    //template<typename TChunkStructure>
-    //struct PropTraits<StructurePtr<TChunkStructure>> : public PropTraitsDefault2<TChunkStructure, StructurePtr<TChunkStructure>, DStructurePtr>
-    //{
-    //};
-
-    struct PropComponentDataArray
-    {
-        void** const ComponentDataArray;
-        void** GetComponentDataArray() const { return ComponentDataArray; }
-
-        PropComponentDataArray(void** value)
-            : ComponentDataArray(value)
-        {
-        }
-        operator void** ()const { return ComponentDataArray; }
-
-        void* operator->()const { return *ComponentDataArray; }
-        void*& operator*()const { return *ComponentDataArray; }
-    };
     template<typename TProps>
     struct DComponentDataArray : public TProps
     {
@@ -375,65 +339,19 @@ namespace PNC
         {
         }
     };
-    template<>
-    struct PropTraits<void**> : public PropTraitsDefault<DComponentDataArray> {};
-    template<>
-    struct PropTraits<PropComponentDataArray> : public PropTraitsDefault<DComponentDataArray> {};
 
-    template<typename TSize>
-    struct PropTraits<NodeCountT<TSize>> : public PropTraitsDefault<DNodeCount>
-    {
-    };
-    //
-    template<typename TSize>
-    struct PropTraits<NodeCapacityT<TSize>> : public PropTraitsDefault<DNodeCapacity>
-    {
-    };
+    template<              > struct PropTraits<void**>                       : public PropTraitsDefault<DComponentDataArray> {};
+    template<              > struct PropTraits<PropComponentDataArray>       : public PropTraitsDefault<DComponentDataArray> {};
+    template<typename TSize> struct PropTraits<NodeCountT<           TSize>> : public PropTraitsDefault<DNodeCount> {};
+    template<typename TSize> struct PropTraits<NodeCapacityT<        TSize>> : public PropTraitsDefault<DNodeCapacity> {};
+    template<typename TSize> struct PropTraits<ChunkCountT<          TSize>> : public PropTraitsDefault<DChunkCount> {};
+    template<typename TSize> struct PropTraits<ChunkCapacityT<       TSize>> : public PropTraitsDefault<DChunkCapacity> {};
+    template<typename TSize> struct PropTraits<NodeCountPerChunkT<   TSize>> : public PropTraitsDefault<DNodeCountPerChunk> {};
+    template<typename TSize> struct PropTraits<NodeCapacityPerChunkT<TSize>> : public PropTraitsDefault<DNodeCapacityPerChunk> {};
 
-    template<typename TSize>
-    struct PropTraits<ChunkCountT<TSize>> : public PropTraitsDefault<DChunkCount>
-    {
-    };
-
-    template<typename TSize>
-    struct PropTraits<ChunkCapacityT<TSize>> : public PropTraitsDefault<DChunkCapacity>
-    {
-    };
-
-    template<typename TSize>
-    struct PropTraits<NodeCountPerChunkT<TSize>> : public PropTraitsDefault<DNodeCountPerChunk>
-    {
-    };
-
-    template<typename TSize>
-    struct PropTraits<NodeCapacityPerChunkT<TSize>> : public PropTraitsDefault<DNodeCapacityPerChunk>
-    {
-    };
-
-
-
-
-
-
-
-
-
-    
-    template<typename TSize>
-    NodeCapacityT<TSize> PropCountToCapacity(const NodeCountT<TSize> nodeCount)
-    {
-        return NodeCapacityT<TSize>(nodeCount.Value);
-    }
-    template<typename TSize>
-    ChunkCapacityT<TSize> PropCountToCapacity(const ChunkCountT<TSize> chunkCount)
-    {
-        return ChunkCapacityT<TSize>(chunkCount.Value);
-    }
-    template<typename TSize>
-    NodeCapacityPerChunkT<TSize> PropCountToCapacity(const NodeCountPerChunkT<TSize> nodeCountPerChunk)
-    {
-        return NodeCapacityPerChunkT<TSize>(nodeCountPerChunk.Value);
-    }
+    template<typename TSize> NodeCapacityT<        TSize> PropCountToCapacity(const NodeCountT<        TSize> nodeCount) {         return NodeCapacityT<        TSize>(nodeCount.Value); }
+    template<typename TSize> ChunkCapacityT<       TSize> PropCountToCapacity(const ChunkCountT<       TSize> chunkCount) {        return ChunkCapacityT<       TSize>(chunkCount.Value); }
+    template<typename TSize> NodeCapacityPerChunkT<TSize> PropCountToCapacity(const NodeCountPerChunkT<TSize> nodeCountPerChunk) { return NodeCapacityPerChunkT<TSize>(nodeCountPerChunk.Value); }
 
     namespace Selectors
     {
@@ -464,8 +382,6 @@ namespace PNC
         template<typename TSize> struct SelectProp<ChunkCountT          <TSize>> : public SelectPropDefault<ChunkCountT          <TSize>> {};
         template<typename TSize> struct SelectProp<NodeCapacityPerChunkT<TSize>> : public SelectPropDefault<NodeCapacityPerChunkT<TSize>> {};
         template<typename TSize> struct SelectProp<NodeCountPerChunkT   <TSize>> : public SelectPropDefault<NodeCountPerChunkT   <TSize>> {};
-
-        //template<typename TStructure> struct SelectProp<StructurePtr   <TStructure>> : public SelectPropDefault<StructurePtr   <TStructure>> {};
     }
     template<typename TSize, typename TIn> NodeCapacityT        <TSize> PropNodeCapacityT        (const TIn& a) { return Selectors::SelectProp<TIn>::GetProp<NodeCapacityT        <TSize>>(a); }
     template<typename TSize, typename TIn> NodeCountT           <TSize> PropNodeCountT           (const TIn& a) { return Selectors::SelectProp<TIn>::GetProp<NodeCountT           <TSize>>(a); }
@@ -473,13 +389,6 @@ namespace PNC
     template<typename TSize, typename TIn> ChunkCountT          <TSize> PropChunkCountT          (const TIn& a) { return Selectors::SelectProp<TIn>::GetProp<ChunkCountT          <TSize>>(a); }
     template<typename TSize, typename TIn> NodeCapacityPerChunkT<TSize> PropNodeCapacityPerChunkT(const TIn& a) { return Selectors::SelectProp<TIn>::GetProp<NodeCapacityPerChunkT<TSize>>(a); }
     template<typename TSize, typename TIn> NodeCountPerChunkT   <TSize> PropNodeCountPerChunkT   (const TIn& a) { return Selectors::SelectProp<TIn>::GetProp<NodeCountPerChunkT   <TSize>>(a); }
-
-    //template<typename TStructure, typename TIn> StructurePtr   <TStructure> PropStructurePtrT(const TIn& a) { return Selectors::SelectProp<TIn>::GetProp<StructurePtr   <TStructure>>(a); }
-    
-
-
-
-
 
     /// <summary>
     /// Append Prop decorator only if props doesn't have the decorator present.
@@ -490,35 +399,47 @@ namespace PNC
         return PropTraits<TProp>::DecorateSingle(props, newProp);
     }
 
+    /// <summary>
+    /// Begin a Props type. All Props types habe the base DProps<TSize>.
+    /// </summary>
     template<typename TSize, typename TProp>
     constexpr auto BeginProps(const TProp& prop)
     {
         return PropTraits<TProp>::Decorate(DProps<TSize>(), prop);
     }
 
+    /// <summary>
+    /// Append a Prop decorator to Props type
+    /// </summary>
     template<typename TProp, typename TProps>
     constexpr auto AppendProp(const TProps& props, const TProp& newProp)
     {
         return PropTraits<TProp>::Decorate(props, newProp);
     }
 
-
+    /// <summary>
+    /// Begin a Props type from a single prop
+    /// </summary>
     template <typename TSize, typename T>
-    constexpr auto MakePropsUnfold(const T& prop) {
+    constexpr auto CombinePropsUnfold(const T& prop) {
         return BeginProps<TSize>(prop);
     }
 
+    /// <summary>
+    /// Combine all props from a parameter pack
+    /// </summary>
     template <typename TSize, typename T, typename... Rest>
-    constexpr auto MakePropsUnfold(const T& first, Rest&&... rest) {
+    constexpr auto CombinePropsUnfold(const T& first, Rest&&... rest) {
         static_assert(!std::is_same_v<TSize, T>);
-        return AppendProp(MakePropsUnfold<TSize>(rest...), first);
+        return AppendProp(CombinePropsUnfold<TSize>(rest...), first);
     }
 
+    /// <summary>
+    /// Make a Props type from a parameter pack
+    /// </summary>
     template<typename TSize, typename... TProps>
     constexpr auto MakeProps(TProps&&... props)
     {
-        return MakePropsUnfold<TSize>(props...);
+        return CombinePropsUnfold<TSize>(props...);
     }
-
-
 }

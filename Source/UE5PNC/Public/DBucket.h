@@ -12,7 +12,7 @@ namespace PNC
     /// Container with a variable NodeCount of constructed nodes smaller or equal to a fixed NodeCapacity of allocated nodes and their components.
     /// A Bucket has a fix capacity of allocated nodes and a variable number of constructed nodes stating at index 0 that cannot overflow the capacity. 
     /// 
-    /// Each Component data is allocated sequentially in memory with the same NodeCapacity
+    /// Each Component data is allocated sequentially in memory with the same NodeCapacity or ChunkCapacity(1)
     /// </summary>
     template<typename TBase>
     struct DBucket : public TBase

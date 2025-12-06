@@ -13,7 +13,7 @@ namespace PNC
     /// <summary>
     /// Execute an algorithm on a DKind container
     /// It will retreive the container's ChunkPointer according to the kind in DKind and
-    /// execute the algorithm using the appropriate AlgorithmRunner Chunk/ChunkArray
+    /// execute the algorithm using the appropriate AlgorithmRunner Chunk/Array
     /// </summary>
     template<typename TAlgorithm, typename TContainer>
     struct AlgorithmRunnerKindPointerSwitch
@@ -25,13 +25,13 @@ namespace PNC
         using ChunkStructure_t = typename TContainer::ChunkStructure_t;
         using Size_t = typename Container_t::Size_t;
 
-        using KindPointer_t = KKindPointerT<ChunkStructure_t>;
+        using KindPointer_t = KindPointerT<ChunkStructure_t>;
         using ChunkPointer_t = ChunkPointerT<ChunkStructure_t>;
         using ChunkArrayPointer_t = ArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
         using KChunkPointer_t = KChunkPointerT<ChunkStructure_t>;
-        using KChunkArrayPointer_t = KChunkArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkArrayPointer_t = KArrayPointerT<ChunkStructure_t, ChunkPointer_t>;
         using KChunkTreePointer_t = KChunkTreePointerT<ChunkStructure_t>;
-        using KChunkArrayTreePointer_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointer_t>;
+        using KChunkArrayTreePointer_t = KArrayTreePointerT<ChunkStructure_t, ChunkPointer_t>;
 
     public:
         /// <summary>
@@ -46,11 +46,11 @@ namespace PNC
             {
             case ContainerKind::Chunk:
                 return AlgorithmRunnerChunk<KChunkPointer_t>::TryRun(algorithm, (KChunkPointer_t&)container);
-            case ContainerKind::ChunkArray:
+            case ContainerKind::Array:
                 return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayPointer_t>::TryRun(algorithm, (KChunkArrayPointer_t&)container);
             case ContainerKind::ChunkTree:
                 return AlgorithmRunnerChunk<KChunkTreePointer_t>::TryRun(algorithm, (KChunkTreePointer_t&)container);
-            case ContainerKind::ChunkArrayTree:
+            case ContainerKind::ArrayTree:
                 return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayTreePointer_t>::TryRun(algorithm, (KChunkArrayTreePointer_t&)container);
             }
             return true;
@@ -71,11 +71,11 @@ namespace PNC
             {
             case ContainerKind::Chunk:
                 return AlgorithmRunnerChunk<KChunkPointer_t>::TryRun(router, algorithm, (KChunkPointer_t&)container);
-            case ContainerKind::ChunkArray:
+            case ContainerKind::Array:
                 return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayPointer_t>::TryRun(router, algorithm, (KChunkArrayPointer_t&)container);
             case ContainerKind::ChunkTree:
                 return AlgorithmRunnerChunk<KChunkTreePointer_t>::TryRun(router, algorithm, (KChunkTreePointer_t&)container);
-            case ContainerKind::ChunkArrayTree:
+            case ContainerKind::ArrayTree:
                 return AlgorithmRunnerChunkArray<Algorithm_t, KChunkArrayTreePointer_t>::TryRun(router, algorithm, (KChunkArrayTreePointer_t&)container);
             }
             return true;

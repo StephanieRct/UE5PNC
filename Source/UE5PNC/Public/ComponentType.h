@@ -59,7 +59,7 @@ namespace PNC
                 new(p + i) T();
             }
         }
-        // void* const baseComponentData, const Size_t firstIndex, const Size_t count
+        // void* const baseData, const Size_t firstIndex, const Size_t count
         static FnDataProcessor<TSize> Get()
         {
             return &Construct;
@@ -353,318 +353,275 @@ namespace PNC
         bool IsNonTrivialCopyAssignment()const { return !!NonTrivialCopyAssignForward; }
         bool IsNonTrivialSwap()const { return !!NonTrivialSwapForward; }
 
-
-        void ConstructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count) const
+        /// <summary>
+        /// Construct array of component (can be either NodeComponent or ChunkComponent)
+        /// </summary>
+        void ConstructDataUnsafe(void* const baseData, const Size_t firstComponentIndex, const Size_t count) const
         {
-            pnc_assert(!!baseComponentData);
+            pnc_assert(!!baseData);
             pnc_assert(firstComponentIndex >= 0);
             pnc_assert(count >= 0);
-            pnc_assert_owns(baseComponentData, (firstComponentIndex + count) * Size);
+            pnc_assert_owns(baseData, (firstComponentIndex + count) * Size);
 
 #ifdef PNC_MEMORY_NODE_CONSTRUCTZERO
-            std::fill((uint8*)baseComponentData + firstComponentIndex * Size, (uint8*)baseComponentData + (firstComponentIndex + count) * Size, 0);
+            std::fill((uint8*)baseData + firstComponentIndex * Size, (uint8*)baseData + (firstComponentIndex + count) * Size, 0);
 #endif
             if (IsNonTrivialConstruct())
-                NonTrivialConstruct(baseComponentData, firstComponentIndex, count);
+                NonTrivialConstruct(baseData, firstComponentIndex, count);
 #if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) && !defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
             else
-                std::fill(baseComponentData + firstComponentIndex * Size, baseComponentData + (firstComponentIndex + count) * Size, 0);
+                std::fill(baseData + firstComponentIndex * Size, baseData + (firstComponentIndex + count) * Size, 0);
 #endif
         }
         
-        void ConstructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                                     const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount) const
+        /// <summary>
+        /// Construct array of component using either node or chunk props depending on the component owner.
+        /// </summary>
+        void ConstructComponentUnsafe(void* const baseData,
+                                      const            Size_t  firstNodeIndex, const             Size_t firstChunkIndex,
+                                      const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount) const
         {
-            ConstructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
-                                                   GetComponentCount(nodeCount,      chunkCount));
+            ConstructDataUnsafe(baseData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
+                                          GetComponentCount(nodeCount,      chunkCount));
         }
 
-        void DestructDataUnsafe(void* const baseComponentData, const Size_t firstComponentIndex, const Size_t count) const
+        /// <summary>
+        /// Destruct array of component (can be either NodeComponent or ChunkComponent)
+        /// </summary>
+        void DestructDataUnsafe(void* const baseData, const Size_t firstComponentIndex, const Size_t count) const
         {
-            pnc_assert(!!baseComponentData);
+            pnc_assert(!!baseData);
             pnc_assert(firstComponentIndex >= 0);
             pnc_assert(count >= 0);
-            pnc_assert_owns(baseComponentData, (firstComponentIndex + count) * Size);
+            pnc_assert_owns(baseData, (firstComponentIndex + count) * Size);
             if (IsNonTrivialDestruct())
-                NonTrivialDestruct(baseComponentData, firstComponentIndex, count);
+                NonTrivialDestruct(baseData, firstComponentIndex, count);
 #ifdef PNC_MEMORY_NODE_DESTRUCTZERO
-            std::fill((uint8*)baseComponentData + firstComponentIndex * Size, (uint8*)baseComponentData + (firstComponentIndex + count) * Size, 0);
+            std::fill((uint8*)baseData + firstComponentIndex * Size, (uint8*)baseData + (firstComponentIndex + count) * Size, 0);
 #endif
         }
-        
-        void DestructComponentUnsafe(void* const baseComponentData, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                                    const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount) const
+
+        /// <summary>
+        /// Destruct array of component using either node or chunk props depending on the component owner.
+        /// </summary>
+        void DestructComponentUnsafe(void* const baseData, 
+                                     const            Size_t firstNodeIndex, const             Size_t  firstChunkIndex,
+                                     const NodeCountT<Size_t> nodeCount,     const ChunkCountT<Size_t> chunkCount) const
         {
-            DestructDataUnsafe(baseComponentData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
+            DestructDataUnsafe(baseData, GetComponentIndex(firstNodeIndex, firstChunkIndex),
                                                   GetComponentCount(nodeCount,      chunkCount));
         }
 
-        void MoveConstructDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
-                                            void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
+        /// <summary>
+        /// Move-Construct components between 2 arrays
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void MoveConstructDataForwardUnsafe(void* const baseDataTo,   const Size_t firstComponentIndexTo,
+                                            void* const baseDataFrom, const Size_t firstComponentIndexFrom,
                                             const Size_t count) const
         {
-            pnc_assert(!!baseComponentDataTo);
-            pnc_assert(!!baseComponentDataFrom);
+            pnc_assert(!!baseDataTo);
+            pnc_assert(!!baseDataFrom);
             pnc_assert(firstComponentIndexTo >= 0);
             pnc_assert(firstComponentIndexFrom >= 0);
             pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseComponentDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
+            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialMoveConstruct())
-                NonTrivialMoveConstructForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
+                NonTrivialMoveConstructForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
             else
             {
                 auto dataLength = count * Size;
-                memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
+                memcpy_s((uint8*)baseDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseDataFrom + firstComponentIndexFrom * Size, dataLength);
 
             }
         }
-        void MoveConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                                 void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                 const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
+
+        /// <summary>
+        /// Move-Construct components between 2 arrays using either node or chunk props depending on the component owner.
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void MoveConstructComponentForwardUnsafe(
+                void* const baseDataTo,   const            Size_t  firstNodeIndexTo,   const             Size_t  firstChunkIndexTo,
+                void* const baseDataFrom, const            Size_t  firstNodeIndexFrom, const             Size_t  firstChunkIndexFrom,
+                                          const NodeCountT<Size_t> nodeCount,          const ChunkCountT<Size_t> chunkCount)const
         {
-            MoveConstructDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
-                                           baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+            MoveConstructDataForwardUnsafe(baseDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
+                                           baseDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
                                                                   GetComponentCount(nodeCount,          chunkCount));
         }
-        
-        void MoveAssignDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
-                                         void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
-                                         const Size_t count)const
+
+        /// <summary>
+        /// Move-Assign components between 2 arrays
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void MoveAssignDataForwardUnsafe(void* const baseDataTo,   const Size_t firstComponentIndexTo,
+                                         void* const baseDataFrom, const Size_t firstComponentIndexFrom,
+                                                                   const Size_t count)const
         {
-            pnc_assert(!!baseComponentDataTo);
-            pnc_assert(!!baseComponentDataFrom);
+            pnc_assert(!!baseDataTo);
+            pnc_assert(!!baseDataFrom);
             pnc_assert(firstComponentIndexTo >= 0);
             pnc_assert(firstComponentIndexFrom >= 0);
             pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseComponentDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
+            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialMoveConstruct())
-                NonTrivialMoveAssignForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
+                NonTrivialMoveAssignForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
             else
             {
                 auto dataLength = count * Size;
-                memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
-
+                memcpy_s((uint8*)baseDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseDataFrom + firstComponentIndexFrom * Size, dataLength);
             }
         }
-        void MoveAssignComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                              void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                              const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
+
+        /// <summary>
+        /// Move-Assign components between 2 arrays using either node or chunk props depending on the component owner.
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void MoveAssignComponentForwardUnsafe(
+                 void* const baseDataTo,   const            Size_t  firstNodeIndexTo,   const             Size_t  firstChunkIndexTo,
+                 void* const baseDataFrom, const            Size_t  firstNodeIndexFrom, const             Size_t  firstChunkIndexFrom,
+                                           const NodeCountT<Size_t> nodeCount,          const ChunkCountT<Size_t> chunkCount)const
         {
-            MoveAssignDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
-                                        baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                                                               GetComponentCount(nodeCount,          chunkCount));
+            MoveAssignDataForwardUnsafe(baseDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
+                                        baseDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+                                                      GetComponentCount(nodeCount,          chunkCount));
         }
 
-        void CopyConstructDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
-                                      const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
-                                      const Size_t count)const
+        /// <summary>
+        /// Copy-Construct components between 2 arrays
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void CopyConstructDataForwardUnsafe(void* const baseDataTo,   const Size_t firstComponentIndexTo,
+                                      const void* const baseDataFrom, const Size_t firstComponentIndexFrom,
+                                                                      const Size_t count)const
         {
-            pnc_assert(!!baseComponentDataTo);
-            pnc_assert(!!baseComponentDataFrom);
+            pnc_assert(!!baseDataTo);
+            pnc_assert(!!baseDataFrom);
             pnc_assert(firstComponentIndexTo >= 0);
             pnc_assert(firstComponentIndexFrom >= 0);
             pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseComponentDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
+            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialCopyConstruct())
-                NonTrivialCopyConstructForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
+                NonTrivialCopyConstructForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
             else
             {
                 auto dataLength = count * Size;
-                memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
+                memcpy_s((uint8*)baseDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseDataFrom + firstComponentIndexFrom * Size, dataLength);
             }
         }
-        void CopyConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                           const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                           const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
+
+        /// <summary>
+        /// Copy-Construct components between 2 arrays using either node or chunk props depending on the component owner.
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void CopyConstructComponentForwardUnsafe(
+                       void* const baseDataTo,   const            Size_t  firstNodeIndexTo,   const             Size_t  firstChunkIndexTo,
+                 const void* const baseDataFrom, const            Size_t  firstNodeIndexFrom, const             Size_t  firstChunkIndexFrom,
+                                                 const NodeCountT<Size_t> nodeCount,          const ChunkCountT<Size_t> chunkCount)const
         {
-            CopyConstructDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
-                                           baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                                                                  GetComponentCount(nodeCount,          chunkCount));
+            CopyConstructDataForwardUnsafe(baseDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
+                                           baseDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+                                                         GetComponentCount(nodeCount,          chunkCount));
         }
         
-
-        
-        void CopyAssignDataForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstComponentIndexTo,
-                                   const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom,
-                                   const Size_t count)const
+        /// <summary>
+        /// Copy-Assign components between 2 arrays.
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void CopyAssignDataForwardUnsafe(void* const baseDataTo,   const Size_t firstComponentIndexTo,
+                                   const void* const baseDataFrom, const Size_t firstComponentIndexFrom,
+                                                                   const Size_t count)const
         {
-            pnc_assert(!!baseComponentDataTo);
-            pnc_assert(!!baseComponentDataFrom);
+            pnc_assert(!!baseDataTo);
+            pnc_assert(!!baseDataFrom);
             pnc_assert(firstComponentIndexTo >= 0);
             pnc_assert(firstComponentIndexFrom >= 0);
             pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseComponentDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseComponentDataFrom, (firstComponentIndexFrom + count) * Size);
+            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialCopyConstruct())
-                NonTrivialCopyAssignForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count);
+                NonTrivialCopyAssignForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
             else
             {
                 auto dataLength = count * Size;
-                memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
+                memcpy_s((uint8*)baseDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseDataFrom + firstComponentIndexFrom * Size, dataLength);
             }
         }
-        void CopyAssignComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                        const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                        const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
+
+        /// <summary>
+        /// Copy-Assign components between 2 arrays using either node or chunk props depending on the component owner.
+        /// Notes:
+        ///     baseDataTo and baseDataFrom CAN be the same but must not overlap forward.
+        /// </summary>
+        void CopyAssignComponentForwardUnsafe(
+                       void* const baseDataTo,   const            Size_t  firstNodeIndexTo,   const             Size_t  firstChunkIndexTo,
+                 const void* const baseDataFrom, const            Size_t  firstNodeIndexFrom, const             Size_t  firstChunkIndexFrom,
+                                                 const NodeCountT<Size_t> nodeCount,          const ChunkCountT<Size_t> chunkCount)const
         {
-            CopyAssignDataForwardUnsafe(baseComponentDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
-                                        baseComponentDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-                                                               GetComponentCount(nodeCount,          chunkCount));
+            CopyAssignDataForwardUnsafe(baseDataTo,   GetComponentIndex(firstNodeIndexTo,   firstChunkIndexTo),
+                                        baseDataFrom, GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
+                                                      GetComponentCount(nodeCount,          chunkCount));
         }
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //void CopyConstructComponentForwardUnsafe(void* const baseComponentDataTo,   const Size_t firstNodeIndexTo,
-        //                                   const void* const baseComponentDataFrom, const Size_t firstNodeIndexFrom,
-        //                                   const NodeCountT<Size_t> nodeCount)const
-        //{
-        //    CopyConstructDataForwardUnsafe(baseComponentDataTo,   firstNodeIndexTo,
-        //                                   baseComponentDataFrom, firstNodeIndexFrom, 1);
-        //}
-
-
-
-
-
-
-        //void MoveComponentDataForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
-        //{
-        //    pnc_assert(!!baseComponentDataTo);
-        //    pnc_assert(!!baseComponentDataFrom);
-        //    pnc_assert(firstComponentIndexTo >= 0);
-        //    pnc_assert(firstComponentIndexFrom >= 0);
-        //    pnc_assert(count >= 0);
-        //    pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-
-        //    if (IsUserMovable())
-        //        NonTrivialMoveConstructForward(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
-        //    else
-        //    {
-        //        auto dataLength = count * Size;
-        //        memcpy_s((uint8*)baseComponentDataTo + firstComponentIndexTo * Size, dataLength, (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size, dataLength);
-        //    }
-        //}
-
-        //void SwapComponentDataForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom, const Size_t firstComponentIndexTo, const Size_t firstComponentIndexFrom, const Size_t count)const
-        //{
-        //    pnc_assert(!!baseComponentDataTo);
-        //    pnc_assert(!!baseComponentDataFrom);
-        //    pnc_assert(firstComponentIndexTo >= 0);
-        //    pnc_assert(firstComponentIndexFrom >= 0);
-        //    pnc_assert(count >= 0);
-        //    pnc_assert(!IsOverlappingForward(baseComponentDataTo, firstComponentIndexTo, baseComponentDataFrom, firstComponentIndexFrom, count));
-
-        //    if (IsUserSwappable())
-        //        NodeSwapForward(baseComponentDataTo, baseComponentDataFrom, firstComponentIndexTo, firstComponentIndexFrom, count);
-        //    else
-        //    {
-        //        auto dataCount = GetComponentCount(count) * Size;
-        //        auto to = (uint8*)baseComponentDataTo + firstComponentIndexTo * Size;
-        //        auto from = (uint8*)baseComponentDataFrom + firstComponentIndexFrom * Size;
-        //        std::swap_ranges(to, to + dataCount, from);
-        //    }
-        //}
-
-
-
-        //void MoveComponentForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)const
-        //{
-        //    MoveComponentDataForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
-        //        GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
-        //        GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-        //        GetComponentCount(nodeCount, chunkCount));
-        //}
-
-        //void SwapComponentForwardUnsafe(void* const baseComponentDataTo, void* const baseComponentDataFrom,
-        //    const Size_t firstNodeIndexTo, const Size_t firstNodeIndexFrom, const NodeCountT<Size_t> nodeCount,
-        //    const Size_t firstChunkIndexTo = 0, const Size_t firstChunkIndexFrom = 0, const ChunkCountT<Size_t> chunkCount = 1)const
-        //{
-        //    SwapComponentDataForwardUnsafe(baseComponentDataTo, baseComponentDataFrom,
-        //        GetComponentIndex(firstNodeIndexTo, firstChunkIndexTo),
-        //        GetComponentIndex(firstNodeIndexFrom, firstChunkIndexFrom),
-        //        GetComponentCount(nodeCount, chunkCount));
-        //}
-
-
-        ///// <summary>
-        ///// Copy component data from one chunk of memory to another.
-        ///// </summary>
-        ///// <param name="to">destination memory</param>
-        ///// <param name="from">source memory</param>
-        ///// <param name="nodeCount">How many component instances to copy</param>
-        //void Copy(void* const to, void const* from, const NodeCountT<Size_t> nodeCount, const ChunkCapacityT<Size_t> chunkCapacity = 1)const
-        //{
-        //    auto count = GetComponentIndex(nodeCount, chunkCapacity);
-        //    memcpy_s(to, count * Size, from, count * Size);
-        //}
-
-        //void* SubChunk(void* ptr, Size_t count)const
-        //{
-        //    switch (Owner)
-        //    {
-        //    case ComponentOwner_Node:
-        //        return ptr + count * Size;
-        //    case ComponentOwner_Chunk:
-        //        return ptr + Size;
-        //    default:
-        //        pnc_assert_no_entry();
-        //        return -1;
-        //    }
-        //}
-
-        void* Forward(void* const ptr, const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const
+        /// <summary>
+        /// Offset a pointer forward by a number of nodes or chunks depending on the component owner.
+        /// </summary>
+        void* Forward(void* const ptr, const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             return (uint8*)ptr + GetComponentCount(nodeCount, chunkCount) * Size;
         }
-        void* Backward(void* const ptr, const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const
+
+        /// <summary>
+        /// Offset a pointer backward by a number of nodes or chunks depending on the component owner.
+        /// </summary>
+        void* Backward(void* const ptr, const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             return (uint8*)ptr - GetComponentCount(nodeCount, chunkCount) * Size;
         }
 
-        bool IsOverlappingForward(const void* const baseComponentDataTo, const Size_t firstComponentIndexTo, const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, const Size_t count)const
+        /// <summary>
+        /// Returns if 2 ranges of memory overlap in a forward operation.
+        /// </summary>
+        bool IsOverlappingForward(const void* const baseDataTo, const Size_t firstComponentIndexTo, const void* const baseDataFrom, const Size_t firstComponentIndexFrom, const Size_t count)const
         {
-            char* toBegin = (char*)baseComponentDataTo + firstComponentIndexTo * Size;
-            char* fromBegin = (char*)baseComponentDataFrom + firstComponentIndexFrom * Size;
+            char* toBegin = (char*)baseDataTo + firstComponentIndexTo * Size;
+            char* fromBegin = (char*)baseDataFrom + firstComponentIndexFrom * Size;
             char* fromEnd = fromBegin + count * Size;
             return toBegin > fromBegin && toBegin < fromEnd;
         }
-        bool IsOverlappingBackward(const void* const baseComponentDataTo, const Size_t firstComponentIndexTo, const void* const baseComponentDataFrom, const Size_t firstComponentIndexFrom, const Size_t count)const
-        {
-            return IsOverlappingForward(baseComponentDataFrom, firstComponentIndexFrom, baseComponentDataTo, firstComponentIndexTo, count);
-        }
 
+        /// <summary>
+        /// Returns if 2 ranges of memory overlap in a backward operation.
+        /// </summary>
+        bool IsOverlappingBackward(const void* const baseDataTo, const Size_t firstComponentIndexTo, const void* const baseDataFrom, const Size_t firstComponentIndexFrom, const Size_t count)const
+        {
+            return IsOverlappingForward(baseDataFrom, firstComponentIndexFrom, baseDataTo, firstComponentIndexTo, count);
+        }
 
         /// <summary>
         /// Figure out the index into an array of this component type where a node's component instance is stored.
         /// </summary>
         /// <param name="nodeIndex"></param>
         /// <returns></returns>
-        Size_t GetComponentIndex(const Size_t nodeIndex, const Size_t chunkIndex = 0)const
+        Size_t GetComponentIndex(const Size_t nodeIndex, const Size_t chunkIndex)const
         {
             switch (Owner)
             {
@@ -676,11 +633,11 @@ namespace PNC
                 pnc_assert_no_entry_return(-1);
             }
         }
-        Size_t GetComponentCount(const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount = 1)const
+        Size_t GetComponentCount(const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const
         {
             return GetComponentIndex(nodeCount, chunkCount);
         }
-        Size_t GetComponentCount(const NodeCapacityT<Size_t> nodeCount, const ChunkCapacityT<Size_t> chunkCount = 1)const
+        Size_t GetComponentCount(const NodeCapacityT<Size_t> nodeCount, const ChunkCapacityT<Size_t> chunkCount)const
         {
             return GetComponentIndex(nodeCount, chunkCount);
         }

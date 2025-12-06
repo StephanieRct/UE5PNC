@@ -2,6 +2,7 @@
 // Copyright (c) 2025 Stephanie Rancourt
 
 #pragma once
+#include "common.h"
 
 #ifdef PNC_MEMORYTRACKER
 #   define pnc_alloc(size, align) ::PNC::MemoryTracker::Allocate(size, align)
@@ -32,7 +33,7 @@ namespace PNC
         std::map<uint8*, Alloc> Allocations;
         int AllocationCount;
         
-        __declspec(noinline) static void* Allocate(std::size_t const size, std::size_t const alignment)
+        PNC_DEBUG_NOINLINE static void* Allocate(std::size_t const size, std::size_t const alignment)
         {
             MemoryTracker& instance = Instance;
             void* ptr = FMemory::Malloc(size, alignment);
@@ -46,7 +47,7 @@ namespace PNC
             }
             return ptr;
         }
-        __declspec(noinline) static void Deallocate(void* const ptr, std::size_t const size, std::size_t const alignment)
+        PNC_DEBUG_NOINLINE static void Deallocate(void* const ptr, std::size_t const size, std::size_t const alignment)
         {
             MemoryTracker& instance = Instance;
             if (ptr != nullptr)
@@ -79,7 +80,7 @@ namespace PNC
 
 
         template<typename T>
-        __declspec(noinline) static void Delete(T* const ptr)
+        PNC_DEBUG_NOINLINE static void Delete(T* const ptr)
         {
             ptr->~T();
             Deallocate(ptr);
@@ -139,19 +140,19 @@ namespace PNC
     constexpr bool operator!=(const PncAllocator<T>&, const PncAllocator<U>&) { return false; }
 
     template<typename T, typename THaser = std::hash<T>, typename TEqualer = std::equal_to<T>>
-    using HashSet = std::unordered_set<T, THaser, TEqualer, PncAllocator<T>>;
+    using std_unordered_set = std::unordered_set<T, THaser, TEqualer, PncAllocator<T>>;
 
     template<typename TKey, typename TValue, typename THaser = std::hash<TKey>, typename TEqualer = std::equal_to<TKey>>
-    using HashMap = std::unordered_map<TKey, TValue, THaser, TEqualer, PncAllocator<std::pair<const TKey,TValue>>>;
+    using std_unordered_map = std::unordered_map<TKey, TValue, THaser, TEqualer, PncAllocator<std::pair<const TKey,TValue>>>;
 
     template<typename T>
-    using Vector = std::vector<T, PncAllocator<T>>;
+    using std_vector = std::vector<T, PncAllocator<T>>;
 
     template<typename T>
-    using List = std::list<T, PncAllocator<T>>;
+    using std_list = std::list<T, PncAllocator<T>>;
 
     template<typename T>
-    struct Deleter
+    struct std_deleter
     {
         void operator()(T* ptr)const
         {
@@ -160,10 +161,10 @@ namespace PNC
     };
 
     template<typename T>
-    using Unique_Ptr = std::unique_ptr<T, Deleter<T>>;
+    using Unique_Ptr = std::unique_ptr<T, std_deleter<T>>;
 
     template<typename T, class... TArgumentTypes>
-    Unique_Ptr<T> Make_Unique(TArgumentTypes&&... args)
+    Unique_Ptr<T> std_make_unique(TArgumentTypes&&... args)
     {
         return Unique_Ptr<T>(pnc_new(T)(std::forward<TArgumentTypes>(args)...));
     }

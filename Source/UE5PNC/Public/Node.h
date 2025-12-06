@@ -29,7 +29,9 @@ namespace PNC
         /// <param name="firstChunkIndex"></param>
         /// <param name="chunkCount"></param>
         template<typename TContainer>
-        static void ConstructAllChunkComponentsUnsafe(TContainer& container, const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
+        static void ConstructAllChunkComponentsUnsafe(TContainer& container, 
+                                                      const             Size_t firstChunkIndex, 
+                                                      const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstChunkIndex >= 0);
@@ -67,7 +69,9 @@ namespace PNC
         ///
         /// </summary>
         template<typename TContainer>
-        static void ConstructAllNodeComponentsUnsafe(TContainer& container, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
+        static void ConstructAllNodeComponentsUnsafe(TContainer& container, 
+                                                     const            Size_t firstNodeIndex, 
+                                                     const NodeCountT<Size_t> nodeCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -105,9 +109,9 @@ namespace PNC
         ///     Same for chunk index firstChunkIndex + chunkCount.
         /// </summary>
         template<typename TContainer>
-        static void ConstructAllComponentsUnsafe(TContainer& container,
-                                                 const Size_t firstNodeIndex,      const NodeCountT<Size_t> nodeCount,
-                                                 const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
+        static void ConstructAllComponentsUnsafe(
+                        TContainer& container, const Size_t firstNodeIndex,  const NodeCountT< Size_t> nodeCount,
+                                               const Size_t firstChunkIndex, const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -123,9 +127,13 @@ namespace PNC
                 componentType.ConstructComponentUnsafe(container.GetComponentData(i), firstNodeIndex, firstChunkIndex, nodeCount, chunkCount);
             }
         }
-
+        /// <summary>
+        /// Destruct all ChunkComponents
+        /// </summary>
         template<typename TContainer>
-        static void DestructAllChunkComponentsUnsafe(TContainer& container, const Size_t firstChunkIndex = 0, const ChunkCountT<Size_t> chunkCount = 1)
+        static void DestructAllChunkComponentsUnsafe(TContainer& container, 
+                                                     const             Size_t firstChunkIndex, 
+                                                     const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstChunkIndex >= 0);
@@ -155,8 +163,13 @@ namespace PNC
 #endif
         }
 
+        /// <summary>
+        /// Destruct all NodeComponents
+        /// </summary>
         template<typename TContainer>
-        static void DestructAllNodeComponentsUnsafe(TContainer& container, const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount)
+        static void DestructAllNodeComponentsUnsafe(TContainer& container, 
+                                                    const            Size_t firstNodeIndex, 
+                                                    const NodeCountT<Size_t> nodeCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -186,9 +199,13 @@ namespace PNC
 #endif
         }
 
+        /// <summary>
+        /// Destruct All components
+        /// </summary>
         template<typename TContainer>
-        static void DestructAllComponentsUnsafe(TContainer& container, const Size_t firstNodeIndex, const Size_t firstChunkIndex,
-                                                               const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount)
+        static void DestructAllComponentsUnsafe(
+                        TContainer& container, const            Size_t  firstNodeIndex, const             Size_t  firstChunkIndex,
+                                               const NodeCountT<Size_t> nodeCount,      const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -205,11 +222,17 @@ namespace PNC
             }
         }
 
+        /// <summary>
+        /// Move all NodeComponents between 2 containers.
+        /// Notes:
+        ///     containerTo and containerFrom CAN be the same but the range of nodes must not overlap forward.
+        /// </summary>
         template<typename TContainer>
-        static void MoveAllNodeComponentsForwardUnsafe(TContainer& containerTo,   const Size_t firstNodeIndexTo, 
-                                                       TContainer& containerFrom, const Size_t firstNodeIndexFrom, 
-                                                       const NodeCountT<Size_t> nodeCount)
-        {
+        static void MoveAllNodeComponentsForwardUnsafe(
+                        TContainer& containerTo,   const            Size_t firstNodeIndexTo, 
+                        TContainer& containerFrom, const            Size_t firstNodeIndexFrom, 
+                                                   const NodeCountT<Size_t> nodeCount)
+        { 
             pnc_assert(!containerTo.IsNull());
             pnc_assert(firstNodeIndexTo >= 0);
             pnc_assert(!containerFrom.IsNull());
@@ -225,18 +248,24 @@ namespace PNC
             {
                 Size_t index = chunkStructure.NodeComponentIndex[i];
                 const ComponentType_t* componentType = chunkStructure.Components[index];
-                void* componentDataTo = containerTo.GetComponentData(index);
+                void* componentDataTo =   containerTo.  GetComponentData(index);
                 void* componentDataFrom = containerFrom.GetComponentData(index);
                 componentType->MoveConstructDataForwardUnsafe(componentDataTo,   firstNodeIndexTo,
                                                               componentDataFrom, firstNodeIndexFrom, 
                                                               nodeCount);
             }
         }
-        
+
+        /// <summary>
+        /// Move all ChunkComponents between 2 containers.
+        /// Notes:
+        ///     containerTo and containerFrom CAN be the same but the range of chunks must not overlap forward.
+        /// </summary>
         template<typename TContainer>
-        static void MoveAllChunkComponentsForwardUnsafe(TContainer& containerTo,   const Size_t firstChunkIndexTo, 
-                                                        TContainer& containerFrom, const Size_t firstChunkIndexFrom, 
-                                                        const ChunkCountT<Size_t> chunkCount)
+        static void MoveAllChunkComponentsForwardUnsafe(
+                        TContainer& containerTo,   const             Size_t firstChunkIndexTo, 
+                        TContainer& containerFrom, const             Size_t firstChunkIndexFrom, 
+                                                   const ChunkCountT<Size_t> chunkCount)
         {
             pnc_assert(!containerTo.IsNull());
             pnc_assert(firstChunkIndexTo >= 0);
@@ -261,120 +290,14 @@ namespace PNC
             }
         }
 
-
-
-
-
-
-
-
-        
-        template<typename TContainerTo, typename TContainerFrom>
-        static void CopyConstructNodeComponentsForwardUnsafe(TContainerTo& containerTo,     const Size_t firstNodeIndexTo,
-                                                       const TContainerFrom& containerFrom, const Size_t firstNodeIndexFrom, 
-                                                       const NodeCountT<Size_t> nodeCount)
-        {
-            pnc_assert(!containerTo.IsNull());
-            pnc_assert(!containerFrom.IsNull());
-            pnc_assert(IsSameStructure(containerTo, containerFrom));
-            pnc_assert(firstNodeIndexTo >= 0);
-            pnc_assert(firstNodeIndexFrom >= 0);
-            pnc_assert(nodeCount >= 0);
-            //pnc_assert(firstNodeIndexTo < containerTo.GetNodeCount());
-            //pnc_assert(firstNodeIndexTo + nodeCount <= containerTo.GetNodeCount());
-            //pnc_assert(firstNodeIndexFrom < containerFrom.GetNodeCount());
-            //pnc_assert(firstNodeIndexFrom + nodeCount <= containerFrom.GetNodeCount());
-
-            const ChunkStructure_t& chunkStructure = containerTo.GetStructure();
-            Size_t componentCount = chunkStructure.NodeComponentIndex.size();
-            for (Size_t i = 0; i < componentCount; ++i)
-            {
-                Size_t index = chunkStructure.NodeComponentIndex[i];
-                void* componentDataTo = containerTo.GetComponentData(index);
-                void* componentDataFrom = containerFrom.GetComponentData(index);
-                chunkStructure.Components[index]->CopyConstructDataForwardUnsafe(
-                    componentDataTo,   firstNodeIndexTo, 
-                    componentDataFrom, firstNodeIndexFrom, nodeCount);
-            }
-        }
-
-        template<typename TContainerTo, typename TContainerFrom>
-        static void CopyConstructChunkComponentsForwardUnsafe(TContainerTo& containerTo,     const Size_t firstChunkIndexTo,
-                                                        const TContainerFrom& containerFrom, const Size_t firstChunkIndexFrom, 
-                                                        const ChunkCountT<Size_t> chunkCount)
-        {
-            pnc_assert(!containerTo.IsNull());
-            pnc_assert(!containerFrom.IsNull());
-            pnc_assert(IsSameStructure(containerTo, containerFrom));
-            pnc_assert(firstChunkIndexTo >= 0);
-            pnc_assert(firstChunkIndexFrom >= 0);
-            pnc_assert(chunkCount >= 0);
-            //pnc_assert(firstChunkIndexTo < containerTo.GetChunkCount());
-            //pnc_assert(firstChunkIndexTo + chunkCount <= containerTo.GetChunkCount());
-            //pnc_assert(firstChunkIndexFrom < containerFrom.GetChunkCount());
-            //pnc_assert(firstChunkIndexFrom + chunkCount <= containerFrom.GetChunkCount());
-
-
-            const ChunkStructure_t& chunkStructure = containerTo.GetStructure();
-            Size_t componentCount = chunkStructure.ChunkComponentIndex.size();
-            for (Size_t i = 0; i < componentCount; ++i)
-            {
-                Size_t index = chunkStructure.ChunkComponentIndex[i];
-                void* componentDataTo = containerTo.GetComponentData(index);
-                void* componentDataFrom = containerFrom.GetComponentData(index);
-                chunkStructure.Components[index]->CopyConstructDataForwardUnsafe(
-                    componentDataTo,   firstChunkIndexTo, 
-                    componentDataFrom, firstChunkIndexFrom, chunkCount);
-            }
-        }
-
-        template<typename TContainerTo, typename TContainerFrom>
-        static void CopyConstructAllComponentsForwardUnsafe(TContainerTo& containerTo,     const Size_t firstNodeIndexTo,   const Size_t firstChunkIndexTo,
-                                                      const TContainerFrom& containerFrom, const Size_t firstNodeIndexFrom, const Size_t firstChunkIndexFrom,
-                                                      const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)
-        {
-            pnc_assert(!containerTo.IsNull());
-            pnc_assert(!containerFrom.IsNull());
-            pnc_assert(IsSameStructure(containerTo, containerFrom));
-            pnc_assert(firstNodeIndexTo >= 0);
-            pnc_assert(firstNodeIndexFrom >= 0);
-            pnc_assert(nodeCount >= 0);
-            pnc_assert(firstChunkIndexTo >= 0);
-            pnc_assert(firstChunkIndexFrom >= 0);
-            pnc_assert(chunkCount >= 0);
-            //pnc_assert(firstNodeIndexTo < containerTo.GetNodeCount());
-            //pnc_assert(firstNodeIndexTo + nodeCount <= containerTo.GetNodeCount());
-            //pnc_assert(firstChunkIndexTo < containerTo.GetChunkCount());
-            //pnc_assert(firstChunkIndexTo + chunkCount <= containerTo.GetChunkCount());
-            //pnc_assert(firstNodeIndexFrom < containerFrom.GetNodeCount());
-            //pnc_assert(firstNodeIndexFrom + nodeCount <= containerFrom.GetNodeCount());
-            //pnc_assert(firstChunkIndexFrom < containerFrom.GetChunkCount());
-            //pnc_assert(firstChunkIndexFrom + chunkCount <= containerFrom.GetChunkCount());
-
-            const ChunkStructure_t& chunkStructure = containerTo.GetStructure();
-            Size_t componentCount = chunkStructure.GetComponentCount();
-            for (Size_t i = 0; i < componentCount; ++i)
-            {
-                chunkStructure.Components[i]->CopyConstructComponentForwardUnsafe(
-                    containerTo.GetComponentData(i),   firstNodeIndexTo,   firstChunkIndexTo,
-                    containerFrom.GetComponentData(i), firstNodeIndexFrom, firstChunkIndexFrom, 
-                    nodeCount, chunkCount);
-            }
-        }
-
-        
-
-
-
-        
         /// <summary>
         /// Allocate and construct all components in a chunk.
         /// </summary>
         template<typename TContainer>
         static void AllocateConstructAllComponentsUnsafe(
                         TContainer& container, const               Size_t  firstNodeIndex, const                Size_t  firstChunkIndex,
-                                               const NodeCountT   <Size_t> nodeCount,      const ChunkCountT   <Size_t> chunkCount,
-                                               const NodeCapacityT<Size_t> nodeCapacity,   const ChunkCapacityT<Size_t> chunkCapacity)
+                                               const NodeCapacityT<Size_t> nodeCapacity,   const ChunkCapacityT<Size_t> chunkCapacity,
+                                               const NodeCountT   <Size_t> nodeCount,      const ChunkCountT   <Size_t> chunkCount)
         {
             pnc_assert(!container.IsNull());
             pnc_assert(firstNodeIndex >= 0);
@@ -399,7 +322,6 @@ namespace PNC
             }
         }
 
-        // TODO capacity parameters before counts
         /// <summary>
         /// Allocate all components in the chunk and copy components' data from a different container with the same structure.
         /// </summary>
@@ -407,8 +329,8 @@ namespace PNC
         static void AllocateCopyConstructAllComponentsForwardUnsafe(
                               TContainerTo&   containerTo,   const               Size_t  firstNodeIndexTo,   const                Size_t  firstChunkIndexTo,
                         const TContainerFrom& containerFrom, const               Size_t  firstNodeIndexFrom, const                Size_t  firstChunkIndexFrom,
-                                                             const NodeCountT   <Size_t> nodeCount,          const ChunkCountT   <Size_t> chunkCount, 
-                                                             const NodeCapacityT<Size_t> nodeCapacity,       const ChunkCapacityT<Size_t> chunkCapacity)
+                                                             const NodeCapacityT<Size_t> nodeCapacity,       const ChunkCapacityT<Size_t> chunkCapacity,
+                                                             const NodeCountT   <Size_t> nodeCount,          const ChunkCountT   <Size_t> chunkCount )
         {
             pnc_assert(!containerTo.IsNull());
             pnc_assert(!containerFrom.IsNull());
@@ -436,7 +358,6 @@ namespace PNC
             }
         }
 
-
         /// <summary>
         /// Reallocate containerToReallocate to fit the nodes copied from containerFrom
         /// Notes:
@@ -447,9 +368,9 @@ namespace PNC
         template<typename TContainerTo, typename TContainerFrom>
         static void ReallocateCopyAllComponentsForwardUnsafe(
                               TContainerTo&   containerToReallocate, const               Size_t firstNodeIndexTo,   const                Size_t firstChunkIndexTo,
-                        const TContainerFrom& containerFrom,         const               Size_t firstNodeIndexFrom, const                Size_t firstChunkIndexFrom,
-                                                                     const NodeCountT   <Size_t> nodeCountToCopy,   const ChunkCountT   <Size_t> chunkCountToCopy, 
-                                                                     const NodeCapacityT<Size_t> nodeCapacity,      const ChunkCapacityT<Size_t> chunkCapacity)
+                        const TContainerFrom& containerFrom,         const               Size_t firstNodeIndexFrom, const                Size_t firstChunkIndexFrom, 
+                                                                     const NodeCapacityT<Size_t> nodeCapacity,      const ChunkCapacityT<Size_t> chunkCapacity,
+                                                                     const NodeCountT   <Size_t> nodeCountToCopy,   const ChunkCountT   <Size_t> chunkCountToCopy)
         {
             pnc_assert(!containerToReallocate.IsNull());
             pnc_assert(!containerFrom.IsNull());
@@ -461,7 +382,6 @@ namespace PNC
             pnc_assert(firstChunkIndexTo >= 0);
             pnc_assert(firstChunkIndexFrom >= 0);
             pnc_assert(chunkCountToCopy >= 0);
-
             pnc_assert(firstNodeIndexFrom + nodeCountToCopy  <= containerFrom.GetNodeCount());
             pnc_assert(firstNodeIndexTo   + nodeCountToCopy  <= nodeCapacity);
             pnc_assert(firstChunkIndexTo  + chunkCountToCopy <= chunkCapacity);
@@ -515,9 +435,9 @@ namespace PNC
         template<typename TContainerTo, typename TContainerFrom>
         static void ReallocateMoveAllComponentsForwardUnsafe(
                         TContainerTo&   containerToReallocate, const               Size_t  firstNodeIndexTo,   const                Size_t firstChunkIndexTo,
-                        TContainerFrom& containerFrom,         const               Size_t  firstNodeIndexFrom, const                Size_t firstChunkIndexFrom,
-                                                               const NodeCountT   <Size_t> nodeCountToMove,    const ChunkCountT   <Size_t> chunkCountToMove,                                                              
-                                                               const NodeCapacityT<Size_t> nodeCapacity,       const ChunkCapacityT<Size_t> chunkCapacity)
+                        TContainerFrom& containerFrom,         const               Size_t  firstNodeIndexFrom, const                Size_t firstChunkIndexFrom,                                                              
+                                                               const NodeCapacityT<Size_t> nodeCapacity,       const ChunkCapacityT<Size_t> chunkCapacity,
+                                                               const NodeCountT   <Size_t> nodeCountToMove,    const ChunkCountT   <Size_t> chunkCountToMove)
         {
             pnc_assert(!containerToReallocate.IsNull());
             pnc_assert(!containerFrom.IsNull());
@@ -528,7 +448,6 @@ namespace PNC
             pnc_assert(firstChunkIndexTo >= 0);
             pnc_assert(firstChunkIndexFrom >= 0);
             pnc_assert(chunkCountToMove >= 0);
-
             pnc_assert(firstNodeIndexFrom + nodeCountToMove  <= containerFrom.GetNodeCount());
             pnc_assert(firstNodeIndexTo   + nodeCountToMove  <= nodeCapacity);
             pnc_assert(firstChunkIndexTo  + chunkCountToMove <= chunkCapacity);
@@ -572,46 +491,9 @@ namespace PNC
             }
         }
 
-        //template<typename TContainerTo, typename TContainerFrom>
-        //static void MoveAllComponentsForward(TContainerTo& containerTo,     const Size_t firstNodeIndexTo,      const Size_t firstChunkIndexTo,
-        //                               const TContainerFrom& containerFrom, const Size_t firstNodeIndexFrom,    const Size_t firstChunkIndexFrom,
-        //                                                                    const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)
-        //{
-        //    pnc_assert(!containerTo.IsNull());
-        //    pnc_assert(!containerFrom.IsNull());
-        //    pnc_assert(IsSameStructure(containerTo, containerFrom));
-        //    pnc_assert(firstNodeIndexTo >= 0);
-        //    pnc_assert(firstNodeIndexFrom >= 0);
-        //    pnc_assert(nodeCount >= 0);
-        //    pnc_assert(firstChunkIndexTo >= 0);
-        //    pnc_assert(firstChunkIndexFrom >= 0);
-        //    pnc_assert(chunkCount >= 0);
-        //    pnc_assert(firstNodeIndexTo < containerTo.GetNodeCount());
-        //    pnc_assert(firstNodeIndexTo + nodeCount <= containerTo.GetNodeCount());
-        //    pnc_assert(firstChunkIndexTo < containerTo.GetChunkCount());
-        //    pnc_assert(firstChunkIndexTo + chunkCount <= containerTo.GetChunkCount());
-        //    pnc_assert(firstNodeIndexFrom < containerFrom.GetNodeCount());
-        //    pnc_assert(firstNodeIndexFrom + nodeCount <= containerFrom.GetNodeCount());
-        //    pnc_assert(firstChunkIndexFrom < containerFrom.GetChunkCount());
-        //    pnc_assert(firstChunkIndexFrom + chunkCount <= containerFrom.GetChunkCount());
-
-        //    const ChunkStructure_t& chunkStructure = containerTo.GetStructure();
-        //    const auto componentCount = chunkStructure.GetComponentCount();
-        //    for (Size_t i = 0; i < componentCount; ++i)
-        //    {
-        //        const ComponentType_t* componentType = chunkStructure.Components[i];
-        //        componentType->MoveComponentForwardUnsafe(containerTo.GetComponentData(i), containerFrom.GetComponentData(i),
-        //            firstNodeIndexTo, firstNodeIndexFrom, nodeCount,
-        //            firstChunkIndexTo, firstChunkIndexFrom, chunkCount);
-        //    }
-        //}
-
-
-        template<typename TChunkA, typename TChunkB>
-        static bool IsSameStructure(const TChunkA& a, const TChunkB& b) { return a.GetStructure() == b.GetStructure(); }
-        template<typename TChunkA, typename TChunkB>
-        static bool IsSameData(const TChunkA& a, const TChunkB& b) { return TChunkA::IsSameData(a,b); }
-        
-
+        template<typename TContainerA, typename TContainerB>
+        static bool IsSameStructure(const TContainerA& a, const TContainerB& b) { return a.GetStructure() == b.GetStructure(); }
+        template<typename TContainerA, typename TContainerB>
+        static bool IsSameData(const TContainerA& a, const TContainerB& b) { return TContainerA::IsSameData(a,b); }
     };
 }
