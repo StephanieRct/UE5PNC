@@ -6,7 +6,7 @@
 #include "SetAlgorithmChunk.h"
 #include "AlgorithmRequirementFulfiller.h"
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
 
     template<typename TSize>

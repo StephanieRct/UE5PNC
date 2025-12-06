@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Will reallocate with a greater NodeCapacity when adding nodes passed the current NodeCapacity.

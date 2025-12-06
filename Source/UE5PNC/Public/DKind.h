@@ -5,7 +5,7 @@
 #include "common.h"
 #include "Containers.h"
 
-namespace PNC
+namespace NiT
 {
     enum class ContainerKind 
     {

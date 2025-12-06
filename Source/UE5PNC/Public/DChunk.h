@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Container of Node and their component data.

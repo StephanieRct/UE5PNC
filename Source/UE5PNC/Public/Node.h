@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     template<typename TChunkStructure>
     struct NodeT

@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Container of Chunk, Node and their component data.
@@ -66,7 +66,7 @@ namespace PNC
                const Size_t nodeCountPerChunk)
             : DArray(chunkStructure,
                      PropChunkCountT<      Size_t>(chunkCount),
-                     PropNodeCountPerChunk<Size_t>(nodeCountPerChunk))
+                     PropNodeCountPerChunkT<Size_t>(nodeCountPerChunk))
         {
         }
 #endif

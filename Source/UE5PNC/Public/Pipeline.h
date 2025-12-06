@@ -6,7 +6,7 @@
 #include "routing\AlgorithmCacheRouter.h"
 #include "routing\AlgorithmMatchStructure.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Extend this template struct to write your own pipeline to process Chunks

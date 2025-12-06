@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// A Chunk part of a tree of Chunks

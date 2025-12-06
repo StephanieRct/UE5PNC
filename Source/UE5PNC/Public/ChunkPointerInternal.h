@@ -5,7 +5,7 @@
 #include "common.h"
 #include "Node.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// A ChunkPointerInternal points to a chunk's component data memory within a range of nodes.

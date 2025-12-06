@@ -4,26 +4,27 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
+    // TODO made enum class
     /// <summary>
     /// The owner of a component determine its multiplicity when allocating the component memory in a chunk
     /// </summary>
-    enum ComponentOwner
+    enum class ComponentOwner
     {
         /// <summary>
         /// Creates a component instance for each node in a chunk. 
         /// All instances are allocated sequentially in memory.
         /// </summary>
-        ComponentOwner_Node = 0,
+        Node = 0,
 
         /// <summary>
         /// Creates a single component instance for each chunk which is shared by all nodes in the chunk.
         /// </summary>
-        ComponentOwner_Chunk = 1,
+        Chunk = 1,
 
-        ComponentOwner__Begin = 0,
-        ComponentOwner__End = 2,
+        Begin = 0,
+        End = 2,
     };
 
 
@@ -302,7 +303,7 @@ namespace PNC
             pnc_assert(TypeInfo != nullptr);
             pnc_assert(Size > 0);
             pnc_assert(Align > 0);
-            pnc_assert(Owner >= ComponentOwner__Begin && Owner < ComponentOwner__End);
+            pnc_assert(Owner >= ComponentOwner::Begin && Owner < ComponentOwner::End);
         }
 
         /// <summary>
@@ -319,7 +320,7 @@ namespace PNC
             , Owner(owner)
         {
             pnc_assert(_nullptr == nullptr);
-            pnc_assert(owner >= ComponentOwner__Begin && owner < ComponentOwner__End);
+            pnc_assert(owner >= ComponentOwner::Begin && owner < ComponentOwner::End);
 
             NonTrivialConstruct = GetDefaultConstructor<Size_t, T, std::is_default_constructible<T>::value>::Get();
             NonTrivialDestruct = GetDestructor<Size_t, T, std::is_destructible<T>::value>::Get();
@@ -343,8 +344,8 @@ namespace PNC
         ComponentOwner GetOwner()const { return Owner; }
         const type_info* GetTypeInfo()const { return TypeInfo; }
 
-        bool IsNodeComponent()const { return Owner == ComponentOwner_Node; }
-        bool IsChunkComponent()const { return Owner == ComponentOwner_Chunk; }
+        bool IsNodeComponent()const { return Owner == ComponentOwner::Node; }
+        bool IsChunkComponent()const { return Owner == ComponentOwner::Chunk; }
         bool IsNonTrivialConstruct()const { return !!NonTrivialConstruct; }
         bool IsNonTrivialDestruct()const { return !!NonTrivialDestruct; }
         bool IsNonTrivialMoveConstruct()const { return !!NonTrivialMoveConstructForward; }
@@ -625,9 +626,9 @@ namespace PNC
         {
             switch (Owner)
             {
-            case ComponentOwner_Node:
+            case ComponentOwner::Node:
                 return nodeIndex;
-            case ComponentOwner_Chunk:
+            case ComponentOwner::Chunk:
                 return chunkIndex;
             default:
                 pnc_assert_no_entry_return(-1);

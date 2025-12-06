@@ -27,7 +27,7 @@
 #include "DTreePointer.h"
 
 
-namespace PNC
+namespace NiT
 {
 
     template<typename TChunkStructure>

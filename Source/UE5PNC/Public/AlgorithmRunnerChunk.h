@@ -7,7 +7,7 @@
 #include "Routing\SetAlgorithmChunk.h"
 #include "Routing\OffsetAlgorithmNode.h"
 
-namespace PNC
+namespace NiT
 {
     template<typename TContainer>
     struct AlgorithmRunnerChunk

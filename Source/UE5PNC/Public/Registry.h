@@ -7,7 +7,7 @@
 /// <summary>
 /// Registries are used to scope the creation of various data.
 /// </summary>
-namespace PNC
+namespace NiT
 {
     template<typename TComponentType>
     struct ComponentTypeRegistryT
@@ -15,6 +15,7 @@ namespace PNC
     public:
         using Self_t = ComponentTypeRegistryT<TComponentType>;
         using ComponentType_t = TComponentType;
+        using Size_t = typename ComponentType_t::Size_t;
 
     public:
         std_vector<Unique_Ptr<ComponentType_t>> ComponentTypes;
@@ -61,7 +62,7 @@ namespace PNC
         using ChunkStructureHasher_t = typename ChunkStructure_t::Hasher_t;
         using ChunkStructureEqualler_t = typename ChunkStructure_t::Equaler_t;
         using ComponentTypeRegistry_t = ComponentTypeRegistryT<ComponentType_t>;
-
+        using Size_t = typename ChunkStructure_t::Size_t;
     public:
         // Keep an array of all our chunk structures
         std_vector<Unique_Ptr<ChunkStructure_t>> ChunkStructures;
@@ -93,7 +94,7 @@ namespace PNC
 
 
         template<typename... TComponentTypes>
-        const ChunkStructure* GetOrAddChunkStructure(ComponentTypeRegistry_t& componentTypeRegistry)
+        const ChunkStructure_t* GetOrAddChunkStructure(ComponentTypeRegistry_t& componentTypeRegistry)
         {
             std_vector<const ComponentType_t*> componentTypes(sizeof...(TComponentTypes));
             Size_t c = 0;
@@ -183,10 +184,6 @@ namespace PNC
         }
 
     };
-
-    using ComponentTypeRegistry = ComponentTypeRegistryT<ComponentType>;
-    using ChunkStructureRegistry = ChunkStructureRegistryT<ChunkStructure>;
-    using ChunkTreeRegistry = ChunkRegistryT<KChunkTree, KArrayTree>;
 
     template<typename TChunkStructure>
     struct PncRegistryT
@@ -301,5 +298,11 @@ namespace PNC
         bool DeleteChunk(KChunkArrayTree_t* const chunk) { return KChunkTreeRegistry.DeleteChunk(chunk); }
     };
 
-    using PncRegistry = PncRegistryT<ChunkStructure>;
+}
+namespace Ni::Containers
+{
+    using ComponentTypeRegistry = NiT::ComponentTypeRegistryT<ComponentType>;
+    using ChunkStructureRegistry = NiT::ChunkStructureRegistryT<ChunkStructure>;
+    using ChunkTreeRegistry = NiT::ChunkRegistryT<KChunkTree, KArrayTree>;
+    using PncRegistry = NiT::PncRegistryT<ChunkStructure>;
 }

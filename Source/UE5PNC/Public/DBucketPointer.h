@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Add a NodeCapacity and methods to add and remove nodes up to the NodeCapacity.

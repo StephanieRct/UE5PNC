@@ -5,7 +5,7 @@
 #include "common.h"
 #include "Node.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Adds a ChunkPointer member to the base container.

@@ -49,7 +49,7 @@
 
 #include "DOwn.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Container is the base of all containers.

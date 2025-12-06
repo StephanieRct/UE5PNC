@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// An AlgorithmRequirementFulfiller is used to receive the requirements of 

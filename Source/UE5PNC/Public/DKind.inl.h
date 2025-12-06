@@ -11,7 +11,7 @@
 //#include "KArrayPointer.h"
 //#include "KArrayTreePointer.h"
 
-namespace PNC
+namespace NiT
 {
 
     template<typename TBase>

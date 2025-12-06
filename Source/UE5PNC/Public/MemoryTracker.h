@@ -5,17 +5,17 @@
 #include "common.h"
 
 #ifdef PNC_MEMORYTRACKER
-#   define pnc_alloc(size, align) ::PNC::MemoryTracker::Allocate(size, align)
-#   define pnc_free_clean(ptr, size, align) ::PNC::MemoryTracker::Deallocate(pnc_clean(ptr), size, align)
-#   define pnc_free_dirty(ptr, size, align) ::PNC::MemoryTracker::Deallocate(ptr, size, align)
-#   define pnc_new(type) new (::PNC::MemoryTracker::Allocate<type>()) type
-#   define pnc_delete_clean(ptr) ::PNC::MemoryTracker::Delete(pnc_clean(ptr))
-#   define pnc_delete_dirty(ptr) ::PNC::MemoryTracker::Delete(ptr)
-#   define pnc_assert_owns(ptr, count) pnc_assert(::PNC::MemoryTracker::Owns(ptr, count))
-#   define pnc_owns(ptr, count) ::PNC::MemoryTracker::Owns(ptr, count)
-#   define pnc_allocation_count ((int)PNC::MemoryTracker::Instance.AllocationCount)
+#   define pnc_alloc(size, align) ::NiT::MemoryTracker::Allocate(size, align)
+#   define pnc_free_clean(ptr, size, align) ::NiT::MemoryTracker::Deallocate(pnc_clean(ptr), size, align)
+#   define pnc_free_dirty(ptr, size, align) ::NiT::MemoryTracker::Deallocate(ptr, size, align)
+#   define pnc_new(type) new (::NiT::MemoryTracker::Allocate<type>()) type
+#   define pnc_delete_clean(ptr) ::NiT::MemoryTracker::Delete(pnc_clean(ptr))
+#   define pnc_delete_dirty(ptr) ::NiT::MemoryTracker::Delete(ptr)
+#   define pnc_assert_owns(ptr, count) pnc_assert(::NiT::MemoryTracker::Owns(ptr, count))
+#   define pnc_owns(ptr, count) ::NiT::MemoryTracker::Owns(ptr, count)
+#   define pnc_allocation_count ((int)::NiT::MemoryTracker::Instance.AllocationCount)
 
-namespace PNC
+namespace NiT
 {
     UE5PNC_API struct MemoryTracker
     {
@@ -186,7 +186,7 @@ struct MemoryTracker
 public:
     enum { AllocationCount = 0 };
 };
-namespace PNC
+namespace NiT
 {
     template<typename T>
     using HashSet = std::unordered_set<T>;

@@ -5,7 +5,7 @@
 #include "common.h"
 #include "AlgorithmRequirementFulfiller.h"
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
     template<typename TChunkArray>
     struct OffsetAlgorithmNode : public AlgorithmRequirementFulfiller
@@ -30,10 +30,10 @@ namespace PNC::Routing
         {
             switch (T::Owner)
             {
-            case ComponentOwner_Chunk:
+            case ComponentOwner::Chunk:
                 ++component;
                 break;
-            case ComponentOwner_Node:
+            case ComponentOwner::Node:
                 component += NodeOffset;
                 break;
             }

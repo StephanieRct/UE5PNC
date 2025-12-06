@@ -5,7 +5,7 @@
 #include "common.h"
 #include "DArrayPointerInternal.h"
 
-namespace PNC
+namespace NiT
 {
     template<typename TArrayExtension, typename TBase>
     struct DArrayPointer : public TBase

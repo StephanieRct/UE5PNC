@@ -24,49 +24,49 @@ public:
     }
 
 public:
-    PNC::ComponentTypeRegistry ComponentTypeRegistry;
-    PNC::ChunkStructureRegistry ChunkStructureRegistry;
-    PNC::ChunkTreeRegistry ChunkRegistry;
+    Ni::Containers::ComponentTypeRegistry ComponentTypeRegistry;
+    Ni::Containers::ChunkStructureRegistry ChunkStructureRegistry;
+    Ni::Containers::ChunkTreeRegistry ChunkRegistry;
 
 public:
     // Add a component type we can use for our centipede chunks
     template<typename T>
-    const PNC::ComponentType* GetOrAddComponentType() { return ComponentTypeRegistry.GetOrAddComponentType<T>(); }
+    const Ni::Containers::ComponentType* GetOrAddComponentType() { return ComponentTypeRegistry.GetOrAddComponentType<T>(); }
 
-    const PNC::ChunkStructure* GetOrAddChunkStructure(const PNC::ComponentType* component)
+    const Ni::Containers::ChunkStructure* GetOrAddChunkStructure(const Ni::Containers::ComponentType* component)
     {
         return ChunkStructureRegistry.GetOrAddChunkStructure(component);
     }
 
     // Add a chunk structure from a list of component type
-    const PNC::ChunkStructure* GetOrAddChunkStructure(const std::initializer_list<const PNC::ComponentType*>& aComponents)
+    const Ni::Containers::ChunkStructure* GetOrAddChunkStructure(const std::initializer_list<const Ni::Containers::ComponentType*>& aComponents)
     {
         return ChunkStructureRegistry.GetOrAddChunkStructure(aComponents);
     }
 
     // Add a chunk structure from a parameter pack of component type
     template<typename... TComponentTypes>
-    const PNC::ChunkStructure* GetOrAddChunkStructure(TComponentTypes... args)
+    const Ni::Containers::ChunkStructure* GetOrAddChunkStructure(TComponentTypes... args)
     {
         return ChunkStructureRegistry.GetOrAddChunkStructure({ args... });
     }
 
     template<typename... TComponentTypes>
-    const PNC::ChunkStructure* GetOrAddChunkStructure()
+    const Ni::Containers::ChunkStructure* GetOrAddChunkStructure()
     {
         return ChunkStructureRegistry.GetOrAddChunkStructure<TComponentTypes...>(ComponentTypeRegistry);
     }
 
     // Add a chunk with a given chunk structure and capacity.
-    PNC::KChunkTree* NewChunk(const PNC::ChunkStructure* chunkStructure, const PNC::Size_t nodeCount)
+    Ni::Containers::KChunkTree* NewChunk(const Ni::Containers::ChunkStructure* chunkStructure, const Ni::Containers::Size_t nodeCount)
     {
-        return ChunkRegistry.NewChunk(chunkStructure, PNC::PropNodeCount(nodeCount));
+        return ChunkRegistry.NewChunk(chunkStructure, Ni::Containers::PropNodeCount(nodeCount));
     }
 
     // Add a chunk with a given chunk structure and capacity.
-    PNC::KArrayTree* NewChunkArray(const PNC::ChunkStructure* const chunkStructure, const PNC::Size_t chunkCount, const PNC::Size_t nodeCountPerChunk)
+    Ni::Containers::KArrayTree* NewChunkArray(const Ni::Containers::ChunkStructure* const chunkStructure, const Ni::Containers::Size_t chunkCount, const Ni::Containers::Size_t nodeCountPerChunk)
     {
-        return ChunkRegistry.NewChunkArray(chunkStructure, PNC::PropChunkCount(chunkCount), PNC::PropNodeCountPerChunk(nodeCountPerChunk));
+        return ChunkRegistry.NewChunkArray(chunkStructure, Ni::Containers::PropChunkCount(chunkCount), Ni::Containers::PropNodeCountPerChunk(nodeCountPerChunk));
     }
 
 public:

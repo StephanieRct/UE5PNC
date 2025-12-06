@@ -5,7 +5,7 @@
 #include "common.h"
 #include "ChunkTreeNode.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// DTreePointerT Adds the pointers needed to make the container part of a tree of this container type.

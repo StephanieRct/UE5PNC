@@ -8,7 +8,7 @@
 #include "DKind.h"
 #include "KContainers.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Execute an algorithm on a DKind container

@@ -5,7 +5,7 @@
 #include "common.h"
 #include "ComponentTypeSet.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// A ChunkStructure defines the types of components that compose a chunk.

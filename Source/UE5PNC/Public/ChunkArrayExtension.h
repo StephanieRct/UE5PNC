@@ -5,7 +5,7 @@
 #include "common.h"
 #include "ChunkPointerInternal.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Extend a ChunkPointer to include the required data field to point to an array of chunks.

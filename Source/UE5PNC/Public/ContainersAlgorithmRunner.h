@@ -11,7 +11,7 @@
 #include "AlgorithmRunnerChunkArray.h"
 #include "AlgorithmRunnerKindPointerSwitch.h"
 
-namespace PNC
+namespace NiT
 {
     template<typename TAlgorithm, typename TContainer, bool THasChunkPointer, bool THasArrayPointer, bool THasKindPointer>
     struct AlgorithmRunnerSelector

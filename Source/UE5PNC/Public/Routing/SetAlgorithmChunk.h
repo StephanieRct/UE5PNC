@@ -6,7 +6,7 @@
 
 #include "AlgorithmRequirementFulfiller.h"
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
     template<typename TContainer>
     struct SetAlgorithmChunkBase : public AlgorithmRequirementFulfiller

@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace PNC
+namespace NiT
 {
     template<typename T, bool isEnum = std::is_enum_v<T>>
     struct Cleaner
@@ -18,9 +18,9 @@ namespace PNC
     };
 }
 #ifdef PNC_MEMORYCLEANUP
-#   define pnc_clean(x) ::PNC::Cleaner<decltype(x)>::Clean(x)
+#   define pnc_clean(x) ::NiT::Cleaner<decltype(x)>::Clean(x)
 
-namespace PNC
+namespace NiT
 {
 
     template<typename T>

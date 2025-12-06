@@ -5,7 +5,7 @@
 #include "common.h"
 #include "DKind.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Force a compile-time ContainerKind value.

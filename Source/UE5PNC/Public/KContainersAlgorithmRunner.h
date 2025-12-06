@@ -11,14 +11,14 @@
 #include "AlgorithmRunnerChunk.h"
 #include "AlgorithmRunnerKindPointerSwitch.h"
 
-namespace PNC
+namespace NiT
 {
     //template<typename TA, typename TC, bool THasCunk, bool THasArray> 
     //struct AlgorithmRunnerSelector< TA, TC, THasCunk, THasArray, /*THasKind:*/true> : AlgorithmRunnerKindPointerSwitch<TA, TC> {};
 
 }
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
     template<typename TChunkStructure>
     struct SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>> : public SetAlgorithmChunkBase<KChunkTreePointerT<TChunkStructure>>

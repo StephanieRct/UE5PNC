@@ -5,11 +5,8 @@
 #include "common.h"
 
 
-namespace PNC
+namespace NiT
 {
-
     template<typename TAlgorithm, typename TContainer>// = KindPointerT<TChunkStructure>>
     struct AlgorithmRunner {};
-
-
 }

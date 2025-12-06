@@ -5,7 +5,7 @@
 #include "common.h"
 #include "SetAlgorithmChunk.h"
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
     /// <summary>
     /// Route an algorithm using the

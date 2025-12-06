@@ -6,7 +6,7 @@
 #include "Routing\SetAlgorithmChunk.h"
 #include "Routing\OffsetAlgorithmNode.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Execute an algorithm on each element Chunks in Chunk array.

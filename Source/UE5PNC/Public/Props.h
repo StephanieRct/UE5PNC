@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace PNC
+namespace NiT
 {
     struct DPropsTag {};
 

@@ -5,7 +5,7 @@
 #include "common.h"
 #include "AlgorithmRunner.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Extend this template struct to write your own algorithm that processes any Chunk's Component data as input or output

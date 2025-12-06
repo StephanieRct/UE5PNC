@@ -5,7 +5,7 @@
 #include "common.h"
 #include "ComponentType.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// A set of component types.
