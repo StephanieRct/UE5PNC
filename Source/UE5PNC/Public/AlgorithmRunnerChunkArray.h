@@ -55,7 +55,7 @@ namespace NiT
         template<typename TRouter>
         static bool TryRun(const TRouter& router, Algorithm_t& algorithm, Container_t& container)
         {
-            pnc_assert(!container.IsNull());
+            ni_assert(!container.IsNull());
             if (!router.RouteAlgorithm(algorithm, container))
                 return false;
 
@@ -65,7 +65,7 @@ namespace NiT
                 auto elementNnodeCount = chunkElement.GetNodeCount();
                 algorithm.Execute(elementNnodeCount);
                 bool nextOk = algorithm.Requirements(Routing::OffsetAlgorithmNode<Container_t>(elementNnodeCount));
-                pnc_assert(nextOk);
+                ni_assert(nextOk);
             }
             return true;
         }

@@ -6,7 +6,6 @@
 
 namespace NiT
 {
-    // TODO made enum class
     /// <summary>
     /// The owner of a component determine its multiplicity when allocating the component memory in a chunk
     /// </summary>
@@ -300,10 +299,10 @@ namespace NiT
             , Align(align)
             , Owner(owner) 
         {
-            pnc_assert(TypeInfo != nullptr);
-            pnc_assert(Size > 0);
-            pnc_assert(Align > 0);
-            pnc_assert(Owner >= ComponentOwner::Begin && Owner < ComponentOwner::End);
+            ni_assert(TypeInfo != nullptr);
+            ni_assert(Size > 0);
+            ni_assert(Align > 0);
+            ni_assert(Owner >= ComponentOwner::Begin && Owner < ComponentOwner::End);
         }
 
         /// <summary>
@@ -319,8 +318,8 @@ namespace NiT
             , Align(alignof(T))
             , Owner(owner)
         {
-            pnc_assert(_nullptr == nullptr);
-            pnc_assert(owner >= ComponentOwner::Begin && owner < ComponentOwner::End);
+            ni_assert(_nullptr == nullptr);
+            ni_assert(owner >= ComponentOwner::Begin && owner < ComponentOwner::End);
 
             NonTrivialConstruct = GetDefaultConstructor<Size_t, T, std::is_default_constructible<T>::value>::Get();
             NonTrivialDestruct = GetDestructor<Size_t, T, std::is_destructible<T>::value>::Get();
@@ -359,17 +358,17 @@ namespace NiT
         /// </summary>
         void ConstructDataUnsafe(void* const baseData, const Size_t firstComponentIndex, const Size_t count) const
         {
-            pnc_assert(!!baseData);
-            pnc_assert(firstComponentIndex >= 0);
-            pnc_assert(count >= 0);
-            pnc_assert_owns(baseData, (firstComponentIndex + count) * Size);
+            ni_assert(!!baseData);
+            ni_assert(firstComponentIndex >= 0);
+            ni_assert(count >= 0);
+            ni_assert_owns(baseData, (firstComponentIndex + count) * Size);
 
-#ifdef PNC_MEMORY_NODE_CONSTRUCTZERO
+#ifdef NI_MEMORY_NODE_CONSTRUCTZERO
             std::fill((uint8*)baseData + firstComponentIndex * Size, (uint8*)baseData + (firstComponentIndex + count) * Size, 0);
 #endif
             if (IsNonTrivialConstruct())
                 NonTrivialConstruct(baseData, firstComponentIndex, count);
-#if defined(PNC_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) && !defined(PNC_MEMORY_NODE_CONSTRUCTZERO)
+#if defined(NI_MEMORY_NODE_CONSTRUCTZERO_TRIVIAL) && !defined(NI_MEMORY_NODE_CONSTRUCTZERO)
             else
                 std::fill(baseData + firstComponentIndex * Size, baseData + (firstComponentIndex + count) * Size, 0);
 #endif
@@ -391,13 +390,13 @@ namespace NiT
         /// </summary>
         void DestructDataUnsafe(void* const baseData, const Size_t firstComponentIndex, const Size_t count) const
         {
-            pnc_assert(!!baseData);
-            pnc_assert(firstComponentIndex >= 0);
-            pnc_assert(count >= 0);
-            pnc_assert_owns(baseData, (firstComponentIndex + count) * Size);
+            ni_assert(!!baseData);
+            ni_assert(firstComponentIndex >= 0);
+            ni_assert(count >= 0);
+            ni_assert_owns(baseData, (firstComponentIndex + count) * Size);
             if (IsNonTrivialDestruct())
                 NonTrivialDestruct(baseData, firstComponentIndex, count);
-#ifdef PNC_MEMORY_NODE_DESTRUCTZERO
+#ifdef NI_MEMORY_NODE_DESTRUCTZERO
             std::fill((uint8*)baseData + firstComponentIndex * Size, (uint8*)baseData + (firstComponentIndex + count) * Size, 0);
 #endif
         }
@@ -422,14 +421,14 @@ namespace NiT
                                             void* const baseDataFrom, const Size_t firstComponentIndexFrom,
                                             const Size_t count) const
         {
-            pnc_assert(!!baseDataTo);
-            pnc_assert(!!baseDataFrom);
-            pnc_assert(firstComponentIndexTo >= 0);
-            pnc_assert(firstComponentIndexFrom >= 0);
-            pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
+            ni_assert(!!baseDataTo);
+            ni_assert(!!baseDataFrom);
+            ni_assert(firstComponentIndexTo >= 0);
+            ni_assert(firstComponentIndexFrom >= 0);
+            ni_assert(count >= 0);
+            ni_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            ni_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            ni_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialMoveConstruct())
                 NonTrivialMoveConstructForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
@@ -465,14 +464,14 @@ namespace NiT
                                          void* const baseDataFrom, const Size_t firstComponentIndexFrom,
                                                                    const Size_t count)const
         {
-            pnc_assert(!!baseDataTo);
-            pnc_assert(!!baseDataFrom);
-            pnc_assert(firstComponentIndexTo >= 0);
-            pnc_assert(firstComponentIndexFrom >= 0);
-            pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
+            ni_assert(!!baseDataTo);
+            ni_assert(!!baseDataFrom);
+            ni_assert(firstComponentIndexTo >= 0);
+            ni_assert(firstComponentIndexFrom >= 0);
+            ni_assert(count >= 0);
+            ni_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            ni_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            ni_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialMoveConstruct())
                 NonTrivialMoveAssignForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
@@ -507,14 +506,14 @@ namespace NiT
                                       const void* const baseDataFrom, const Size_t firstComponentIndexFrom,
                                                                       const Size_t count)const
         {
-            pnc_assert(!!baseDataTo);
-            pnc_assert(!!baseDataFrom);
-            pnc_assert(firstComponentIndexTo >= 0);
-            pnc_assert(firstComponentIndexFrom >= 0);
-            pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
+            ni_assert(!!baseDataTo);
+            ni_assert(!!baseDataFrom);
+            ni_assert(firstComponentIndexTo >= 0);
+            ni_assert(firstComponentIndexFrom >= 0);
+            ni_assert(count >= 0);
+            ni_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            ni_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            ni_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialCopyConstruct())
                 NonTrivialCopyConstructForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
@@ -549,14 +548,14 @@ namespace NiT
                                    const void* const baseDataFrom, const Size_t firstComponentIndexFrom,
                                                                    const Size_t count)const
         {
-            pnc_assert(!!baseDataTo);
-            pnc_assert(!!baseDataFrom);
-            pnc_assert(firstComponentIndexTo >= 0);
-            pnc_assert(firstComponentIndexFrom >= 0);
-            pnc_assert(count >= 0);
-            pnc_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
-            pnc_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
-            pnc_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
+            ni_assert(!!baseDataTo);
+            ni_assert(!!baseDataFrom);
+            ni_assert(firstComponentIndexTo >= 0);
+            ni_assert(firstComponentIndexFrom >= 0);
+            ni_assert(count >= 0);
+            ni_assert(!IsOverlappingForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count));
+            ni_assert_owns(baseDataTo,   (firstComponentIndexTo   + count) * Size);
+            ni_assert_owns(baseDataFrom, (firstComponentIndexFrom + count) * Size);
 
             if (IsNonTrivialCopyConstruct())
                 NonTrivialCopyAssignForward(baseDataTo, firstComponentIndexTo, baseDataFrom, firstComponentIndexFrom, count);
@@ -631,7 +630,7 @@ namespace NiT
             case ComponentOwner::Chunk:
                 return chunkIndex;
             default:
-                pnc_assert_no_entry_return(-1);
+                ni_assert_no_entry_return(-1);
             }
         }
         Size_t GetComponentCount(const NodeCountT<Size_t> nodeCount, const ChunkCountT<Size_t> chunkCount)const

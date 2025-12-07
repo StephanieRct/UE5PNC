@@ -153,9 +153,9 @@ namespace NiT
         template<typename TContainer>
         static void AllocateComponentDataArray(TContainer& container)
         {
-            pnc_assert(container.IsStruct());
+            ni_assert(container.IsStruct());
             typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(container);
-            internalChunk.ComponentDataArray = (void**)pnc_alloc(internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            internalChunk.ComponentDataArray = (void**)ni_alloc(internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
@@ -164,9 +164,9 @@ namespace NiT
         template<typename TContainer>
         static void FreeComponentDataArray(TContainer& container)
         {
-            pnc_assert(container.IsStruct());
+            ni_assert(container.IsStruct());
             typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(container);
-            pnc_free_clean(internalChunk.ComponentDataArray, internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            ni_free_clean(internalChunk.ComponentDataArray, internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace NiT
         template<typename TContainer, typename TProps>
         static void AllocateConstruct(TContainer& container, const TProps& props)
         {
-            pnc_assert(container.IsStructData());
+            ni_assert(container.IsStructData());
             const auto nodeCount = props.GetNodeCount();
             Node_t::AllocateConstructAllComponentsUnsafe(
                         container, 0/*:firstNodeIndex*/,           0/*:firstChunkIndex*/, 
@@ -202,11 +202,11 @@ namespace NiT
                                  const NodeCapacityT< Size_t> nodeCapacity, 
                                  const ChunkCapacityT<Size_t> chunkCapacity)
         {
-            pnc_assert(containerTo.  IsStructData());
-            pnc_assert(containerFrom.IsStructData());
-            pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
-            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
-            pnc_assert(!IsSameData(containerTo, containerFrom));
+            ni_assert(containerTo.  IsStructData());
+            ni_assert(containerFrom.IsStructData());
+            ni_assert(nodeCapacity  >= containerFrom.GetNodeCount());
+            ni_assert(chunkCapacity >= containerFrom.GetChunkCount());
+            ni_assert(!IsSameData(containerTo, containerFrom));
             const auto nodeCount =  containerFrom.GetNodeCount();
             const auto chunkCount = containerFrom.GetChunkCount();
             Node_t::AllocateCopyConstructAllComponentsForwardUnsafe(
@@ -240,12 +240,12 @@ namespace NiT
                                    const NodeCapacityT< Size_t> nodeCapacity,
                                    const ChunkCapacityT<Size_t> chunkCapacity)
         {
-            pnc_assert(containerToReallocate.IsStructData());
-            pnc_assert(containerFrom.        IsStructData());
-            pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
-            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
-            pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
-            pnc_assert(!IsSameData    (containerToReallocate, containerFrom));
+            ni_assert(containerToReallocate.IsStructData());
+            ni_assert(containerFrom.        IsStructData());
+            ni_assert(nodeCapacity  >= containerFrom.GetNodeCount());
+            ni_assert(chunkCapacity >= containerFrom.GetChunkCount());
+            ni_assert(IsSameStructure(containerToReallocate, containerFrom));
+            ni_assert(!IsSameData    (containerToReallocate, containerFrom));
 
             const auto nodeCount =  containerFrom.GetNodeCount();
             const auto chunkCount = containerFrom.GetChunkCount();
@@ -279,11 +279,11 @@ namespace NiT
                                    const NodeCapacityT< Size_t> nodeCapacity,
                                    const ChunkCapacityT<Size_t> chunkCapacity)
         {
-            pnc_assert(containerToReallocate.IsStructData());
-            pnc_assert(containerFrom.        IsStructData());
-            pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
-            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
-            pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
+            ni_assert(containerToReallocate.IsStructData());
+            ni_assert(containerFrom.        IsStructData());
+            ni_assert(nodeCapacity  >= containerFrom.GetNodeCount());
+            ni_assert(chunkCapacity >= containerFrom.GetChunkCount());
+            ni_assert(IsSameStructure(containerToReallocate, containerFrom));
 
             const auto nodeCount  = containerFrom.GetNodeCount();
             const auto chunkCount = containerFrom.GetChunkCount();
@@ -320,7 +320,7 @@ namespace NiT
                 componentType.DestructComponentUnsafe(componentDataArrayTo[i], 
                                   0/*:firstNodexIndex*/, 0/*:firstChunkIndex*/,
                                   nodeCount,             chunkCount);
-                pnc_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
+                ni_free_clean(componentDataArrayTo[i], componentType.GetSize(nodeCapacity, chunkCapacity), componentType.GetAlignment());
             }
         }
     };

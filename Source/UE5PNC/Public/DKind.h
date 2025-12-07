@@ -45,10 +45,10 @@ namespace NiT
         {
         }
 
-#ifdef PNC_MEMORYCLEANUP
+#ifdef NI_MEMORYCLEANUP
         ~DKind()
         {
-            pnc_clean(Kind);
+            ni_clean(Kind);
         }
 #endif
         ContainerKind GetKind()const 
@@ -94,7 +94,7 @@ namespace NiT
 
     protected:
         template<typename TProps>
-        PNC_DEBUG_NOINLINE DKind(const DPropsTag& tag, const TProps& props)
+        NI_DEBUG_NOINLINE DKind(const DPropsTag& tag, const TProps& props)
             : Kind(props.GetChunkKind())
         {
         }

@@ -91,7 +91,7 @@ namespace NiT
                      PropNodeCapacityT< Size_t>(nodeCapacity),
                      nodeCountPerChunk)
         {
-            pnc_assert(nodeCapacity >= PropCountToCapacity(chunkCount * nodeCountPerChunk));
+            ni_assert(nodeCapacity >= PropCountToCapacity(chunkCount * nodeCountPerChunk));
         }
 #ifndef PNC_PROPS_STRICT
         DArray(const ChunkStructure_t* chunkStructure,

@@ -26,10 +26,8 @@
 #include "DOfKind.h"
 #include "DTreePointer.h"
 
-
 namespace NiT
 {
-
     template<typename TChunkStructure>
     using KindPointerT = DKind<Container<TChunkStructure>>;
 
@@ -65,8 +63,6 @@ namespace NiT
                     DOwn<
                     KBunchPointerT<TChunkStructure>>>;
 
-
-
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KArrayT = DArray<
                     DOwn<
@@ -101,7 +97,6 @@ namespace NiT
     using KBunchTreePointerT = DBunchPointer<
                                KBucketTreePointerT<TChunkStructure>>;
 
-    
     template<typename TChunkStructure>
     using KBunchTreeT = DBucket< // TODO replace DBucket with a DBunchTree decorator and add them to AlgorithmRunner
                         DOwn<
@@ -112,17 +107,13 @@ namespace NiT
                                DOfKind<ContainerKind::ArrayTree,
                                KChunkTreePointerT<TChunkStructure>>>;
 
-    
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KArrayTreeT = DArray< // TODO replace DArray with a DChunkArrayTree decorator and add them to AlgorithmRunner
                         DOwn<
                         KArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>;
 
-
     // TODO complete
     template<typename TChunkStructure, typename TChunkPointerElement>
     using KBucketBarrelTreeT = DBucketBarrel<DOwn<DBarrelPointer<KArrayTreePointerT<TChunkStructure, ChunkPointerT<TChunkStructure>>>>>;
-
-
 }
 

@@ -17,8 +17,8 @@ namespace NiT
         }
     };
 }
-#ifdef PNC_MEMORYCLEANUP
-#   define pnc_clean(x) ::NiT::Cleaner<decltype(x)>::Clean(x)
+#ifdef NI_MEMORYCLEANUP
+#   define ni_clean(x) ::NiT::Cleaner<decltype(x)>::Clean(x)
 
 namespace NiT
 {
@@ -70,5 +70,5 @@ namespace NiT
 
 }
 #else
-#   define pnc_clean(x) x
+#   define ni_clean(x) x
 #endif

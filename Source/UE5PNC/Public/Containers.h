@@ -227,7 +227,7 @@ namespace NiT
               BucketCarryPointerT<TChunkStructure, TChunkPointerElement>>>;
 
 
-    namespace 
+    namespace Selectors
     {
         template<template<typename> typename TDecorator0>
         struct ContainerHasDecorator0T
@@ -254,7 +254,7 @@ namespace NiT
     template<typename TContainer, template<typename> typename TDecorator>
     consteval bool ContainerHasDecorator()
     {
-        return ContainerHasDecorator0T< TDecorator>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
+        return Selectors::ContainerHasDecorator0T< TDecorator>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
     }
 
     /// <summary>
@@ -263,7 +263,7 @@ namespace NiT
     template<typename TContainer, template<typename, typename> typename TDecorator, typename TValue >
     consteval bool ContainerHasDecorator()
     {
-        return ContainerHasDecorator1T< TDecorator, TValue>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
+        return Selectors::ContainerHasDecorator1T< TDecorator, TValue>::Select((const TContainer*)nullptr, (const TContainer*)nullptr);
     }
 }
 
@@ -304,11 +304,11 @@ namespace NiT
         {
             if (chunk)
             {
-                pnc_assert(component);
+                ni_assert(component);
             }
             else
             {
-                pnc_assert(!component);
+                ni_assert(!component);
             }
             Update();
         }
@@ -319,25 +319,25 @@ namespace NiT
         {
             if (!Chunk) return;
             Component = Chunk->GetComponentData<Component_t>();
-            pnc_assert(Component);
+            ni_assert(Component);
         }
         Chunk_t* GetChunk()const { return Chunk; }
         Component_t& operator[](const Size_t nodeIndex)const
         {
-            pnc_assert(nodeIndex >= 0);
-            pnc_assert(nodeIndex < Chunk->GetNodeCount());
+            ni_assert(nodeIndex >= 0);
+            ni_assert(nodeIndex < Chunk->GetNodeCount());
             return Component[nodeIndex];
         }
 
         Component_t& operator*()const
         {
-            pnc_assert(Chunk->GetNodeCount() > 0);
+            ni_assert(Chunk->GetNodeCount() > 0);
             return *Component;
         }
 
         Component_t* operator->()const
         {
-            pnc_assert(Chunk->GetNodeCount() > 0);
+            ni_assert(Chunk->GetNodeCount() > 0);
             return Component;
         }
 

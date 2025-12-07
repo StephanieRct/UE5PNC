@@ -33,7 +33,7 @@ namespace NiT
         template<typename TRouter, typename TAlgorithm>
         static bool TryRun(const TRouter& router, TAlgorithm& algorithm, TContainer& container)
         {
-            pnc_assert(!container.IsNull());
+            ni_assert(!container.IsNull());
             if (!router.RouteAlgorithm(algorithm, container))
                 return false;
             const auto nodeCount = container.GetNodeCount();

@@ -50,11 +50,11 @@ namespace NiT
         {
         }
 
-#ifdef PNC_MEMORYCLEANUP
+#ifdef NI_MEMORYCLEANUP
         ~ChunkArrayExtensionT()
         {
-            pnc_clean(Chunks);
-            pnc_clean(ChunkCount);
+            ni_clean(Chunks);
+            ni_clean(ChunkCount);
         }
 #endif
 
@@ -113,8 +113,8 @@ namespace NiT
         template<typename TChunk>
         void ConstructCopy(TChunk& chunk, const TChunk& chunkFrom, const Self& arrayFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
         {
-            pnc_assert(IsSameStructure(chunk, chunkFrom));
-            pnc_assert(!IsSameData(chunk, chunkFrom));
+            ni_assert(IsSameStructure(chunk, chunkFrom));
+            ni_assert(!IsSameData(chunk, chunkFrom));
             typename TChunk::ChunkPointerInternal_t& internalChunkTo =   TChunk::GetInternalChunk(chunk);
             typename TChunk::ChunkPointerInternal_t& internalChunkFrom = TChunk::GetInternalChunk(chunkFrom);
             const Size_t chunkCountFrom = chunkFrom.GetChunkCount();
@@ -138,8 +138,8 @@ namespace NiT
         template<typename TChunk>
         void ReallocateCopy(TChunk& chunkToReallocate, const TChunk& chunkFrom, const Self& arrayFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
         {
-            pnc_assert(IsSameStructure(chunkToReallocate, chunkFrom));
-            pnc_assert(!IsSameData(chunkToReallocate, chunkFrom));
+            ni_assert(IsSameStructure(chunkToReallocate, chunkFrom));
+            ni_assert(!IsSameData(chunkToReallocate, chunkFrom));
             typename TChunk::ChunkPointerInternal_t& internalChunkTo =   TChunk::GetInternalChunk(chunkToReallocate);
             typename TChunk::ChunkPointerInternal_t& internalChunkFrom = TChunk::GetInternalChunk(chunkFrom);
             const Size_t chunkCountTo =    chunkToReallocate.GetChunkCount();
@@ -186,7 +186,7 @@ namespace NiT
         template<typename TChunk>
         void ReallocateMove(TChunk& chunkToReallocate, const TChunk& chunkFrom, const Self& arrayFrom, const NodeCapacityT<Size_t> newNodeCapacity, const ChunkCapacityT<Size_t> newChunkCapacity)
         {
-            pnc_assert(IsSameStructure(chunkToReallocate, chunkFrom));
+            ni_assert(IsSameStructure(chunkToReallocate, chunkFrom));
             const Size_t chunkCountTo =    chunkToReallocate.GetChunkCount();
             const Size_t chunkCapacityTo = chunkToReallocate.GetChunkCapacity();
             const Size_t chunkCountFrom =  chunkFrom.GetChunkCount();
@@ -229,18 +229,18 @@ namespace NiT
     protected:
         ChunkPointerElement_t* Allocate(const ChunkCapacityT<Size_t> chunkCapacity)
         {
-            return (ChunkPointerElement_t*)pnc_alloc(chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
+            return (ChunkPointerElement_t*)ni_alloc(chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
 
         void Deallocate(ChunkPointerElement_t*& chunks, const ChunkCapacityT<Size_t> chunkCapacity)
         {
-            pnc_free_clean(chunks, chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
+            ni_free_clean(chunks, chunkCapacity * sizeof(ChunkPointerElement_t), alignof(ChunkPointerElement_t));
         }
 
         void** GetComponentDataArrayForChunk(const Size_t chunkIndex)
         {
             ChunkPointerInternal_t& internalChunk = GetInternalChunk(*this);
-            pnc_assert(!internalChunk.IsNull());
+            ni_assert(!internalChunk.IsNull());
             return &internalChunk.ComponentDataArray[chunkIndex * internalChunk.Structure->GetComponentCount()];
         }
 

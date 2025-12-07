@@ -128,12 +128,12 @@ namespace NiT
         ChunkPointerInternalT(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
 
-#ifdef PNC_MEMORYCLEANUP
+#ifdef NI_MEMORYCLEANUP
         ~ChunkPointerInternalT()
         {
-            pnc_clean(Structure);
-            pnc_clean(ComponentDataArray);
-            pnc_clean(NodeCount);
+            ni_clean(Structure);
+            ni_clean(ComponentDataArray);
+            ni_clean(NodeCount);
         }
 #endif
     public:
@@ -178,7 +178,7 @@ namespace NiT
         /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(const Size_t componentTypeIndexInChunk)
         {
-            pnc_assert(!IsNull());
+            ni_assert(!IsNull());
             return this->ComponentDataArray[componentTypeIndexInChunk];
         }
 
@@ -192,7 +192,7 @@ namespace NiT
         /// <returns>Const pointer to the component memory array</returns>
         const void* GetComponentData(const Size_t componentTypeIndexInChunk)const
         {
-            pnc_assert(!IsNull());
+            ni_assert(!IsNull());
             return this->ComponentDataArray[componentTypeIndexInChunk];
         }
 
@@ -247,7 +247,7 @@ namespace NiT
         /// <returns>Pointer to the component memory array</returns>
         void* GetComponentData(const type_info* const componentType)
         {
-            pnc_assert(!IsNull());
+            ni_assert(!IsNull());
             auto index = GetStructure().Components.GetComponentTypeIndexInChunk(componentType);
             if (index < 0)
                 return nullptr;
@@ -265,7 +265,7 @@ namespace NiT
         /// <returns>Const pointer to the component memory array</returns>
         const void* GetComponentData(const type_info* const componentType)const
         {
-            pnc_assert(!IsNull());
+            ni_assert(!IsNull());
             auto index = GetStructure().Components.GetComponentTypeIndexInChunk(componentType);
             if (index < 0)
                 return nullptr;
@@ -285,7 +285,7 @@ namespace NiT
         template<typename TComponent>
         TComponent* GetComponentData()
         {
-            pnc_assert(!IsNull());
+            ni_assert(!IsNull());
             return (TComponent*)GetComponentData(&typeid(TComponent));
         }
 
@@ -301,7 +301,7 @@ namespace NiT
         template<typename TComponent>
         const TComponent* GetComponentData()const
         {
-            pnc_assert(!IsNull());
+            ni_assert(!IsNull());
             return (TComponent*)GetComponentData(&typeid(TComponent));
         }
 

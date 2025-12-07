@@ -26,7 +26,7 @@ namespace NiT
 
     protected:
         template<typename TProps>
-        PNC_DEBUG_NOINLINE DOfKind(const DPropsTag& tag, const TProps& props)
+        NI_DEBUG_NOINLINE DOfKind(const DPropsTag& tag, const TProps& props)
             : Base_t(tag, AppendPropSingle(props, TKind))
         {
         }

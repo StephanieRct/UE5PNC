@@ -86,10 +86,10 @@ namespace NiT
         template<typename TContainer>
         static void AllocateComponentDataArray(TContainer& container)
         {
-            pnc_assert(container.IsStruct());
+            ni_assert(container.IsStruct());
             typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(container);
             const ChunkCapacityT<Size_t> chunkCapacity = container.GetChunkCapacity();
-            internalChunk.ComponentDataArray = (void**)pnc_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            internalChunk.ComponentDataArray = (void**)ni_alloc(chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
@@ -98,10 +98,10 @@ namespace NiT
         template<typename TContainer>
         static void FreeComponentDataArray(TContainer& container)
         {
-            pnc_assert(container.IsStruct());
+            ni_assert(container.IsStruct());
             typename TContainer::ChunkPointerInternal_t& internalChunk = TContainer::GetInternalChunk(container);
             ChunkCapacityT<Size_t> chunkCapacity = container.GetChunkCapacity();
-            pnc_free_clean(internalChunk.ComponentDataArray, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
+            ni_free_clean(internalChunk.ComponentDataArray, chunkCapacity * internalChunk.Structure->Components.GetSize() * sizeof(void*), alignof(void*));
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace NiT
         template<typename TContainer>
         static void AllocateCopy(TContainer& containerTo, const TContainer& containerFrom)
         {
-            pnc_assert(!IsSameData(containerTo, containerFrom));
+            ni_assert(!IsSameData(containerTo, containerFrom));
 
             const auto nodeCapacity =  containerFrom.GetNodeCapacity();
             const auto chunkCapacity = containerFrom.GetChunkCapacity();
@@ -183,12 +183,12 @@ namespace NiT
                                    const NodeCapacityT< Size_t> nodeCapacity, 
                                    const ChunkCapacityT<Size_t> chunkCapacity)
         {
-            pnc_assert(containerToReallocate.IsStructData());
-            pnc_assert(containerFrom.        IsStructData());
-            pnc_assert(nodeCapacity  >= containerFrom.GetNodeCount());
-            pnc_assert(chunkCapacity >= containerFrom.GetChunkCount());
-            pnc_assert(IsSameStructure(containerToReallocate, containerFrom));
-            pnc_assert(!IsSameData(    containerToReallocate, containerFrom));
+            ni_assert(containerToReallocate.IsStructData());
+            ni_assert(containerFrom.        IsStructData());
+            ni_assert(nodeCapacity  >= containerFrom.GetNodeCount());
+            ni_assert(chunkCapacity >= containerFrom.GetChunkCount());
+            ni_assert(IsSameStructure(containerToReallocate, containerFrom));
+            ni_assert(!IsSameData(    containerToReallocate, containerFrom));
 
             Base_t::                    ReallocateCopy(containerToReallocate, containerFrom);
             containerToReallocate.Array.ReallocateCopy(containerToReallocate, containerFrom, containerFrom.Array, nodeCapacity, chunkCapacity);
@@ -233,15 +233,15 @@ namespace NiT
         // TODO cleanup
         static void ConstructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex, const Size_t nodeFirstIndex, const NodeCountT<Size_t> nodeCount)
         {
-            pnc_assert(chunkIndex >= 0);
-            pnc_assert(chunkIndex < chunkArray.Array.GetChunkCount());
-            pnc_assert(nodeFirstIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-            pnc_assert(nodeFirstIndex < chunkArray.GetNodeCount());
-            pnc_assert(nodeFirstIndex + nodeCount <= chunkArray.GetNodeCount());
+            ni_assert(chunkIndex >= 0);
+            ni_assert(chunkIndex < chunkArray.Array.GetChunkCount());
+            ni_assert(nodeFirstIndex >= 0);
+            ni_assert(nodeCount >= 0);
+            ni_assert(nodeFirstIndex < chunkArray.GetNodeCount());
+            ni_assert(nodeFirstIndex + nodeCount <= chunkArray.GetNodeCount());
 
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(chunkArray);
-            pnc_assert(!internalChunkArray.IsNull());
+            ni_assert(!internalChunkArray.IsNull());
             const Size_t componentCount = internalChunkArray.Structure->Components.GetSize();
 
             new(&internalChunkArray.Array.Chunks[chunkIndex]) ChunkPointerElement_t(internalChunkArray.Structure, nodeCount, internalChunkArray.ComponentDataArray + chunkIndex * componentCount);
@@ -263,11 +263,11 @@ namespace NiT
         // TODO cleanup
         static void DestructChunkElementAndNodes(Self_t& chunkArray, const Size_t chunkIndex)
         {
-            pnc_assert(chunkIndex >= 0);
-            pnc_assert(chunkIndex < chunkArray.Array.GetChunkCount());
+            ni_assert(chunkIndex >= 0);
+            ni_assert(chunkIndex < chunkArray.Array.GetChunkCount());
 
             ChunkPointerInternal_t& internalChunkArray = GetInternalChunk(chunkArray);
-            pnc_assert(!internalChunkArray.IsNull());
+            ni_assert(!internalChunkArray.IsNull());
 
             auto internalChunkElement = GetInternalChunkElement(chunkArray, chunkIndex);
             if (internalChunkElement.NodeCount > 0)
@@ -282,16 +282,16 @@ namespace NiT
         // Nodes must fit in target container.
         static void CopyElementAndNodesForward(Self_t& chunkArrayTo, const Size_t elementFirstIndexTo, const Self_t& chunkArrayFrom, const Size_t elementFirstIndexFrom, const Size_t elementCount)
         {
-            pnc_assert(!chunkArrayTo.IsNull());
-            pnc_assert(!chunkArrayFrom.IsNull());
-            pnc_assert(IsSameStructure(chunkArrayTo, chunkArrayFrom));
-            pnc_assert(elementCount >= 0);
-            pnc_assert(elementFirstIndexTo >= 0);
-            pnc_assert(elementFirstIndexTo < chunkArrayTo.GetChunkCount());
-            pnc_assert(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCount());
-            pnc_assert(elementFirstIndexFrom >= 0);
-            pnc_assert(elementFirstIndexFrom < chunkArrayFrom.GetChunkCount());
-            pnc_assert(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCount());
+            ni_assert(!chunkArrayTo.IsNull());
+            ni_assert(!chunkArrayFrom.IsNull());
+            ni_assert(IsSameStructure(chunkArrayTo, chunkArrayFrom));
+            ni_assert(elementCount >= 0);
+            ni_assert(elementFirstIndexTo >= 0);
+            ni_assert(elementFirstIndexTo < chunkArrayTo.GetChunkCount());
+            ni_assert(elementFirstIndexTo + elementCount <= chunkArrayTo.GetChunkCount());
+            ni_assert(elementFirstIndexFrom >= 0);
+            ni_assert(elementFirstIndexFrom < chunkArrayFrom.GetChunkCount());
+            ni_assert(elementFirstIndexFrom + elementCount <= chunkArrayFrom.GetChunkCount());
 
             for (Size_t i = 0; i < elementCount; ++i)
             {
@@ -316,25 +316,25 @@ namespace NiT
         // TODO implement
         static void MoveElementAndNodesForward(Self_t& chunkArrayTo, const Size_t chunkIndexTo, Self_t& chunkArrayFrom, const Size_t chunkIndexFrom, const ChunkCountT<Size_t> chunkCount)
         {
-            pnc_todo;
-        //    pnc_assert(chunkIndexTo >= 0);
-        //    pnc_assert(chunkIndexTo < ChunkCapacity);
-        //    pnc_assert(chunkIndexTo + chunkCount < ChunkCapacity);
-        //    pnc_assert(chunkIndexTo < GetChunkCount());
-        //    pnc_assert(chunkIndexTo + chunkCount <= GetChunkCount());
-        //    pnc_assert(chunkIndexFrom >= 0);
-        //    pnc_assert(chunkIndexFrom < chunkArrayFrom.GetChunkCount());
-        //    pnc_assert(chunkIndexFrom + chunkCount <= chunkArrayFrom.GetChunkCount());
-        //    pnc_assert(chunkCount >= 0);
-        //    pnc_assert(!chunkArrayFrom.IsNull());
-        //    pnc_assert(IsSameStructure(*this, chunkArrayFrom));
+            //ni_todo("MoveElementAndNodesForward");
+        //    ni_assert(chunkIndexTo >= 0);
+        //    ni_assert(chunkIndexTo < ChunkCapacity);
+        //    ni_assert(chunkIndexTo + chunkCount < ChunkCapacity);
+        //    ni_assert(chunkIndexTo < GetChunkCount());
+        //    ni_assert(chunkIndexTo + chunkCount <= GetChunkCount());
+        //    ni_assert(chunkIndexFrom >= 0);
+        //    ni_assert(chunkIndexFrom < chunkArrayFrom.GetChunkCount());
+        //    ni_assert(chunkIndexFrom + chunkCount <= chunkArrayFrom.GetChunkCount());
+        //    ni_assert(chunkCount >= 0);
+        //    ni_assert(!chunkArrayFrom.IsNull());
+        //    ni_assert(IsSameStructure(*this, chunkArrayFrom));
 
         //    ChunkPointerElement_t& chunkElementTo = this->GetChunkElement(chunkIndexTo);
         //    ChunkPointerElement_t& chunkElementFrom = chunkArrayFrom->GetChunkElement(chunkIndexFrom);
         //    ChunkPointerElementInternal_t& internalChunkElementTo = ChunkPointerElement_t::GetInternalChunk(chunkElementTo);
         //    ChunkPointerElementInternal_t& internalChunkElementFrom = ChunkPointerElement_t::GetInternalChunk(chunkElementFrom);
         //    const Size_t nodeCountFrom = chunkElementFrom.GetNodeCount();
-        //    pnc_assert(NodeCapacityPerChunk >= nodeCountFrom);
+        //    ni_assert(NodeCapacityPerChunk >= nodeCountFrom);
 
         //    // Move Chunk
         //    chunkElementTo = std::move(chunkElementFrom);

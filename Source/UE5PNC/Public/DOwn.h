@@ -31,7 +31,7 @@ namespace NiT
         {
             if (this == &containerFrom)
                 return *this;
-            pnc_assertf(!IsVoidData(), TEXT("Cannot move over a VoidData Chunk without the Structure."));
+            ni_assertf(!IsVoidData(), TEXT("Cannot move over a VoidData Chunk without the Structure."));
             if (IsData())
             {
                 FreeDestruct(*this);
@@ -49,7 +49,7 @@ namespace NiT
         DOwn(const Self_t& containerFrom)
             : Base_t(containerFrom)
         {
-            pnc_assertf(!containerFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk. Data cannot be copied without a structure."));
+            ni_assertf(!containerFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk. Data cannot be copied without a structure."));
             //TODO construct from null chunk
             if (containerFrom.IsNull())
                 return;
@@ -68,8 +68,8 @@ namespace NiT
             if (this == &containerFrom)
                 return *this;
 
-            pnc_assertf(!containerFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk without the Structure."));
-            pnc_assertf(!this->IsVoidData(), TEXT("Cannot copy over a VoidData Chunk without the Structure."));
+            ni_assertf(!containerFrom.IsVoidData(), TEXT("Cannot copy a VoidData Chunk without the Structure."));
+            ni_assertf(!this->IsVoidData(), TEXT("Cannot copy over a VoidData Chunk without the Structure."));
 
             if (IsData())
             {
@@ -125,7 +125,7 @@ namespace NiT
         /// </summary>
         ~DOwn() noexcept(false)
         {
-            pnc_assertf(!IsVoidData(), TEXT("A VoidData Chunk is being destructed. Data cannot be destructed and freed without a structure. Use force_structure."));
+            ni_assertf(!IsVoidData(), TEXT("A VoidData Chunk is being destructed. Data cannot be destructed and freed without a structure. Use force_structure."));
             if (IsData())
             {
                 FreeDestruct(*this);

@@ -58,10 +58,10 @@ namespace NiT
                      PropNodeCapacityT<Size_t>(chunkCapacity * nodeCountPerChunk),
                      nodeCountPerChunk)
         {
-            pnc_assert(chunkCapacity >= 0);
-            pnc_assert(nodeCountPerChunk >= 0);
-            pnc_assert(chunkCount >= 0);
-            pnc_assert(chunkCount <= chunkCapacity);
+            ni_assert(chunkCapacity >= 0);
+            ni_assert(nodeCountPerChunk >= 0);
+            ni_assert(chunkCount >= 0);
+            ni_assert(chunkCount <= chunkCapacity);
         }
 
         // Empty, Partial or Full Uniform array with additional node capacity.

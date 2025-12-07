@@ -69,7 +69,7 @@ namespace NiT
         {
             if (!TryRun(container))
             {
-                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TContainer).name());
+                ni_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TContainer).name());
             }
         }
 
@@ -78,7 +78,7 @@ namespace NiT
         {
             if (!container)
             {
-                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TContainer).name());
+                ni_assertf(false, TEXT("Could not run algorithm '%hs' on null chunk '%hs'."), typeid(Algorithm_t).name(), typeid(TContainer).name());
             }
             return Run(*container);
         }
@@ -95,7 +95,7 @@ namespace NiT
         {
             if (!TryRun(router, container))
             {
-                pnc_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TContainer).name());
+                ni_assertf(false, TEXT("Could not run algorithm '%hs' on chunk '%hs'. The chunk failed the algorithm requirements."), typeid(Algorithm_t).name(), typeid(TContainer).name());
             }
         }
 

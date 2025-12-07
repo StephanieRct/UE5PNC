@@ -144,7 +144,7 @@ namespace NiT
         /// <param name="child">KTreePointer to move.</param>
         void InsertFirstChild(Self_t* child)
         {
-            pnc_assert(child->Tree.IsExtracted());
+            ni_assert(child->Tree.IsExtracted());
             child->Tree.Parent = this;
             if (Tree.FirstChild == nullptr)
             {
@@ -165,7 +165,7 @@ namespace NiT
         /// <param name="child">KTreePointer to move.</param>
         void InsertLastChild(Self_t* child)
         {
-            pnc_assert(child->Tree.IsExtracted());
+            ni_assert(child->Tree.IsExtracted());
             child->Tree.Parent = this;
             if (Tree.FirstChild == nullptr)
             {
@@ -185,7 +185,7 @@ namespace NiT
         /// <param name="sibling">KTreePointer to move.</param>
         void InsertPreviousSibling(Self_t* sibling)
         {
-            pnc_assert(sibling->Tree.IsExtracted());
+            ni_assert(sibling->Tree.IsExtracted());
             auto last = Tree.PreviousSibling;
             last->Tree.NextSibling = sibling;
             sibling->Tree.PreviousSibling = last;

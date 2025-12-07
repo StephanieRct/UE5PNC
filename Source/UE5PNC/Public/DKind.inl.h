@@ -26,7 +26,7 @@ namespace NiT
         case ContainerKind::ArrayTree:
             return reinterpret_cast<const KChunkTreePointerT<ChunkStructure_t>*>(this)->GetStructure();
         }
-        pnc_assert_no_entry_return(*(ChunkStructure_t*)nullptr);
+        ni_assert_no_entry_return(*(ChunkStructure_t*)nullptr);
     }
 
     template<typename TBase>
@@ -41,7 +41,7 @@ namespace NiT
         case ContainerKind::ArrayTree:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkTreePointerT<ChunkStructure_t>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
+        ni_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
     }
 
     template<typename TBase>
@@ -56,7 +56,7 @@ namespace NiT
         case ContainerKind::ArrayTree:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KChunkTreePointerT<ChunkStructure_t>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
+        ni_assert_no_entry_return(*(ChunkPointer_t*)nullptr);
     }
 
     template<typename TBase>
@@ -65,15 +65,15 @@ namespace NiT
         switch (this->Kind)
         {
         case ContainerKind::Chunk:
-            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+            ni_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
         case ContainerKind::ChunkTree:
-            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+            ni_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
         case ContainerKind::Array:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
         case ContainerKind::ArrayTree:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+        ni_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
     }
 
     template<typename TBase>
@@ -82,14 +82,14 @@ namespace NiT
         switch (this->Kind)
         {
         case ContainerKind::Chunk:
-            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+            ni_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
         case ContainerKind::ChunkTree:
-            pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+            ni_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
         case ContainerKind::Array:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayPointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
         case ContainerKind::ArrayTree:
             return reinterpret_cast<ArrayPointer_t&>(reinterpret_cast<KArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>*>(this)->GetChunk());
         }
-        pnc_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
+        ni_assert_no_entry_return(*(ArrayPointer_t*)nullptr);
     }
 }

@@ -45,13 +45,13 @@ namespace NiT
 
     public:
         ChunkTreeNodeT() = default;
-#ifdef PNC_MEMORYCLEANUP
+#ifdef NI_MEMORYCLEANUP
         ~ChunkTreeNodeT()
         {
-            pnc_clean(Parent);
-            pnc_clean(FirstChild);
-            pnc_clean(PreviousSibling);
-            pnc_clean(NextSibling);
+            ni_clean(Parent);
+            ni_clean(FirstChild);
+            ni_clean(PreviousSibling);
+            ni_clean(NextSibling);
         }
 #endif
         //ChunkTreeNodeT(Self_t&& o)

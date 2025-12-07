@@ -61,7 +61,7 @@ namespace NiT
         {
             if (!TryRun(container))
             {
-                pnc_assertf(false, TEXT("Could not run pipeline '%hs' on container '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TContainer).name());
+                ni_assertf(false, TEXT("Could not run pipeline '%hs' on container '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TContainer).name());
             }
         }
         template<typename TContainer>

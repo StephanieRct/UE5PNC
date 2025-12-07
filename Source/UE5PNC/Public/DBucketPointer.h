@@ -110,7 +110,7 @@ namespace NiT
         Size_t AddNodes(const NodeCountT<Size_t> count)
         {
             auto& internalChunk = GetInternalChunk(*this);
-            pnc_assert(!internalChunk.IsNull());
+            ni_assert(!internalChunk.IsNull());
             Size_t firstIndex = internalChunk.NodeCount;
             if (firstIndex + count <= NodeCapacity)
             {
@@ -133,10 +133,10 @@ namespace NiT
         /// </summary>
         void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const NodeCountT<Size_t> nodeCount = NodeCountT<Size_t>::V_1())
         {
-            pnc_assert(firstNodexIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-            pnc_assert(firstNodexIndex < GetNodeCount());
-            pnc_assert(firstNodexIndex + nodeCount <= GetNodeCount());
+            ni_assert(firstNodexIndex >= 0);
+            ni_assert(nodeCount >= 0);
+            ni_assert(firstNodexIndex < GetNodeCount());
+            ni_assert(firstNodexIndex + nodeCount <= GetNodeCount());
 
             auto& internalChunk = GetInternalChunk(*this);
 
@@ -168,10 +168,10 @@ namespace NiT
         /// </summary>
         void RemoveNode(const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount = NodeCountT<Size_t>::V_1())
         {
-            pnc_assert(firstNodeIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-            pnc_assert(firstNodeIndex < GetNodeCount());
-            pnc_assert(firstNodeIndex + nodeCount <= GetNodeCount());
+            ni_assert(firstNodeIndex >= 0);
+            ni_assert(nodeCount >= 0);
+            ni_assert(firstNodeIndex < GetNodeCount());
+            ni_assert(firstNodeIndex + nodeCount <= GetNodeCount());
 
             auto& internalChunk = GetInternalChunk(*this);
 

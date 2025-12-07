@@ -140,9 +140,9 @@ namespace NiT
         ~ChunkRegistryT()
         {
             for (Chunk_t* chunk : Chunks)
-                pnc_delete_dirty(chunk);
+                ni_delete_dirty(chunk);
             for (ChunkArray_t* chunk : ChunkArrays)
-                pnc_delete_dirty(chunk);
+                ni_delete_dirty(chunk);
         }
 
 
@@ -150,7 +150,7 @@ namespace NiT
         // Add a chunk with a given chunk structure and capacity.
         Chunk_t* NewChunk(const ChunkStructure_t* const chunkStructure, const NodeCountT<Size_t> nodeCount)
         {
-            Chunk_t* const chunk = pnc_new(Chunk_t)(chunkStructure, nodeCount);
+            Chunk_t* const chunk = ni_new(Chunk_t)(chunkStructure, nodeCount);
             Chunks.insert(chunk);
             return chunk;
         }
@@ -158,7 +158,7 @@ namespace NiT
         // Add a chunk with a given chunk structure and capacity.
         ChunkArray_t* NewChunkArray(const ChunkStructure_t* const chunkStructure, const ChunkCountT<Size_t> chunkCount, const NodeCountPerChunkT<Size_t> nodeCountPerChunk)
         {
-            ChunkArray_t* const chunk = pnc_new(ChunkArray_t)(chunkStructure, chunkCount, nodeCountPerChunk);
+            ChunkArray_t* const chunk = ni_new(ChunkArray_t)(chunkStructure, chunkCount, nodeCountPerChunk);
             ChunkArrays.insert(chunk);
             return chunk;
         }
@@ -167,7 +167,7 @@ namespace NiT
         {
             if (Chunks.erase(chunk) > 0)
             {
-                pnc_delete_dirty(chunk);
+                ni_delete_dirty(chunk);
                 return true;
             }
             return false;
@@ -177,7 +177,7 @@ namespace NiT
         {
             if (ChunkArrays.erase(chunk) > 0)
             {
-                pnc_delete_dirty(chunk);
+                ni_delete_dirty(chunk);
                 return true;
             }
             return false;
@@ -299,7 +299,7 @@ namespace NiT
     };
 
 }
-namespace Ni::Containers
+namespace Ni
 {
     using ComponentTypeRegistry = NiT::ComponentTypeRegistryT<ComponentType>;
     using ChunkStructureRegistry = NiT::ChunkStructureRegistryT<ChunkStructure>;
