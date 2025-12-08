@@ -2,7 +2,7 @@
 // Copyright (c) 2025 Stephanie Rancourt
 
 #pragma once
-#include "PNCDefault.h"
+#include "Ni.h"
 
 /// <summary>
 /// Registries are used to scope the creation of various data.

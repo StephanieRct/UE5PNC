@@ -17,8 +17,8 @@
 #include "CoreMinimal.h"
 
 #ifdef WITH_EDITOR
-#   define NI_ASSERT_THROW
-#   define NI_MEMORYTRACKER
+//#   define NI_ASSERT_THROW
+//#   define NI_MEMORYTRACKER
 #endif
 
 #define NI_STRINGIFY(x) #x
@@ -66,8 +66,6 @@
 #      define ni_assert_switch_default_no_entry() 
 #   endif
 #endif
-
-
 
 #include "Cleaner.h"
 #include "MemoryTracker.h"

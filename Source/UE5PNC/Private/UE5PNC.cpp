@@ -21,7 +21,9 @@ void FUE5PNCModule::ShutdownModule()
 IMPLEMENT_MODULE(FUE5PNCModule, UE5PNC)
 
 
+#ifdef NI_MEMORYTRACKER
 namespace NiT
 {
 	MemoryTracker MemoryTracker::Instance;
 }
+#endif

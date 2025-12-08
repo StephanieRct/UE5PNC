@@ -14,7 +14,7 @@
 #       define ni_delete_clean(ptr) delete ni_clean(ptr)
 #       define ni_assert_owns(ptr, count) 
 #       define ni_owns(ptr, count) true
-#       define ni_allocation_count ((std::size_t)0)
+#       define ni_allocation_count ((int)0)
 #   endif
 #else
 #   ifndef NI_OVERRIDE_MEMORY_MACROS
