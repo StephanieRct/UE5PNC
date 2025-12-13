@@ -17,8 +17,10 @@
 #include "CoreMinimal.h"
 
 #ifdef WITH_EDITOR
-//#   define NI_ASSERT_THROW
-//#   define NI_MEMORYTRACKER
+#   define NI_ASSERT_THROW
+#   ifdef UE_BUILD_DEBUG
+#       define NI_MEMORYTRACKER
+#   endif
 #endif
 
 #define NI_STRINGIFY(x) #x
