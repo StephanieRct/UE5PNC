@@ -5,7 +5,7 @@
 #include "common.h"
 #include "SetAlgorithmChunk.h"
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
     /// <summary>
     /// Route an algorithm using the
@@ -33,22 +33,22 @@ namespace PNC::Routing
             return ((TAlgorithm*)nullptr)->Requirements(req);
         }
 
-        template<typename TChunkPointer>
-        bool RouteAlgorithm(Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        bool RouteAlgorithm(Algorithm_t& algorithm, TContainer& container) const
         {
-            return algorithm.Requirements(SetAlgorithmChunk<TChunkPointer>());
+            return algorithm.Requirements(SetAlgorithmChunk<TContainer>());
         }
 
-        template<typename TChunkPointer>
-        bool TryRun(const Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        bool TryRun(const Algorithm_t& algorithm, TContainer& container) const
         {
-            return algorithm.TryRun(*this, chunkPointer);
+            return algorithm.TryRun(*this, container);
         }
 
-        template<typename TChunkPointer>
-        void Run(const Algorithm_t& algorithm, TChunkPointer& chunkPointer) const
+        template<typename TContainer>
+        void Run(const Algorithm_t& algorithm, TContainer& container) const
         {
-            algorithm.Run(*this, chunkPointer);
+            algorithm.Run(*this, container);
         }
     };
 }

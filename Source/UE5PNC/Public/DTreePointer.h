@@ -3,43 +3,45 @@
 
 #pragma once
 #include "common.h"
-#include "Components.h"
-#include "KindPointer.h"
 #include "ChunkTreeNode.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
-    /// A KTreePointer is a KindPointer that is part of a Tree of Chunks
-    /// A KTreePointer is non-copyable as it may be pointed to by other KTreePointers
+    /// DTreePointerT Adds the pointers needed to make the container part of a tree of this container type.
     /// </summary>
     /// <typeparam name="TChunkStructure">Structure of the Chunk's Component data.</typeparam>
-    template<typename TChunkStructure>
-    struct KTreePointerT : public KindPointerT<TChunkStructure>
+    template<typename TBase>
+    struct DTreePointer : public TBase
     {
     public:
-        using Base_t = KindPointerT<TChunkStructure>;
-        using Self_t = KTreePointerT<TChunkStructure>;
-        using ChunkStructure_t = TChunkStructure;
-        using Size_t = typename ChunkStructure_t::Size_t;
+        using Base_t = TBase;
+        using Self_t = DTreePointer<TBase>;
+        using Size_t = TBase::Size_t;
+        using ChunkStructure_t = TBase::ChunkStructure_t;
 
     protected:
         using ChunkTreeNode_t = ChunkTreeNodeT<Self_t>;
         ChunkTreeNode_t Tree;
 
     protected:
-        KTreePointerT(ChunkKind kind)
-            :Base_t(kind)
+        DTreePointer()
+            :Base_t()
+        {
+        }
+        template<typename TProps>
+        DTreePointer(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, props)
         {
         }
 
     public:
-        KTreePointerT(const KTreePointerT& o)
+        DTreePointer(const Self_t& o)
             : Base_t(o)
             , Tree()
         {
         }
-        KTreePointerT(const KTreePointerT&& o)
+        DTreePointer(const Self_t&& o)
             : Base_t(o)
             , Tree(o.Tree)
         {
@@ -58,7 +60,7 @@ namespace PNC
                         break;
                 }
         }
-        KTreePointerT& operator=(const KTreePointerT&) = delete;
+        DTreePointer& operator=(const DTreePointer&) = delete;
 
     public:
         /// <summary>
@@ -142,7 +144,7 @@ namespace PNC
         /// <param name="child">KTreePointer to move.</param>
         void InsertFirstChild(Self_t* child)
         {
-            pnc_assert(child->Tree.IsExtracted());
+            ni_assert(child->Tree.IsExtracted());
             child->Tree.Parent = this;
             if (Tree.FirstChild == nullptr)
             {
@@ -163,7 +165,7 @@ namespace PNC
         /// <param name="child">KTreePointer to move.</param>
         void InsertLastChild(Self_t* child)
         {
-            pnc_assert(child->Tree.IsExtracted());
+            ni_assert(child->Tree.IsExtracted());
             child->Tree.Parent = this;
             if (Tree.FirstChild == nullptr)
             {
@@ -183,7 +185,7 @@ namespace PNC
         /// <param name="sibling">KTreePointer to move.</param>
         void InsertPreviousSibling(Self_t* sibling)
         {
-            pnc_assert(sibling->Tree.IsExtracted());
+            ni_assert(sibling->Tree.IsExtracted());
             auto last = Tree.PreviousSibling;
             last->Tree.NextSibling = sibling;
             sibling->Tree.PreviousSibling = last;

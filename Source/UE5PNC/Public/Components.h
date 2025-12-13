@@ -4,7 +4,7 @@
 #pragma once
 #include "common.h"
 
-namespace PNC 
+namespace NiT
 {
     /// <summary>
     /// Inherit of this struct to declare a Node Component.
@@ -13,7 +13,7 @@ namespace PNC
     struct NodeComponent 
     {
     public:
-        static const ComponentOwner Owner = ComponentOwner_Node;
+        static const ComponentOwner Owner = ComponentOwner::Node;
     };
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace PNC
     struct ChunkComponent
     {
     public:
-        static const ComponentOwner Owner = ComponentOwner_Chunk;
+        static const ComponentOwner Owner = ComponentOwner::Chunk;
     };
 
     /// <summary>

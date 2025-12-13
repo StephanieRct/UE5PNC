@@ -3,32 +3,10 @@
 
 #pragma once
 #include "common.h"
-#include "AlgorithmRunnerKindPointerSwitch.h"
 
-namespace PNC
+
+namespace NiT
 {
-    /// <summary>
-    /// Add a template specialization if you need a special implementation for any specific type that inherit of KindPointer
-    /// </summary>
-    /// <typeparam name="TChunkStructure"></typeparam>
-    /// <typeparam name="TAlgorithm"></typeparam>
-    /// <typeparam name="TKChunkPointer"></typeparam>
-    template<typename TChunkStructure, typename TAlgorithm, typename TKChunkPointer = KindPointerT<TChunkStructure>>
-    struct AlgorithmRunner 
-        : public AlgorithmRunnerKindPointerSwitch<TChunkStructure, TAlgorithm>
-    {
-    };
-
-    template<typename TChunkStructure, typename TAlgorithm>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkPointerT<TChunkStructure>> 
-        : public AlgorithmRunnerChunk<TAlgorithm, ChunkPointerT<TChunkStructure>>
-    {
-    };
-
-
-    template<typename TChunkStructure, typename TAlgorithm, typename TChunkPointerElement>
-    struct AlgorithmRunner< TChunkStructure, TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>> 
-        : public AlgorithmRunnerChunkArray<TAlgorithm, ChunkArrayPointerT<TChunkStructure, TChunkPointerElement>>
-    {
-    };
+    template<typename TAlgorithm, typename TContainer>// = KindPointerT<TChunkStructure>>
+    struct AlgorithmRunner {};
 }

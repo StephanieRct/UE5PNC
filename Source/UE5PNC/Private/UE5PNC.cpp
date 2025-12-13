@@ -21,12 +21,9 @@ void FUE5PNCModule::ShutdownModule()
 IMPLEMENT_MODULE(FUE5PNCModule, UE5PNC)
 
 
-namespace PNC
+#ifdef NI_MEMORYTRACKER
+namespace NiT
 {
-
 	MemoryTracker MemoryTracker::Instance;
-
-	//std::atomic<int> MemoryTracker::AllocationCount = 0;
-
-	//std::map<uint8*, std::size_t> MemoryTracker::Allocations;
 }
+#endif

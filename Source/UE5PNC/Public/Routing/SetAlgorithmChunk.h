@@ -4,35 +4,33 @@
 #pragma once
 #include "common.h"
 
-#include "..\KChunkTreePointer.h"
-#include "..\KChunkArrayTreePointer.h"
 #include "AlgorithmRequirementFulfiller.h"
 
-namespace PNC::Routing
+namespace NiT::Routing
 {
-    template<typename TChunkPointer>
+    template<typename TContainer>
     struct SetAlgorithmChunkBase : public AlgorithmRequirementFulfiller
     {
     public:
         using Base_t = AlgorithmRequirementFulfiller;
-        using Self_t = SetAlgorithmChunkBase< TChunkPointer>;
-        using ChunkPointer_t = TChunkPointer;
-        using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
-        using Size_t = typename ChunkPointer_t::Size_t;
+        using Self_t = SetAlgorithmChunkBase< TContainer>;
+        using Container_t = TContainer;
+        using ChunkStructure_t = typename Container_t::ChunkStructure_t;
+        using Size_t = typename Container_t::Size_t;
 
     protected:
-        ChunkPointer_t* ChunkPointer;
+        Container_t* Container;
 
     public:
-        SetAlgorithmChunkBase(ChunkPointer_t* chunkPointer)
-            :ChunkPointer(chunkPointer)
+        SetAlgorithmChunkBase(Container_t* container)
+            :Container(container)
         {
         }
 
         template<typename T>
         bool Component(T*& component)
         {
-            auto& chunk = ChunkPointer->GetChunk();
+            auto& chunk = Container->GetChunk();
             const auto& chunkStructure = chunk.GetStructure();
             auto index = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
             if (index < 0)
@@ -53,14 +51,14 @@ namespace PNC::Routing
             return false;
         }
 
-        bool ParentChunk(ChunkPointer_t*& parent)
+        bool ParentChunk(Container_t*& parent)
         {
-            parent = ChunkPointer->GetParentChunk();
+            parent = Container->GetParentChunk();
             return parent != nullptr;
         }
-        bool ChildrenChunk(ChunkPointer_t*& children)
+        bool ChildrenChunk(Container_t*& children)
         {
-            children = ChunkPointer->GetFirstChildChunk();
+            children = Container->GetFirstChildChunk();
             return children != nullptr;
         }
     };
@@ -69,81 +67,22 @@ namespace PNC::Routing
     /// Will set the required component pointers on an algorithm from a given chunk.
     /// </summary>
     /// <typeparam name="TChunkPointer"></typeparam>
-    template<typename TChunkPointer>
-    struct SetAlgorithmChunk : public SetAlgorithmChunkBase<TChunkPointer>
+    template<typename TContainer>
+    struct SetAlgorithmChunk : public SetAlgorithmChunkBase<TContainer>
     {
     public:
-        using Base_t = SetAlgorithmChunkBase<TChunkPointer>;
-        using Self_t = SetAlgorithmChunk<TChunkPointer>;
-        using ChunkPointer_t = TChunkPointer;
-        using ChunkStructure_t = typename ChunkPointer_t::ChunkStructure_t;
-        using Size_t = typename ChunkPointer_t::Size_t;
+        using Base_t = SetAlgorithmChunkBase<TContainer>;
+        using Self_t = SetAlgorithmChunk<TContainer>;
+        using Container_t = TContainer;
+        using ChunkStructure_t = typename Container_t::ChunkStructure_t;
+        using Size_t = typename Container_t::Size_t;
 
 
     public:
-        SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
-            :Base_t(chunkPointer)
+        SetAlgorithmChunk(Container_t* container)
+            :Base_t(container)
         {
         }
     };
-
-    template<typename TChunkStructure>
-    struct SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>> : public SetAlgorithmChunkBase<KChunkTreePointerT<TChunkStructure>>
-    {
-    public:
-        using Base_t = SetAlgorithmChunkBase<KChunkTreePointerT<TChunkStructure>>;
-        using Self_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
-        using ChunkStructure_t = TChunkStructure;
-        using Size_t = typename ChunkStructure_t::Size_t;
-        using ChunkPointer_t = KChunkTreePointerT<ChunkStructure_t>;
-
-        SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
-            :Base_t(chunkPointer)
-        {
-        }
-
-        template<typename T>
-        bool ParentComponent(T*& component)
-        {
-            if (this->ChunkPointer->GetParentChunk() == nullptr)
-                return false;
-            auto& parentChunk = this->ChunkPointer->GetParentChunk()->GetChunk();
-            const auto& chunkStructure = parentChunk.GetStructure();
-            auto index = chunkStructure.GetComponentTypeIndexInChunk(&typeid(T));
-            if (index < 0)
-                return false;
-            component = (T*)parentChunk.GetComponentData(index);
-            return true;
-        }
-
-        bool ParentChunk(ChunkPointer_t*& parent)
-        {
-            parent = this->ChunkPointer->GetParentChunk();
-            return parent != nullptr;
-        }
-        bool ChildrenChunk(ChunkPointer_t*& children)
-        {
-            children = this->ChunkPointer->GetFirstChildChunk();
-            return children != nullptr;
-        }
-    };
-
-    template<typename TChunkStructure, typename TChunkPointerElement>
-    struct SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>> : public SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>
-    {
-    public:
-        using Base_t = SetAlgorithmChunk<KChunkTreePointerT<TChunkStructure>>;
-        using Self_t = SetAlgorithmChunk<KChunkArrayTreePointerT<TChunkStructure, TChunkPointerElement>>;
-        using ChunkStructure_t = TChunkStructure;
-        using ChunkPointerElement_t = TChunkPointerElement;
-        using Size_t = typename TChunkStructure::Size_t;
-        using ChunkPointer_t = KChunkArrayTreePointerT<ChunkStructure_t, ChunkPointerElement_t>;
-
-        SetAlgorithmChunk(ChunkPointer_t* chunkPointer)
-            :Base_t(chunkPointer)
-        {
-        }
-
-    };
-
 }
+

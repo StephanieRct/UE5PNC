@@ -5,7 +5,7 @@
 #include "common.h"
 #include "ComponentType.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// A set of component types.
@@ -21,8 +21,8 @@ namespace PNC
 
     private:
         std::size_t Hash;
-        Vector<const ComponentType_t*> ComponentTypes;
-        HashMap<const type_info*, Size_t> TypeToComponentTypeIndexInChunk;
+        std_vector<const ComponentType_t*> ComponentTypes;
+        std_unordered_map<const type_info*, Size_t> TypeToComponentTypeIndexInChunk;
 
     public:
 
@@ -69,7 +69,7 @@ namespace PNC
             Normalize();
         }
 
-        ComponentTypeSetT(Vector<const ComponentType_t*>&& types)
+        ComponentTypeSetT(std_vector<const ComponentType_t*>&& types)
             :ComponentTypes(std::move(types))
         {
             Normalize();
@@ -173,7 +173,7 @@ namespace PNC
         template<typename TPredicate>
         void SubSet(Self_t* const resultMemory, TPredicate predicate)
         {
-            Vector<const ComponentType_t*> subComponentTypes;
+            std_vector<const ComponentType_t*> subComponentTypes;
             for (Size_t i = 0; i < ComponentTypes.size(); ++i)
             {
                 if (predicate(ComponentTypes[i]))
@@ -185,9 +185,9 @@ namespace PNC
         }
 
         template<typename TPredicate>
-        void SubSetIndex(Vector<Size_t>* resultMemory, TPredicate predicate)
+        void SubSetIndex(std_vector<Size_t>* resultMemory, TPredicate predicate)
         {
-            Vector<Size_t> subComponentTypes;
+            std_vector<Size_t> subComponentTypes;
             for (Size_t i = 0; i < ComponentTypes.size(); ++i)
             {
                 if (predicate(ComponentTypes[i]))
@@ -195,7 +195,7 @@ namespace PNC
                     subComponentTypes.push_back(i);
                 }
             }
-            new (resultMemory) Vector<Size_t>(std::move(subComponentTypes));
+            new (resultMemory) std_vector<Size_t>(std::move(subComponentTypes));
         }
 
     private:

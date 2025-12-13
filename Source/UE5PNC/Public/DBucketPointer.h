@@ -4,92 +4,113 @@
 #pragma once
 #include "common.h"
 
-namespace PNC
+namespace NiT
 {
+    /// <summary>
+    /// Add a NodeCapacity and methods to add and remove nodes up to the NodeCapacity.
+    /// </summary>
+    /// <typeparam name="TBase"></typeparam>
     template<typename TBase>
-    struct DBucketPointerT : public TBase
+    struct DBucketPointer : public TBase
     {
     public:
         using Base_t = TBase;
-        using Self_t = DBucketPointerT<TBase>;
+        using Self_t = DBucketPointer<TBase>;
         using typename Base_t::ChunkStructure_t;
         using typename Base_t::Size_t;
-        using typename Base_t::ChunkPointer_t;
-        using typename Base_t::Chunk_t;
         using typename Base_t::Node_t;
+        using typename Base_t::ChunkPointerInternal_t;
+        using typename Base_t::ChunkPointer_t;
         using ComponentType_t = typename ChunkStructure_t::ComponentType_t;
-        using ChunkPointerInternal_t = ChunkPointerT<ChunkStructure_t>::ChunkPointerInternal_t;
 
     protected:
         /// <summary>
-        /// Maximum number of Nodes this Chunk can grow to.
+        /// Maximum number of Nodes this Container can grow to.
         /// </summary>
-        Size_t NodeCapacity;
+        NodeCapacityT<Size_t> NodeCapacity;
+    public:
 
-    protected:
         /// <summary>
-        /// Create a VoidNull Chunk.
+        /// Create a VoidNull Container.
         /// </summary>
-        DBucketPointerT()
+        DBucketPointer()
             : Base_t()
             , NodeCapacity(0)
         {
         }
 
         /// <summary>
-        /// Create a StructData Chunk
-        /// The Components' memory can fit as many instances of each Components as the Chunk's capacity.
-        /// Any computation performed on this Chunk must only process nodes within the chunk's NodeCount and not it's capacity.
+        /// Create a StructNull Container
         /// </summary>
-        /// <param name="chunkStructure">Structure of the Chunk's component data.</param>
-        /// <param name="nodeCapacity">Maximum number of Nodes this Chunk can grow to.</param>
-        /// <param name="nodeCount"></param>
-        DBucketPointerT(const ChunkStructure_t* chunkStructure, Size_t nodeCapacity, Size_t nodeCount = 0)
-            : Base_t(chunkStructure, nodeCount)
-            , NodeCapacity(nodeCapacity)
+        DBucketPointer(const ChunkStructure_t* const chunkStructure)
+            : Base_t(chunkStructure)
+            , NodeCapacity(0)
         {
         }
 
-        DBucketPointerT(Self_t&& o)
-            : Base_t(std::forward<Self_t>(o))
+        /// <summary>
+        /// Create a StructData from a ComponentDataArray with a NodeCount equal to its NodeCapacity
+        /// </summary>
+        DBucketPointer(const ChunkStructure_t* const chunkStructure, 
+                       const NodeCountT<Size_t> nodeCount, 
+                       const PropComponentDataArray& componentDataArray)
+            : Base_t(chunkStructure, nodeCount, componentDataArray)
+            , NodeCapacity(PropCountToCapacity(nodeCount))
+        {
+        }
+
+        DBucketPointer(Self_t&& o)
+            : Base_t(std::move(o))
             , NodeCapacity(o.NodeCapacity)
         {
-            o.NodeCapacity = 0;
+            o.NodeCapacity = NodeCapacityT<Size_t>::V_0();
         }
 
         Self_t& operator=(Self_t&& o)
         {
             Base_t::operator=(std::move(o));
             auto tmpNodeCapacity = o.NodeCapacity;
-            o.NodeCapacity = 0;
+            o.NodeCapacity = NodeCapacityT<Size_t>::V_0();
             NodeCapacity = tmpNodeCapacity;
             return *this;
         }
 
-        DBucketPointerT(const Self_t& o) = default;
+        DBucketPointer(const Self_t& o) = default;
         Self_t& operator=(const Self_t& o) = default;
 
-
-    public:
-        PNC_USING_CHUNKPOINTER_INTERFACE();
-        PNC_IMPLEMENT_CHUNKPOINTER_SELFPOINTER();
+        using Base_t::GetChunk;
+        using Base_t::GetNodeCount;
+        using Base_t::GetInternalChunk;
+        using Base_t::IsSameData;
+        using Base_t::IsSameStructure;
 
         /// <summary>
         /// Get the maximum number of Nodes the Chunk can grow to.
         /// </summary>
-        /// <returns>The capacity of the chunk</returns>
-        Size_t GetNodeCapacity()const { return NodeCapacity; }
+        /// <returns>The capacity of the container</returns>
+        NodeCapacityT<Size_t> GetNodeCapacity()const { return NodeCapacity; }
 
-
-        Size_t AvailableNodes()const
+        NodeCountT<Size_t> AvailableNodes()const
         {
             return NodeCapacity - GetNodeCount();
         }
-        Size_t AddNode() { return AddNodes(1); }
-        Size_t AddNodes(const Size_t count)
+        /// <summary>
+        /// Add a single node at index NodeCount and return the index.
+        /// If NodeCount >= NodeCapacity, return -1 without adding a new node.
+        /// </summary>
+        Size_t AddNode() 
+        { 
+            return AddNodes(1); 
+        }
+
+        /// <summary>
+        /// Add a multiple sequential nodes at index NodeCount and return the index of the first node added.
+        /// If NodeCount + count >= NodeCapacity, return -1 without adding any new nodes.
+        /// </summary>
+        Size_t AddNodes(const NodeCountT<Size_t> count)
         {
             auto& internalChunk = GetInternalChunk(*this);
-            pnc_assert(!internalChunk.IsNull());
+            ni_assert(!internalChunk.IsNull());
             Size_t firstIndex = internalChunk.NodeCount;
             if (firstIndex + count <= NodeCapacity)
             {
@@ -99,65 +120,126 @@ namespace PNC
             }
             return -1;
         }
+#ifndef PNC_PROPS_STRICT
+        Size_t AddNodes(const Size_t count) 
+        { 
+            return AddNodes(PropNodeCountT<Size_t>(count)); 
+        }
+#endif
         
-        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const Size_t nodeCount = 1)
+        /// <summary>
+        /// Remove a range of nodes and close the gap by moving the higher nodes after 
+        /// the lower nodes, preserving the order of nodes.
+        /// </summary>
+        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const NodeCountT<Size_t> nodeCount = NodeCountT<Size_t>::V_1())
         {
-            pnc_assert(firstNodexIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-            pnc_assert(firstNodexIndex < GetNodeCount());
-            pnc_assert(firstNodexIndex + nodeCount <= GetNodeCount());
+            ni_assert(firstNodexIndex >= 0);
+            ni_assert(nodeCount >= 0);
+            ni_assert(firstNodexIndex < GetNodeCount());
+            ni_assert(firstNodexIndex + nodeCount <= GetNodeCount());
 
             auto& internalChunk = GetInternalChunk(*this);
 
             Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodexIndex, nodeCount);
 
-            const Size_t firstMovingNodeIndex = internalChunk.NodeCount - nodeCount;
-            const Size_t firstFollowingNodeIndex = firstNodexIndex + nodeCount;
+            const auto firstMovingNodeIndex = internalChunk.NodeCount - nodeCount;
+            const auto firstFollowingNodeIndex = firstNodexIndex + nodeCount;
             if(firstFollowingNodeIndex < internalChunk.NodeCount)
             {
-                const Size_t followingNodeCount = internalChunk.NodeCount - firstFollowingNodeIndex;
+                const auto followingNodeCount = internalChunk.NodeCount - firstFollowingNodeIndex;
                 Node_t::MoveAllNodeComponentsForwardUnsafe(internalChunk, firstNodexIndex,
                                                            internalChunk, firstFollowingNodeIndex,
-                                                           followingNodeCount);
-                internalChunk.NodeCount = firstNodexIndex + followingNodeCount;
+                                                                          followingNodeCount);
+                internalChunk.NodeCount = PropNodeCountT<Size_t>(firstNodexIndex + followingNodeCount);
             }
             else
-                internalChunk.NodeCount = firstNodexIndex;
+                internalChunk.NodeCount = PropNodeCountT<Size_t>(firstNodexIndex);
         }
-        
-        void RemoveNode(const Size_t firstNodeIndex, const Size_t nodeCount = 1)
+#ifndef PNC_PROPS_STRICT
+        void RemoveNodeKeepOrder(const Size_t firstNodexIndex, const Size_t nodeCount = (Size_t)0)
         {
-            pnc_assert(firstNodeIndex >= 0);
-            pnc_assert(nodeCount >= 0);
-            pnc_assert(firstNodeIndex < GetNodeCount());
-            pnc_assert(firstNodeIndex + nodeCount <= GetNodeCount());
+            RemoveNodeKeepOrder(firstNodexIndex, PropNodeCountT<Size_t>(nodeCount));
+        }
+#endif
+
+        /// <summary>
+        /// Remove a range of nodes and close the gap by moving the trailing nodes in 
+        /// the gap, which will break the previous ordering of nodes.
+        /// </summary>
+        void RemoveNode(const Size_t firstNodeIndex, const NodeCountT<Size_t> nodeCount = NodeCountT<Size_t>::V_1())
+        {
+            ni_assert(firstNodeIndex >= 0);
+            ni_assert(nodeCount >= 0);
+            ni_assert(firstNodeIndex < GetNodeCount());
+            ni_assert(firstNodeIndex + nodeCount <= GetNodeCount());
 
             auto& internalChunk = GetInternalChunk(*this);
 
             Node_t::DestructAllNodeComponentsUnsafe(internalChunk, firstNodeIndex, nodeCount);
-            const Size_t lastNodexIndex = firstNodeIndex + nodeCount;
-            const Size_t movingFirstNodeIndex = std::max(lastNodexIndex, internalChunk.NodeCount - nodeCount);
-            const Size_t movingNodeCount = internalChunk.NodeCount - movingFirstNodeIndex;
+            const auto lastNodexIndex = firstNodeIndex + nodeCount;
+            const auto movingFirstNodeIndex = std::max<Size_t>(lastNodexIndex, internalChunk.NodeCount - nodeCount);
+            const auto movingNodeCount = internalChunk.NodeCount - movingFirstNodeIndex;
             if(movingNodeCount > 0)
             {
                 Node_t::MoveAllNodeComponentsForwardUnsafe(internalChunk, firstNodeIndex,
                                                            internalChunk, movingFirstNodeIndex,
-                                                           movingNodeCount);
+                                                                          movingNodeCount);
             }
             internalChunk.NodeCount -= nodeCount;
         }
-        //Size_t RemoveNode(const Size_t count) // Remove from the end of the chunk
+#ifndef PNC_PROPS_STRICT
+        void RemoveNode(const Size_t firstNodexIndex, const Size_t nodeCount = (Size_t)1)
+        {
+            RemoveNode(firstNodexIndex, PropNodeCountT<Size_t>(nodeCount));
+        }
+#endif
+
+        //TODO Size_t RemoveNode(const Size_t count) // Remove from the end of the container
+
+        /// <summary>
+        /// Destruct all nodes and set NodeCount to 0.
+        /// ChunkComponents are NOT destructed.
+        /// </summary>
         void Clear()
         {
-            auto& chunk = GetInternalChunk(*this);
-            if (chunk.IsNull()) return;
-            Node_t::DestructAllNodeComponentsUnsafe(GetChunk(), 0, chunk.NodeCount);
-            chunk.NodeCount = 0;
+            auto& container = GetInternalChunk(*this);
+            if (container.IsNull()) return;
+            Node_t::DestructAllNodeComponentsUnsafe(GetChunk(), 0, container.NodeCount);
+            container.NodeCount = NodeCountT<Size_t>::V_0();
         }
+
     protected:
+        /// <summary>
+        /// Construct from Props
+        /// </summary>
+        template<typename TProps>
+        DBucketPointer(const DPropsTag& tag, const TProps& props)
+            : Base_t(tag, props)
+            , NodeCapacity(props.GetNodeCapacity())
+        {
+        }
 
-        void SetNodeCapacity(const Size_t value) { NodeCapacity = value; }
+        void SetNodeCapacity(const NodeCapacityT<Size_t> nodeCapacity) { NodeCapacity = nodeCapacity; }
+#ifndef PNC_PROPS_STRICT
+        void SetNodeCapacity(const Size_t nodeCapacity) { NodeCapacity = PropNodeCapacityT<Size_t>(nodeCapacity); }
+#endif
 
-        
+        /// <summary>
+        /// Allocate component memory for props.GetNodeCapacity() nodes and contruct all components for props.GetNodeCount() nodes.
+        /// Notes:
+        ///     container must be StructData.
+        ///     Does not set the NodeCapacity nor NodeCount on container. 
+        ///     Will Set the container's ComponentDataArray void* values to the newly allocated component data.
+        /// </summary>
+        template<typename TContainer, typename TProps>
+        static void AllocateConstruct(TContainer& container, const TProps& props)
+        {
+            const auto nodeCapacity = props.GetNodeCapacity();
+            const auto nodeCount = props.GetNodeCount();
+            Node_t::AllocateConstructAllComponentsUnsafe(
+                        container, 0/*:firstNodeIndex*/, 0/*:firstChunkIndex*/, 
+                                   nodeCapacity,         ChunkCapacityT<Size_t>::V_1(), 
+                                   nodeCount,            ChunkCountT<   Size_t>::V_1());
+        }
     };
 }
