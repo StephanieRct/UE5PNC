@@ -18,9 +18,7 @@
 
 #ifdef WITH_EDITOR
 #   define NI_ASSERT_THROW
-#   ifdef UE_BUILD_DEBUG
-#       define NI_MEMORYTRACKER
-#   endif
+#   define NI_MEMORYTRACKER
 #endif
 
 #define NI_STRINGIFY(x) #x
