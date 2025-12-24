@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UE5PNC.h"
+#include "UE5PNC/public/common.h"
 
 #define LOCTEXT_NAMESPACE "FUE5PNCModule"
 
@@ -18,3 +19,11 @@ void FUE5PNCModule::ShutdownModule()
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FUE5PNCModule, UE5PNC)
+
+
+#ifdef NI_MEMORYTRACKER
+namespace NiT
+{
+	MemoryTracker MemoryTracker::Instance;
+}
+#endif

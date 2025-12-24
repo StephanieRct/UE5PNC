@@ -6,7 +6,7 @@
 #include "routing\AlgorithmCacheRouter.h"
 #include "routing\AlgorithmMatchStructure.h"
 
-namespace PNC
+namespace NiT
 {
     /// <summary>
     /// Extend this template struct to write your own pipeline to process Chunks
@@ -42,31 +42,30 @@ namespace PNC
             return iMatching->second;
         }
 
-        template<typename TChunkPointer>
-        bool TryRun(TChunkPointer& chunkPointer)
+        template<typename TContainer>
+        bool TryRun(TContainer& container)
         {
-            auto& chunk = *chunkPointer;
-            assert(!chunk.IsNull());
-            const auto* chunkStructure = &chunk.GetChunkStructure();
+            assert(!container.IsNull());
+            const auto* chunkStructure = &container.GetStructure();
             if (!Match(chunkStructure))
                 return false;
-            Impl()->Execute(chunkPointer);
+            Impl()->Execute(container);
             return true;
         }
 
-        template<typename TChunkPointer>
-        void TryRun(TChunkPointer* chunkPointer) = delete;
+        template<typename TContainer>
+        void TryRun(TContainer* container) = delete;
 
-        template<typename TChunkPointer>
-        void Run(TChunkPointer& chunkPointer)
+        template<typename TContainer>
+        void Run(TContainer& container)
         {
-            if (!TryRun(chunkPointer))
+            if (!TryRun(container))
             {
-                checkf(false, TEXT("Could not run pipeline '%hs' on chunk '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TChunkPointer).name());
+                ni_assertf(false, TEXT("Could not run pipeline '%hs' on container '%hs'. The chunk failed the pipeline requirements."), typeid(Pipeline_t).name(), typeid(TContainer).name());
             }
         }
-        template<typename TChunkPointer>
-        void Run(TChunkPointer* chunkPointer) = delete;
+        template<typename TContainer>
+        void Run(TContainer* container) = delete;
 
     private:
         Pipeline_t* Impl() { return (reinterpret_cast<Pipeline_t*>(this)); }
