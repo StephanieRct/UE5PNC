@@ -16,7 +16,7 @@
 #include <algorithm> 
 #include "CoreMinimal.h"
 
-#ifdef WITH_EDITOR
+#if defined(WITH_EDITOR) && defined(NI_TESTS)
 #   define NI_ASSERT_THROW
 #   define NI_MEMORYTRACKER
 #endif
